@@ -22,11 +22,25 @@
 
     <modules>
         <module>server</module>
+        <module>client</module>
     </modules>
+
+    <properties>
+        <scala.version>2.10.4</scala.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
-
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-actors</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -71,9 +85,6 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.0</version>
-                <configuration>
-                    <mainSourceDir>src/main/scala</mainSourceDir>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
