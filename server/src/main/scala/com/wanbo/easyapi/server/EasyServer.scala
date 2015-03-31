@@ -8,12 +8,11 @@ import java.util.concurrent.Executors
  * The server of EasyAPI
  * Created by wanbo on 15/3/30.
  */
-class EasyServer {
+object EasyServer {
     def main(args: Array[String]) {
         val socket = new ServerSocket(8800)
 
         val execService = Executors.newFixedThreadPool(10)
-
 
         var client: Socket = socket.accept()
         while( client != null ) {
