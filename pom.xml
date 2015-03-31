@@ -26,7 +26,9 @@
     </modules>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scala.version>2.10.4</scala.version>
+        <file_encoding>UTF-8</file_encoding>
     </properties>
 
     <dependencyManagement>
@@ -34,11 +36,6 @@
             <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-library</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-actors</artifactId>
                 <version>${scala.version}</version>
             </dependency>
         </dependencies>
@@ -69,6 +66,7 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>${file_encoding}</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -76,7 +74,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${file_encoding}}</encoding>
                 </configuration>
             </plugin>
 
@@ -90,29 +88,6 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!--
-                Bind the maven-assembly-plugin to the package phase this will create
-                a jar file without the storm dependencies suitable for deployment to
-                a cluster.
-            -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>

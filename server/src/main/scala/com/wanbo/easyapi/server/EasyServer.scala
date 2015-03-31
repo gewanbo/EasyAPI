@@ -2,8 +2,7 @@ package com.wanbo.easyapi.server
 
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{ServerSocket, Socket}
-
-import scala.actors.threadpool.Executors
+import java.util.concurrent.Executors
 
 /**
  * The server of EasyAPI
@@ -16,8 +15,8 @@ class EasyServer {
         val execService = Executors.newFixedThreadPool(10)
 
 
-        var client: Socket = new Socket()
-        while( (client = socket.accept()) != null) {
+        var client: Socket = socket.accept()
+        while( client != null ) {
 
             // In message
             val in = new BufferedReader(new InputStreamReader(client.getInputStream))
@@ -27,6 +26,8 @@ class EasyServer {
 
             execService.submit(new Worker(in, out))
 
+            // Accept next message
+            client = socket.accept()
         }
 
         client.close()
