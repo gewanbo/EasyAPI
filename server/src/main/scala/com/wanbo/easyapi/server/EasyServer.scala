@@ -1,35 +1,53 @@
 package com.wanbo.easyapi.server
 
-import java.io.{BufferedReader, InputStreamReader, PrintWriter}
+import java.io.FileInputStream
 import java.net.{ServerSocket, Socket}
-import java.util.concurrent.Executors
+import java.util.Properties
+
+import org.slf4j.LoggerFactory
+
+import scala.actors.threadpool.Executors
 
 /**
  * The server of EasyAPI
  * Created by wanbo on 15/3/30.
  */
 object EasyServer {
+
+    private val logger = LoggerFactory.getLogger(EasyServer.getClass.getSimpleName)
+
+    var port = "8800"
+
     def main(args: Array[String]) {
-        val socket = new ServerSocket(8800)
 
-        val execService = Executors.newFixedThreadPool(10)
+        try {
+            logger.info("Starting up ...")
 
-        var client: Socket = socket.accept()
-        while( client != null ) {
+            val properties = new Properties()
+            val configFile = System.getProperty("easy.conf", "config.properties")
 
-            // In message
-            val in = new BufferedReader(new InputStreamReader(client.getInputStream))
+            properties.load(new FileInputStream(configFile))
 
-            // Out message
-            val out = new PrintWriter(client.getOutputStream, true)
+            port = properties.getProperty("server.port", "8800")
 
-            execService.submit(new Worker(in, out))
+            val socket = new ServerSocket(port.toInt)
 
-            // Accept next message
-            client = socket.accept()
+            val execService = Executors.newFixedThreadPool(properties.getProperty("server.max_threads", "10").toInt)
+
+            var client: Socket = socket.accept()
+            while (client != null) {
+
+                execService.submit(new Worker(client))
+
+                // Accept next message
+                client = socket.accept()
+            }
+
+            client.close()
+            logger.info("Easyapi server stop done.")
+        } catch {
+            case e: Exception =>
+                logger.error("Error:", e)
         }
-
-        client.close()
-        println("Done.")
     }
 }
