@@ -1,8 +1,8 @@
 package com.wanbo.easyapi.server
 
 import akka.actor.{Props, ActorSystem}
-import com.wanbo.easyapi.server.actors.{Listener, Manager}
-import com.wanbo.easyapi.server.messages.{StartUp, Work}
+import com.wanbo.easyapi.server.actors.{WorkerTracker, Manager}
+import com.wanbo.easyapi.server.messages.StartUp
 
 /**
  * Test
@@ -13,13 +13,11 @@ object Test {
 
         val system = ActorSystem("System")
 
-        val listener = system.actorOf(Props[Listener], name = "listener")
+        val workTracker = system.actorOf(Props[WorkerTracker], name = "work_tracker")
 
-        val manager = system.actorOf(Props(new Manager(listener)), name = "manager")
+        val manager = system.actorOf(Props(new Manager(workTracker)), name = "manager")
 
         manager ! StartUp
-
-        manager ! Work
 
         //system.shutdown()
     }
