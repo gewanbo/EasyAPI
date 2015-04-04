@@ -24,6 +24,9 @@ class SeedWatcher extends Actor {
 
             println("worker listening on 8801")
 
+        case ListenerWorkerStop =>
+            context.stop(worker)
+            context.stop(self)
     }
 
     def workerListen(port: Int): Unit ={

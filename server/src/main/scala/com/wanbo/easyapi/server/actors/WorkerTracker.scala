@@ -22,5 +22,6 @@ class WorkerTracker extends Actor {
             if(msg != null)
                 println(msg)
             context.system.shutdown()
+            System.exit(-1)
     }
 }

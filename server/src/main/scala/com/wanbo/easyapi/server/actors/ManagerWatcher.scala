@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server.actors
 
 import java.net.ServerSocket
 
-import akka.actor.{ActorRef, Actor, Props}
+import akka.actor.{ActorRef, Actor}
 import com.wanbo.easyapi.server.messages._
 
 /**
@@ -12,6 +12,8 @@ import com.wanbo.easyapi.server.messages._
  */
 class ManagerWatcher(manager: ActorRef) extends Actor {
 
+    var socket: ServerSocket = _
+    var isClose: Boolean = false
 
     override def receive: Receive = {
 
@@ -19,9 +21,23 @@ class ManagerWatcher(manager: ActorRef) extends Actor {
             val server_port = conf.getProperty("server.port", "8800")
 
             // Manager watcher
-            managerListen(server_port.toInt)
+            val stat = managerListen(server_port.toInt)
 
-            println("manager listening on 8800")
+            if(!stat)
+                manager ! ListenerFailed
+            else
+                self ! ListenerManagerProcess(conf)
+
+        case ListenerManagerProcess(conf) =>
+            if(!isClose) {
+                managerListen(8800)
+                self ! ListenerManagerProcess(conf)
+            }
+
+        case ListenerManagerStop =>
+            isClose = true
+            socket.close()
+            context.stop(self)
 
     }
 
@@ -29,19 +45,20 @@ class ManagerWatcher(manager: ActorRef) extends Actor {
         var ret = true
 
         try {
-            val socket = new ServerSocket(port)
-            var client = socket.accept()
 
-            while (client != null) {
+            if(!isClose && socket == null)
+                socket = new ServerSocket(port)
+
+            val client = socket.accept()
+            if (client != null) {
                 manager ! ManagerCommand(client)
-                client = socket.accept()
             }
         } catch {
             case e: Exception =>
+                println(e.getMessage)
                 ret = false
         }
 
         ret
     }
-
 }

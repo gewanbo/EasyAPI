@@ -22,7 +22,9 @@ class WatcherController(manager: ActorRef) extends Actor {
             sender() ! ListenerRunning
 
         case WatcherStop(conf) =>
-            println("Stopping up listeners ...")
+            println("Stopping listeners ...")
+            managerWatcher ! ListenerManagerStop
+            seedWatcher ! ListenerWorkerStop
             context.stop(self)
     }
 }

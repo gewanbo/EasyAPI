@@ -40,9 +40,7 @@ class Manager(workTracker: ActorRef) extends Actor {
 
         case ShutDown(msg) =>
             workTracker ! ShutDown(msg)
-            println(1)
             watcherController ! WatcherStop(_conf)
-            println(2)
             context.stop(self)
     }
 
