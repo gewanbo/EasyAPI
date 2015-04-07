@@ -50,8 +50,9 @@ class SeedWatcher extends Actor {
 
         try {
 
-            if(!isClose && socket == null)
+            if(!isClose && socket == null) {
                 socket = new ServerSocket(port)
+            }
 
             val client = socket.accept()
             if (client != null) {

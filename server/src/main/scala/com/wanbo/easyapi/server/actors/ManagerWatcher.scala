@@ -52,8 +52,9 @@ class ManagerWatcher(manager: ActorRef) extends Actor {
                 throw new Exception("Socket has closed.")
             }
 
-            if(!isClose && socket == null)
+            if(!isClose && socket == null) {
                 socket = new ServerSocket(port)
+            }
 
             val client = socket.accept()
             if (client != null) {

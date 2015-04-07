@@ -22,9 +22,10 @@ class WorkerTracker extends Actor {
             if(msg != null)
                 println(msg)
 
-            Thread.sleep(10000)
+            Thread.sleep(3000)
 
             println("Shutting down main process ... ")
             context.system.shutdown()
+            System.exit(-1)
     }
 }
