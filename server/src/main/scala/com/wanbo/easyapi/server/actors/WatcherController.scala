@@ -14,7 +14,7 @@ class WatcherController(_conf: Properties, manager: ActorRef) extends Actor {
     val managerWatcher = context.actorOf(Props(new ManagerWatcher(manager)), name = "manager_watcher")
     var seedWatcherBox = List[ActorRef]()
 
-    println(_conf)
+    //println(_conf)
 
     override def receive: Receive = {
         case ListenerStart(conf) =>
