@@ -34,6 +34,9 @@ class WatcherController(_conf: Properties, manager: ActorRef) extends Actor {
 
             sender() ! ListenerRunning
 
+        case ListenerFailed =>
+            manager ! ListenerFailed
+
         case WatcherStop(conf) =>
             println("Stopping listeners ...")
             managerWatcher ! ListenerManagerStop

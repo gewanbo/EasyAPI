@@ -46,6 +46,12 @@ class ManagerWatcher(manager: ActorRef) extends Actor {
 
         try {
 
+            if(isClose) {
+                if(!socket.isClosed)
+                    socket.close()
+                throw new Exception("Socket has closed.")
+            }
+
             if(!isClose && socket == null)
                 socket = new ServerSocket(port)
 
