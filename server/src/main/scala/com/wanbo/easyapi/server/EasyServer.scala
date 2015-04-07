@@ -1,12 +1,8 @@
 package com.wanbo.easyapi.server
 
-import java.io.FileInputStream
-import java.net.{ServerSocket, Socket}
-import java.util.Properties
-
-import org.slf4j.LoggerFactory
-
-import scala.actors.threadpool.Executors
+import akka.actor.{Props, ActorSystem}
+import com.wanbo.easyapi.server.actors.{Manager, WorkerTracker}
+import com.wanbo.easyapi.server.messages.StartUp
 
 /**
  * The server of EasyAPI
@@ -14,40 +10,17 @@ import scala.actors.threadpool.Executors
  */
 object EasyServer {
 
-    private val logger = LoggerFactory.getLogger(EasyServer.getClass.getSimpleName)
-
     var port = "8800"
 
     def main(args: Array[String]) {
 
-        try {
-            logger.info("Starting up ...")
+        val system = ActorSystem("System")
 
-            val properties = new Properties()
-            val configFile = System.getProperty("easy.conf", "config.properties")
+        val workTracker = system.actorOf(Props[WorkerTracker], name = "work_tracker")
 
-            properties.load(new FileInputStream(configFile))
+        val manager = system.actorOf(Props(new Manager(workTracker)), name = "manager")
 
-            port = properties.getProperty("server.port", "8800")
+        manager ! StartUp
 
-            val socket = new ServerSocket(port.toInt)
-
-            val execService = Executors.newFixedThreadPool(properties.getProperty("server.max_threads", "10").toInt)
-
-            var client: Socket = socket.accept()
-            while (client != null) {
-
-                execService.submit(new Worker(client))
-
-                // Accept next message
-                client = socket.accept()
-            }
-
-            client.close()
-            logger.info("Easyapi server stop done.")
-        } catch {
-            case e: Exception =>
-                logger.error("Error:", e)
-        }
     }
 }
