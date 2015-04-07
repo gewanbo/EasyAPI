@@ -16,13 +16,13 @@ class SeedWatcher extends Actor {
 
     override def receive: Receive = {
 
-        case ListenerWorkerStart(conf) =>
-            val worker_port = conf.getProperty("server.worker.port", "8801")
+        case ListenerWorkerStart(port: Int) =>
 
+            println(self.hashCode())
+
+            println("worker listening on %s".format(port))
             // Workers' watcher
-            workerListen(worker_port.toInt)
-
-            println("worker listening on 8801")
+            workerListen(port)
 
         case ListenerWorkerStop =>
             context.stop(worker)

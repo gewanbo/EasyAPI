@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server
 
 import akka.actor.{Props, ActorSystem}
 import com.wanbo.easyapi.server.actors.{WorkerTracker, Manager}
-import com.wanbo.easyapi.server.messages.StartUp
+import com.wanbo.easyapi.server.messages.{ShutDown, StartUp}
 
 /**
  * Test
@@ -18,6 +18,10 @@ object Test {
         val manager = system.actorOf(Props(new Manager(workTracker)), name = "manager")
 
         manager ! StartUp
+
+//        Thread.sleep(10000)
+
+//        manager ! ShutDown("")
 
 //        system.shutdown()
     }

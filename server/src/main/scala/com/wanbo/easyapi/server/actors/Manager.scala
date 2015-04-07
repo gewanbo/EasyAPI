@@ -13,9 +13,9 @@ import com.wanbo.easyapi.server.messages._
  */
 class Manager(workTracker: ActorRef) extends Actor {
 
-    val _conf: Properties = new Properties()
+    protected val _conf: Properties = new Properties()
 
-    val watcherController = context.actorOf(Props(new WatcherController(self)), name = "watcher_controller")
+    val watcherController = context.actorOf(Props(new WatcherController(_conf, self)), name = "watcher_controller")
 
     override def receive: Receive = {
         case StartUp =>

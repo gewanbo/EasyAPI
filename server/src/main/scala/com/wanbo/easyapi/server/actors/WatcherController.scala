@@ -1,5 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
+import java.util.Properties
+
 import akka.actor.{Props, ActorRef, Actor}
 import com.wanbo.easyapi.server.messages._
 
@@ -7,24 +9,37 @@ import com.wanbo.easyapi.server.messages._
  * The controller of watchers
  * Created by wanbo on 15/4/3.
  */
-class WatcherController(manager: ActorRef) extends Actor {
+class WatcherController(_conf: Properties, manager: ActorRef) extends Actor {
 
     val managerWatcher = context.actorOf(Props(new ManagerWatcher(manager)), name = "manager_watcher")
-    val seedWatcher = context.actorOf(Props[SeedWatcher], name = "seed_watcher")
+    var seedWatcherBox = List[ActorRef]()
+
+    println(_conf)
 
     override def receive: Receive = {
         case ListenerStart(conf) =>
             println("Starting up listeners ...")
 
             managerWatcher ! ListenerManagerStart(conf)
-            seedWatcher ! ListenerWorkerStart(conf)
+
+            val workers_port = conf.getProperty("server.worker.port", "8801")
+
+            val workerPorts = workers_port.split(";")
+
+            workerPorts.foreach(port => {
+                val seedWatcher = context.actorOf(Props[SeedWatcher], name = "seed_watcher_" + port)
+                seedWatcher ! ListenerWorkerStart(port.toInt)
+                seedWatcherBox = seedWatcherBox :+ seedWatcher
+            })
 
             sender() ! ListenerRunning
 
         case WatcherStop(conf) =>
             println("Stopping listeners ...")
             managerWatcher ! ListenerManagerStop
-            seedWatcher ! ListenerWorkerStop
+            seedWatcherBox.foreach(watcher => {
+                watcher ! ListenerWorkerStop
+            })
             context.stop(self)
     }
 }
