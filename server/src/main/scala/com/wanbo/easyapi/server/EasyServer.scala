@@ -10,8 +10,6 @@ import com.wanbo.easyapi.server.messages.StartUp
  */
 object EasyServer {
 
-    var port = "8800"
-
     def main(args: Array[String]) {
 
         val system = ActorSystem("System")
