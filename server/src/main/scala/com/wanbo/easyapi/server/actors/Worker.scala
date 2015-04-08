@@ -4,6 +4,7 @@ import java.io.{PrintWriter, InputStreamReader, BufferedReader}
 import java.net.Socket
 
 import akka.actor.Actor
+import com.wanbo.easyapi.server.lib.SeederManager
 import com.wanbo.easyapi.server.messages.{Seed, ShutDown}
 import org.slf4j.LoggerFactory
 
@@ -20,8 +21,6 @@ class Worker extends Actor {
             log.info("I'm working ...")
             val ret = process(client)
 
-            if(ret.trim == "shutdown")
-                sender() ! ShutDown
     }
 
     def process(client: Socket): String = {
@@ -42,10 +41,12 @@ class Worker extends Actor {
 
             log.info("Message body is :" + message)
 
-            log.info(message)
+            val seederManager = new SeederManager(message)
+
+            val fruits = seederManager.farming()
 
             // Response message
-            out.println(message + " - OK")
+            out.println(fruits)
 
             out.close()
             in.close()
