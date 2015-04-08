@@ -7,6 +7,7 @@ import java.util.Properties
 import akka.actor.{ActorRef, Props, Actor}
 import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import org.slf4j.LoggerFactory
 
 /**
  * Manager
@@ -15,6 +16,8 @@ import com.wanbo.easyapi.server.messages._
 class Manager(workTracker: ActorRef) extends Actor {
 
     protected val conf: EasyConfig = new EasyConfig
+
+    private val log = LoggerFactory.getLogger(classOf[Manager])
 
     val watcherController = context.actorOf(Props(new WatcherController(conf, self)), name = "watcher_controller")
 
