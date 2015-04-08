@@ -84,7 +84,7 @@ class Manager(workTracker: ActorRef) extends Actor {
             client.close()
         } catch {
             case e: Exception =>
-                println("Manage process exception :", e)
+                log.error("Manage process exception :", e)
         }
 
         message
