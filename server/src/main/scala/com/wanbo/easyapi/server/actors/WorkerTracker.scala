@@ -38,11 +38,13 @@ class WorkerTracker extends Actor {
 
 //            self ! ListenerRunning(ports, workers)
 
-            val workerList = conf.workersPort.map(port => conf.serverHost + ":" + port)
-            val zkManager = new ZooKeeperManager(conf.zkHosts)
+            if(conf.zkEnable) {
+                val workerList = conf.workersPort.map(port => conf.serverHost + ":" + port)
+                val zkManager = new ZooKeeperManager(conf.zkHosts)
 
-            zkManager.registerWorkers(workerList)
-
+                zkManager.registerWorkers(workerList)
+            }
+            
         case ListenerFailed =>
             log.info("Listener starting failed ...")
             context.system.shutdown()

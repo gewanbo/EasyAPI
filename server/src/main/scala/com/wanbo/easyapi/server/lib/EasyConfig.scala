@@ -8,6 +8,7 @@ class EasyConfig() {
     var serverHost: String = _
     var serverPort: Int = _
 
+    var zkEnable: Boolean = true
     var zkHosts: String = _
 
     var workersPort: List[Int] = _
