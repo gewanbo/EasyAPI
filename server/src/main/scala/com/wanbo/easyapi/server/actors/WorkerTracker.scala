@@ -29,9 +29,9 @@ class WorkerTracker extends Actor {
                 })
 
                 if(isWorking)
-                    log.info("Port --" + port + " is working")
+                    log.info("Port - " + port + " is working")
                 else
-                    log.info("Port --" + port + " isn't working")
+                    log.info("Port - " + port + " isn't working")
             })
 
 //            Thread.sleep(3000)
@@ -44,7 +44,7 @@ class WorkerTracker extends Actor {
 
                 zkManager.registerWorkers(workerList)
             }
-            
+
         case ListenerFailed =>
             log.info("Listener starting failed ...")
             context.system.shutdown()

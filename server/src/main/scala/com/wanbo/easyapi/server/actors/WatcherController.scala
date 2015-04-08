@@ -17,7 +17,7 @@ class WatcherController(conf: EasyConfig, manager: ActorRef) extends Actor {
         case ListenerStart =>
             println("Starting up listeners ...")
 
-            managerWatcher ! ListenerManagerStart(conf)
+            managerWatcher ! ListenerManagerStart
 
             if(conf.workersPort.length > 0) {
 

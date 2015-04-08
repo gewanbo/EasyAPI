@@ -5,6 +5,7 @@ import java.net.ServerSocket
 import akka.actor.{ActorRef, Actor}
 import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import org.slf4j.LoggerFactory
 
 /**
  * Listener
@@ -15,6 +16,8 @@ class ManagerWatcher(conf: EasyConfig,manager: ActorRef) extends Actor {
 
     var socket: ServerSocket = _
     var isClose: Boolean = false
+
+    private val log = LoggerFactory.getLogger(classOf[ManagerWatcher])
 
     override def receive: Receive = {
 
@@ -58,10 +61,12 @@ class ManagerWatcher(conf: EasyConfig,manager: ActorRef) extends Actor {
             val client = socket.accept()
             if (client != null) {
                 manager ! ManagerCommand(client)
+            } else {
+                log.warn("Manager watcher: The socket client was null.")
             }
         } catch {
             case e: Exception =>
-                println(e.getMessage)
+                log.error("Manager watcher exception:", e)
                 ret = false
         }
 
