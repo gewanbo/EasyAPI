@@ -12,8 +12,28 @@ class WorkerTracker extends Actor {
     override def receive: Receive = {
         case StartUp =>
             println("Starting up ...")
-        case ListenerRunning =>
+        case ListenerRunning(conf, workers) =>
             println("Listener is running ...")
+            conf.workersPort.foreach(port => {
+                var isWorking = false
+
+                workers.children.foreach(worker => {
+
+                    if(worker.toString().contains("watcher_" + port))
+                        isWorking = true
+
+                })
+
+                if(isWorking)
+                    println("Port --" + port + " is working")
+                else
+                    println("Port --" + port + " isn't working")
+            })
+
+//            Thread.sleep(3000)
+
+//            self ! ListenerRunning(ports, workers)
+
         case ListenerFailed =>
             println("Listener starting failed ...")
             context.system.shutdown()
