@@ -50,6 +50,12 @@
                 <artifactId>akka-actor_2.10</artifactId>
                 <version>${akka.version}</version>
             </dependency>
+            <!-- Zookeeper -->
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>3.4.6</version>
+            </dependency>
             <!-- logging -->
             <dependency>
                 <groupId>org.slf4j</groupId>
