@@ -3,6 +3,7 @@ package com.wanbo.easyapi.server.actors
 import java.net.ServerSocket
 
 import akka.actor.{ActorRef, Actor}
+import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
 
 /**
@@ -10,25 +11,23 @@ import com.wanbo.easyapi.server.messages._
  *
  * Created by wanbo on 15/4/3.
  */
-class ManagerWatcher(manager: ActorRef) extends Actor {
+class ManagerWatcher(conf: EasyConfig,manager: ActorRef) extends Actor {
 
     var socket: ServerSocket = _
     var isClose: Boolean = false
 
     override def receive: Receive = {
 
-        case ListenerManagerStart(conf) =>
-            val server_port = conf.getProperty("server.port", "8800")
-
+        case ListenerManagerStart =>
             // Manager watcher
-            val stat = managerListen(server_port.toInt)
+            val stat = managerListen(conf.serverPort)
 
             if(!stat)
                 manager ! ListenerFailed
             else
                 self ! ListenerManagerProcess(conf)
 
-        case ListenerManagerProcess(conf) =>
+        case ListenerManagerProcess =>
             if(!isClose) {
                 managerListen(8800)
                 self ! ListenerManagerProcess(conf)

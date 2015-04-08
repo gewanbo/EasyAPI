@@ -4,6 +4,7 @@ import java.net.ServerSocket
 
 import akka.actor.{Props, Actor}
 import akka.routing.{DefaultResizer, RoundRobinRouter}
+import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
 
 /**
@@ -11,20 +12,18 @@ import com.wanbo.easyapi.server.messages._
  *
  * Created by wanbo on 15/4/3.
  */
-class SeedWatcher extends Actor {
+class SeedWatcher(conf: EasyConfig) extends Actor {
 
     var socket: ServerSocket = _
     var isClose: Boolean = false
 
-    val resizer = DefaultResizer(lowerBound=1, upperBound = 10)
+    val resizer = DefaultResizer(lowerBound=1, upperBound = conf.workersMaxThreads)
 
     val worker = context.actorOf(Props[Worker].withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "worker")
 
     override def receive: Receive = {
 
         case ListenerWorkerStart(port: Int) =>
-
-            println("worker listening on %s".format(port))
 
             // Workers' watcher
             val stat = workerListen(port)

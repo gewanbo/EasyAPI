@@ -5,6 +5,7 @@ import java.net.Socket
 import java.util.Properties
 
 import akka.actor.{ActorRef, Props, Actor}
+import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
 
 /**
@@ -13,21 +14,31 @@ import com.wanbo.easyapi.server.messages._
  */
 class Manager(workTracker: ActorRef) extends Actor {
 
-    protected val _conf: Properties = new Properties()
+    protected val conf: EasyConfig = new EasyConfig
 
-    val watcherController = context.actorOf(Props(new WatcherController(_conf, self)), name = "watcher_controller")
+    val watcherController = context.actorOf(Props(new WatcherController(conf, self)), name = "watcher_controller")
 
     override def receive: Receive = {
         case StartUp =>
             workTracker ! StartUp
 
+            val confProps = new Properties()
             val configFile = System.getProperty("easy.conf", "config.properties")
-            _conf.load(new FileInputStream(configFile))
+            confProps.load(new FileInputStream(configFile))
 
-            watcherController ! ListenerStart(_conf)
+            conf.serverHost = confProps.getProperty("server.host", "localhost")
+            conf.serverPort = confProps.getProperty("server.port", "8800").toInt
 
-        case ListenerRunning =>
-            workTracker ! ListenerRunning
+            val workers_port = confProps.getProperty("server.worker.port", "8801")
+
+            conf.workersPort = workers_port.split(";").toList.map(_.toInt)
+
+            conf.workersMaxThreads = confProps.getProperty("server.worker.max_threads", "10").toInt
+
+            watcherController ! ListenerStart
+
+        case ListenerRunning(null, workers) =>
+            workTracker ! ListenerRunning(conf, workers)
 
         case ListenerFailed =>
             workTracker ! ListenerFailed
@@ -40,7 +51,7 @@ class Manager(workTracker: ActorRef) extends Actor {
 
         case ShutDown(msg) =>
             workTracker ! ShutDown(msg)
-            watcherController ! WatcherStop(_conf)
+            watcherController ! WatcherStop
             context.stop(self)
     }
 
