@@ -38,6 +38,8 @@ class Manager(workTracker: ActorRef) extends Actor {
 
             conf.workersMaxThreads = confProps.getProperty("server.worker.max_threads", "10").toInt
 
+            conf.zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
+
             watcherController ! ListenerStart
 
         case ListenerRunning(null, workers) =>

@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
+import com.wanbo.easyapi.server.lib.{ZooKeeperManager, ZookeeperClient}
 import com.wanbo.easyapi.server.messages.{ListenerFailed, ListenerRunning, ShutDown, StartUp}
 
 /**
@@ -33,6 +34,11 @@ class WorkerTracker extends Actor {
 //            Thread.sleep(3000)
 
 //            self ! ListenerRunning(ports, workers)
+
+            val workerList = conf.workersPort.map(port => conf.serverHost + ":" + port)
+            val zkManager = new ZooKeeperManager(conf.zkHosts)
+
+            zkManager.registerWorkers(workerList)
 
         case ListenerFailed =>
             println("Listener starting failed ...")

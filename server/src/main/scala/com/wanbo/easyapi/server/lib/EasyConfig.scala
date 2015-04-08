@@ -8,6 +8,9 @@ class EasyConfig() {
     var serverHost: String = _
     var serverPort: Int = _
 
+    var zkHosts: String = _
+
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
+
 }

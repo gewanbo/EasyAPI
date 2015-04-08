@@ -24,6 +24,11 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
 
     private val log = LoggerFactory.getLogger(classOf[ZookeeperClient])
 
+    def this(servers: String) =
+        this(servers, 3000, "", None)
+
+    connect()
+
     private def connect (): Unit = {
         val connectionLatch = new CountDownLatch(1)
         val assignLatch = new CountDownLatch(1)
@@ -70,6 +75,10 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         val paths = l.tail.foldLeft[List[String]](Nil){(xs, x) =>
             (xs.headOption.getOrElse("") + sep.toString + x)::xs}
         paths.reverse
+    }
+
+    def exists(path: String): Boolean ={
+        zk.exists(path, false) != null
     }
 
     private def makeNodePath(path : String) = "%s/%s".format(basePath, path).replaceAll("//", "/")
