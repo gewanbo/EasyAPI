@@ -25,12 +25,12 @@ class ManagerWatcher(conf: EasyConfig,manager: ActorRef) extends Actor {
             if(!stat)
                 manager ! ListenerFailed
             else
-                self ! ListenerManagerProcess(conf)
+                self ! ListenerManagerProcess
 
         case ListenerManagerProcess =>
             if(!isClose) {
                 managerListen(8800)
-                self ! ListenerManagerProcess(conf)
+                self ! ListenerManagerProcess
             }
 
         case ListenerManagerStop =>
