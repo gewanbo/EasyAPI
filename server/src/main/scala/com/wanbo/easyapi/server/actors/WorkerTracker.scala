@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
-import com.wanbo.easyapi.server.lib.{ZooKeeperManager, ZookeeperClient}
+import com.wanbo.easyapi.server.lib.ZooKeeperManager
 import com.wanbo.easyapi.server.messages.{ListenerFailed, ListenerRunning, ShutDown, StartUp}
 import org.slf4j.LoggerFactory
 
