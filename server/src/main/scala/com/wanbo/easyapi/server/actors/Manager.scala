@@ -7,7 +7,7 @@ import java.util.Properties
 import akka.actor.{ActorRef, Props, Actor}
 import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
-import org.slf4j.LoggerFactory
+import org.slf4j.{MDC, LoggerFactory}
 
 /**
  * Manager
@@ -20,6 +20,8 @@ class Manager(workTracker: ActorRef) extends Actor {
     private val log = LoggerFactory.getLogger(classOf[Manager])
 
     val watcherController = context.actorOf(Props(new WatcherController(conf, self)), name = "watcher_controller")
+
+    MDC.put("destination", "system")
 
     override def receive: Receive = {
         case StartUp =>

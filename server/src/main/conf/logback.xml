@@ -33,7 +33,7 @@
         </sift>
     </appender>
 
-    <logger name="com.wanbo.easyapi.server.EasyServer" additivity="false">
+    <logger name="com.wanbo.easyapi.server" additivity="false">
         <level value="INFO" />
         <appender-ref ref="EASY-ROOT" />
     </logger>
