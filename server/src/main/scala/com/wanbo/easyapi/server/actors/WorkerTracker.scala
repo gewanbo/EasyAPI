@@ -3,6 +3,7 @@ package com.wanbo.easyapi.server.actors
 import akka.actor.Actor
 import com.wanbo.easyapi.server.lib.{ZooKeeperManager, ZookeeperClient}
 import com.wanbo.easyapi.server.messages.{ListenerFailed, ListenerRunning, ShutDown, StartUp}
+import org.slf4j.LoggerFactory
 
 /**
  * Worker tracker
@@ -10,11 +11,13 @@ import com.wanbo.easyapi.server.messages.{ListenerFailed, ListenerRunning, ShutD
  */
 class WorkerTracker extends Actor {
 
+    private val log = LoggerFactory.getLogger(classOf[WorkerTracker])
+    
     override def receive: Receive = {
         case StartUp =>
-            println("Starting up ...")
+            log.info("Starting up ...")
         case ListenerRunning(conf, workers) =>
-            println("Listener is running ...")
+            log.info("Listener is running ...")
             conf.workersPort.foreach(port => {
                 var isWorking = false
 
@@ -26,9 +29,9 @@ class WorkerTracker extends Actor {
                 })
 
                 if(isWorking)
-                    println("Port --" + port + " is working")
+                    log.info("Port --" + port + " is working")
                 else
-                    println("Port --" + port + " isn't working")
+                    log.info("Port --" + port + " isn't working")
             })
 
 //            Thread.sleep(3000)
@@ -41,16 +44,16 @@ class WorkerTracker extends Actor {
             zkManager.registerWorkers(workerList)
 
         case ListenerFailed =>
-            println("Listener starting failed ...")
+            log.info("Listener starting failed ...")
             context.system.shutdown()
         case ShutDown(msg) =>
-            println("Shutting down ... ")
+            log.info("Shutting down ... ")
             if(msg != null)
-                println(msg)
+                log.info(msg)
 
             Thread.sleep(3000)
 
-            println("Shutting down main process ... ")
+            log.info("Shutting down main process ... ")
             context.system.shutdown()
             System.exit(-1)
     }

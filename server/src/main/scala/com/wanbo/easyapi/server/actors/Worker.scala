@@ -5,6 +5,7 @@ import java.net.Socket
 
 import akka.actor.Actor
 import com.wanbo.easyapi.server.messages.{Seed, ShutDown}
+import org.slf4j.LoggerFactory
 
 /**
  * Worker
@@ -12,9 +13,11 @@ import com.wanbo.easyapi.server.messages.{Seed, ShutDown}
  */
 class Worker extends Actor {
 
+    private val log = LoggerFactory.getLogger(classOf[Worker])
+
     override def receive: Receive = {
         case Seed(client) =>
-            println("I'm working ...")
+            log.info("I'm working ...")
             val ret = process(client)
 
             if(ret.trim == "shutdown")
@@ -27,7 +30,7 @@ class Worker extends Actor {
 
         try {
 
-            println("Receive a message:")
+            log.info("Receive a message:")
 
             // In message
             val in = new BufferedReader(new InputStreamReader(client.getInputStream))
@@ -37,9 +40,9 @@ class Worker extends Actor {
 
             message = in.readLine()
 
-            println("Message body is :" + message)
+            log.info("Message body is :" + message)
 
-            println(message)
+            log.info(message)
 
             // Response message
             out.println(message + " - OK")
@@ -49,7 +52,7 @@ class Worker extends Actor {
             client.close()
         } catch {
             case e: Exception =>
-                println("Message worker process exception :", e)
+                log.error("Message worker process exception :", e)
         }
 
         message
