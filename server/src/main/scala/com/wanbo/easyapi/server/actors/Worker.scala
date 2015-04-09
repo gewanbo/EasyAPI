@@ -5,7 +5,7 @@ import java.net.Socket
 
 import akka.actor.Actor
 import com.wanbo.easyapi.server.lib.SeederManager
-import com.wanbo.easyapi.server.messages.{Seed, ShutDown}
+import com.wanbo.easyapi.server.messages.Seed
 import org.slf4j.LoggerFactory
 
 /**
@@ -37,16 +37,36 @@ class Worker extends Actor {
             // Out message
             val out = new PrintWriter(client.getOutputStream, true)
 
-            message = in.readLine()
+            var fruits = ""
 
-            log.info("Message body is :" + message)
+            try {
+                var msgLength = 10
+                //val headers = in.readLine()
+                message = in.readLine().trim
 
-            val seederManager = new SeederManager(message)
+                while (msgLength > 0 && message != null && !message.startsWith("{") && !message.endsWith("}")) {
+                    msgLength -= 1
+                    println(message)
+                    message = in.readLine().trim
+                }
 
-            val fruits = seederManager.farming()
+                if (message == "") {
+                    throw new Exception("Request body is empty!")
+                }
 
+                val seederManager = new SeederManager(message)
+
+                fruits = seederManager.farming()
+
+            } catch {
+                case e: Exception =>
+                    fruits = """{"errorcode": 99999, "errormsg": %s}""".format(e.getMessage)
+            }
             // Response message
             out.println(fruits)
+
+            log.info("Input message is:" + message)
+            log.info("Output message is:" + fruits)
 
             out.close()
             in.close()
