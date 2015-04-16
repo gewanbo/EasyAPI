@@ -8,7 +8,9 @@ import com.alibaba.fastjson.JSONObject
  */
 abstract class Seeder {
 
-    protected var fruits: JSONObject = _
+    var name: String = _
 
-    protected def onDBHandle()
+    protected var fruits: JSONObject = new JSONObject()
+
+    protected def onDBHandle(): Any
 }
