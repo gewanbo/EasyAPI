@@ -14,4 +14,5 @@ class EasyConfig() {
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
 
+    var driver_mysql = Map[String, String]()
 }
