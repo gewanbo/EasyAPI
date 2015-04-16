@@ -3,7 +3,7 @@ package com.wanbo.easyapi.server.actors
 import akka.actor.Actor
 import akka.io.Tcp.{Close, PeerClosed, Write, Received}
 import akka.util.ByteString
-import com.wanbo.easyapi.server.lib.SeederManager
+import com.wanbo.easyapi.server.lib.{EasyConfig, SeederManager}
 import com.wanbo.easyapi.server.messages.Seed
 import org.slf4j.LoggerFactory
 
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
  * Worker
  * Created by wanbo on 15/4/3.
  */
-class Worker extends Actor {
+class Worker(conf: EasyConfig) extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[Worker])
 
@@ -49,7 +49,7 @@ class Worker extends Actor {
                 throw new Exception("Request body is empty!")
             }
 
-            val seederManager = new SeederManager(message)
+            val seederManager = new SeederManager(conf, message)
 
             fruits = seederManager.farming()
 
