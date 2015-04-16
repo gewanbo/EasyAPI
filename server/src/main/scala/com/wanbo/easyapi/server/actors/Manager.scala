@@ -43,6 +43,11 @@ class Manager(workTracker: ActorRef) extends Actor {
             conf.zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
             conf.zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
 
+            conf.driver_mysql = conf.driver_mysql.+("mysql.db.host" -> confProps.getProperty("mysql.db.host", "localhost"))
+            conf.driver_mysql = conf.driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
+            conf.driver_mysql = conf.driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
+            conf.driver_mysql = conf.driver_mysql.+("mysql.db.password" -> confProps.getProperty("mysql.db.password", ""))
+
             watcherController ! ListenerStart
 
         case ListenerRunning(null, workers) =>
