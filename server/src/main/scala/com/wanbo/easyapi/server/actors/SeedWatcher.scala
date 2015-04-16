@@ -20,7 +20,7 @@ class SeedWatcher(conf: EasyConfig, port: Int) extends Actor {
 
     val resizer = DefaultResizer(lowerBound=1, upperBound = conf.workersMaxThreads)
 
-    val worker = context.actorOf(Props[Worker].withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "worker")
+    val worker = context.actorOf(Props(new Worker(conf)).withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "worker")
 
     IO(Tcp) ! Bind(self, new InetSocketAddress(conf.serverHost, port))
 
