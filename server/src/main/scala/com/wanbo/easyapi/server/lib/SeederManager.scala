@@ -1,14 +1,14 @@
 package com.wanbo.easyapi.server.lib
 
 import com.alibaba.fastjson.{JSONException, JSONObject, JSON}
-import com.wanbo.easyapi.server.workers.Seeder_10001
+import com.wanbo.easyapi.server.database.MysqlDriver
 import org.slf4j.LoggerFactory
 
 /**
  * The manager of all types workers
  * Created by GWB on 2015/4/8.
  */
-class SeederManager(seed: String) {
+class SeederManager(conf: EasyConfig, seed: String) {
 
     private val log = LoggerFactory.getLogger(classOf[SeederManager])
 
@@ -19,29 +19,38 @@ class SeederManager(seed: String) {
     private var _fruit: JSONObject = _
 
     private def loadSeed(): Unit = {
-        try {
-            _seed = JSON.parseObject(seed)
+        var seedBox: JSONObject = null
 
-            messageid = _seed.getString("messageid")
+        try {
+            seedBox = JSON.parseObject(seed)
+
+            val head = seedBox.getJSONObject("head")
+
+            messageid = head.getString("messageid")
 
             if(messageid == null)
                 messageid = "139287742832"
 
-            transactionType = _seed.getString("transactiontype")
+            transactionType = head.getString("transactiontype")
 
-//            if(transactionType == null || transactionType == "")
-//                throw new Exception("Can't find the TransactionType!")
+            if(transactionType == null || transactionType == "")
+                throw new Exception("Can't find the TransactionType!")
+            else if (!transactionType.forall(_.isDigit))
+                throw new Exception("The transaction type is not supported.")
 
 
+            _seed = seedBox.getJSONObject("body").getJSONObject("ielement")
 
+            if(_seed == null)
+                throw new Exception("Can't find the input element.")
 
 
         } catch {
             case je: JSONException =>
-                log.warn("The seed string is :" + _seed)
+                log.warn("The seed string is :" + seedBox)
                 log.error("Throws exception when parse seed:", je)
             case e: Exception =>
-                log.error("The seed string is :" + _seed, e)
+                log.error("The seed string is :" + seedBox, e)
         }
     }
 
@@ -49,21 +58,53 @@ class SeederManager(seed: String) {
 
         loadSeed()
 
-        val fruits = Seeder_10001.apply().onHandle(_seed)
-
-
         _fruit = new JSONObject()
+
         val head = new JSONObject()
         head.put("messageid", messageid)
         head.put("transactiontype", transactionType)
 
         val body = new JSONObject()
         val oelement = new JSONObject()
-        oelement.put("errorcode", 0)
-        oelement.put("errormsg", "")
-        body.put("oelement", oelement)
-        body.put("odata", {fruits})
 
+        try {
+
+            var fruits: JSONObject = null
+
+            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + transactionType)
+
+            val seederObj = cla.newInstance().asInstanceOf[ISeeder]
+
+            seederObj.driver match {
+                case MysqlDriver() =>
+                    seederObj.driver.setConfiguration(conf)
+            }
+
+            fruits = seederObj.onHandle(_seed)
+
+            if (fruits == null)
+                throw new Exception("The transaction type is not supported.")
+
+
+            val _eCode = fruits.getString("errorcode").toInt
+            if(_eCode == 0) {
+                body.put("odatalist", fruits.getJSONArray("data"))
+                throw new EasyException("0")
+            } else {
+                throw new EasyException("12002")
+            }
+
+        } catch {
+            case ee: EasyException =>
+                oelement.put("errorcode", ee.getCode)
+                oelement.put("errormsg", ee.getMessage)
+            case e: Exception =>
+                e.printStackTrace()
+                oelement.put("errorcode", "99999")
+                oelement.put("errormsg", e.getMessage)
+        }
+
+        body.put("oelement", oelement)
 
         _fruit.put("head", head)
         _fruit.put("body", body)
