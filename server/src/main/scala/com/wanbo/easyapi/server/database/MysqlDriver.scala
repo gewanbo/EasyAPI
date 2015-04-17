@@ -57,7 +57,7 @@ case class MysqlDriver() extends Driver {
 
         } catch {
             case e: Exception =>
-                e.printStackTrace()
+                throw e
         }
     }
 
