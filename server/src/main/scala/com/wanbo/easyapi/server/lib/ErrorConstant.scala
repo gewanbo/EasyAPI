@@ -12,6 +12,10 @@ object ErrorConstant {
     errorList = errorList.+("0" -> "Successful.")
     errorList = errorList.+("12002" -> "Undefined exception.")
 
+    errorList = errorList.+("20001" -> "The input parameters were wrong.")
+    errorList = errorList.+("20010" -> "The length of UserName was wrong.")
+    errorList = errorList.+("20100" -> "There is no data in results data set.")
+
     errorList = errorList.+("99999" -> "Undefined exception.")
 
     def getErrorMessage(code: String): String = {
