@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.server.lib
 
 import com.alibaba.fastjson.{JSONException, JSONObject, JSON}
-import com.wanbo.easyapi.server.database.MysqlDriver
+import com.wanbo.easyapi.server.database.{HBaseDriver, MysqlDriver}
 import org.slf4j.LoggerFactory
 
 /**
@@ -78,6 +78,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
             seederObj.driver match {
                 case MysqlDriver() =>
                     seederObj.driver.setConfiguration(conf)
+                case HBaseDriver() =>
+                    seederObj.driver.setConfiguration(conf)
             }
 
             fruits = seederObj.onHandle(_seed)
@@ -91,7 +93,11 @@ class SeederManager(conf: EasyConfig, seed: String) {
                 body.put("odatalist", fruits.getJSONArray("data"))
                 throw new EasyException("0")
             } else {
-                throw new EasyException("12002")
+                val msg = fruits.getString("errormsg")
+                if(msg != null && msg != "")
+                    throw new EasyException(_eCode.toString, msg)
+                else
+                    throw new EasyException(_eCode.toString)
             }
 
         } catch {
