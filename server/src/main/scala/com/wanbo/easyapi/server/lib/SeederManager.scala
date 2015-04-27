@@ -91,6 +91,10 @@ class SeederManager(conf: EasyConfig, seed: String) {
             val _eCode = fruits.getString("errorcode").toInt
             if(_eCode == 0) {
                 body.put("odatalist", fruits.getJSONArray("data"))
+
+                if(fruits.containsKey("fromcache"))
+                    oelement.put("fromcache", fruits.getString("fromcache"))
+
                 throw new EasyException("0")
             } else {
                 val msg = fruits.getString("errormsg")
