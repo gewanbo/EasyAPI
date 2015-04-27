@@ -8,7 +8,11 @@ import com.wanbo.easyapi.server.database.Driver
  * Created by GWB on 2015/4/8.
  */
 trait ISeeder {
+    var _conf: EasyConfig = _
+
     var driver: Driver = _
+
+    var isUpdateCache = false
 
     def onHandle(seed: JSONObject): JSONObject
 }
