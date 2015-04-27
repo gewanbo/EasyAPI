@@ -1,6 +1,6 @@
 package com.wanbo.easyapi.server.cache
 
-import com.wanbo.easyapi.server.lib.{EasyConfig, EasyOutput, ObjectSerialization}
+import com.wanbo.easyapi.server.lib.{ObjectSerialization, EasyConfig, EasyOutput}
 import org.slf4j.LoggerFactory
 
 /**
