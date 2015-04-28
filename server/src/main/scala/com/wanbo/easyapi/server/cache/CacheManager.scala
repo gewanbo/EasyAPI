@@ -63,8 +63,6 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
                 // Get cache
                 val getData = cacher.get(cache_name)
 
-                println("The get cache is---------:" + getData)
-
                 if(getData == null)
                     output = null
                 else
