@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.cache
 
 import com.wanbo.easyapi.server.lib.{ObjectSerialization, EasyConfig, EasyOutput}
+import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 
 /**
@@ -46,6 +47,8 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
         try {
             val cache_name = cacheName(name)
 
+            println("------Cache name is:" + cache_name)
+
             if (cacher == null)
                 throw new Exception("There is no cache can use.")
 
@@ -77,6 +80,6 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
     }
 
     private def cacheName(name: String): String ={
-        name.substring(5, 10) + java.security.MessageDigest.getInstance("MD5").digest(name.getBytes("UTF-8"))
+        name.substring(5, 10) + new String(Hex.encodeHex(java.security.MessageDigest.getInstance("MD5").digest(name.getBytes("UTF-8"))))
     }
 }
