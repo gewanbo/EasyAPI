@@ -24,13 +24,9 @@ class CacheRedis(host: String, port: Int) extends EasyCache {
 
         try {
 
-            println("--------------sssss:" + redis.connected)
-
             if(redis.exists(name)){
-                println("--------cache key exists")
                 data = redis.get(name).get
             } else {
-                println("--------cache key doesn't exists")
                 data = null
             }
 
@@ -45,11 +41,10 @@ class CacheRedis(host: String, port: Int) extends EasyCache {
         var ret = false
 
         try {
-            println("Write cache data : ---------------" + data)
 
             ret = redis.set(name, data)
+            redis.expire(name, 600)
 
-            println("Write cache data : ---------------" + ret)
         } catch {
             case e: Exception =>
                 log.error("", e)
