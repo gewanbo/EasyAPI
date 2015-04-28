@@ -61,6 +61,8 @@ class Manager(workTracker: ActorRef) extends Actor {
             val cmd = parseCommand(client)
             if(cmd == "shutdown")
                 self ! ShutDown("Command shut down.")
+            if(cmd == "clean cache")
+                println("Clean cache.")
 
         case ShutDown(msg) =>
             workTracker ! ShutDown(msg)
