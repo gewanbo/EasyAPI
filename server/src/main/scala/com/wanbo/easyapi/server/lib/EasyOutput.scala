@@ -6,5 +6,5 @@ package com.wanbo.easyapi.server.lib
  */
 class EasyOutput extends Serializable {
     var oelement: Map[String, String] = Map(("errorcode", "-1"), ("errormsg", ""))
-    var odata: List[List[(String, Any)]] = _
+    var odata: List[Map[String, Any]] = _
 }
