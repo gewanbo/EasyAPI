@@ -57,13 +57,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
             val cacheData = cacher.cacheData(cache_name)
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
-                cacheData.odata.foreach(x => {
-                    var obj = Map[String, Any]()
-                    x.foreach(y => {
-                        obj = obj + (y._1 -> y._2)
-                    })
-                    dataList = dataList :+ obj
-                })
+                dataList = cacheData.odata
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true")
             } else {
 
