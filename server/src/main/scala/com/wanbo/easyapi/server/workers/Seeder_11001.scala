@@ -65,6 +65,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
             case e: Exception =>
                 log.error("Seeder has exception:", e)
                 fruits.oelement = fruits.oelement.updated("errorcode", "-1")
+                fruits.oelement = fruits.oelement.updated("errormsg", e.getMessage)
         }
 
         fruits
