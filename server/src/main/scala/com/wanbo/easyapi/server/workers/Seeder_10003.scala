@@ -2,6 +2,7 @@ package com.wanbo.easyapi.server.workers
 
 import java.util.{TimeZone, Calendar}
 
+import com.wanbo.easyapi.server.cache.CacheManager
 import com.wanbo.easyapi.server.database.MysqlDriver
 import com.wanbo.easyapi.server.lib.{EasyOutput, EasyException, ISeeder, Seeder}
 import org.slf4j.LoggerFactory
@@ -24,7 +25,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
 
     override def onHandle(seed: Map[String, Any]): EasyOutput = {
 
-        var dataList = List[List[(String, Any)]]()
+        var dataList = List[Map[String, Any]]()
 
         try {
             val days: String = seed.getOrElse("days", "1").toString
@@ -47,17 +48,44 @@ final class Seeder_10003 extends Seeder with ISeeder {
             if(_topNum > 30)
                 _topNum = 30
 
-            val data = onDBHandle()
 
-            if(data.size < 1)
-                throw new EasyException("20100")
-            else
-                data.foreach(x => {
-                   var obj = List[(String, String)]()
-                    obj = obj :+ ("storyid", x._1)
-                    obj = obj :+ ("cheadline", x._2)
+            // Cache
+            val cache_name = this.getClass.getSimpleName + _days + _topNum
+
+            val cacher = new CacheManager()
+
+            val cacheData = cacher.cacheData(cache_name)
+
+            if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
+                cacheData.odata.foreach(x => {
+                    var obj = Map[String, Any]()
+                    x.foreach(y => {
+                        obj = obj + (y._1 -> y._2)
+                    })
                     dataList = dataList :+ obj
                 })
+                fruits.oelement = fruits.oelement + ("fromcache" -> "true")
+            } else {
+
+                val data = onDBHandle()
+
+                if (data.size < 1)
+                    throw new EasyException("20100")
+                else {
+                    val cache_data = new EasyOutput
+                    cache_data.odata = List[Map[String, Any]]()
+                    data.foreach(x => {
+                        var obj = Map[String, Any]()
+                        obj = obj + ("storyid" -> x._1)
+                        obj = obj + ("cheadline" -> x._2)
+                        dataList = dataList :+ obj
+
+                        cache_data.odata = cache_data.odata :+ obj
+                    })
+                    cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
+                    cacher.cacheData(cache_name, cache_data)
+                }
+            }
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
             fruits.odata = dataList
