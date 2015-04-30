@@ -78,6 +78,6 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
     }
 
     private def cacheName(name: String): String ={
-        name.substring(5, 10) + new String(Hex.encodeHex(java.security.MessageDigest.getInstance("MD5").digest(name.getBytes("UTF-8"))))
+        name.filter(_.isDigit).substring(0, 5) + new String(Hex.encodeHex(java.security.MessageDigest.getInstance("MD5").digest(name.getBytes("UTF-8"))))
     }
 }
