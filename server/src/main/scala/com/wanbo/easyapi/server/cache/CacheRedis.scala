@@ -37,13 +37,13 @@ class CacheRedis(host: String, port: Int) extends EasyCache {
         data
     }
 
-    override def set(name: String, data: String): Boolean = {
+    override def set(name: String, data: String, expire: Int = 60): Boolean = {
         var ret = false
 
         try {
 
             ret = redis.set(name, data)
-            redis.expire(name, 600)
+            redis.expire(name, expire)
 
         } catch {
             case e: Exception =>

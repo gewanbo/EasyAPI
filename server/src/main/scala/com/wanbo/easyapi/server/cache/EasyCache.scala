@@ -6,6 +6,6 @@ package com.wanbo.easyapi.server.cache
  */
 abstract class EasyCache {
     def get(name: String): String
-    def set(name: String, data: String): Boolean
+    def set(name: String, data: String, expire: Int = 60): Boolean
     def del(name: String): Boolean
 }

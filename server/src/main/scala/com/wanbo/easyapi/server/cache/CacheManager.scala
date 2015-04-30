@@ -57,7 +57,7 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
                 cacher.del(cache_name)
             } else if (data.odata != null || data.oelement.size > 2) {
                 // Set cache
-                cacher.set(cache_name, ObjectSerialization.objectEncode(data))
+                cacher.set(cache_name, ObjectSerialization.objectEncode(data), expire)
                 output = data
             } else {
                 // Get cache
