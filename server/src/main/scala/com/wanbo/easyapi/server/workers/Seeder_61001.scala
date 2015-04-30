@@ -46,13 +46,7 @@ final class Seeder_61001 extends Seeder with ISeeder {
             val cacheData = cacher.cacheData(cache_name)
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
-                cacheData.odata.foreach(x => {
-                    var obj = Map[String, Any]()
-                    x.foreach(y => {
-                        obj = obj + (y._1 -> y._2)
-                    })
-                    dataList = dataList :+ obj
-                })
+                dataList = cacheData.odata
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true")
             } else {
 
@@ -67,7 +61,7 @@ final class Seeder_61001 extends Seeder with ISeeder {
                     val sortData = data.sortBy(x => x._3)(Ordering.Double.reverse)
                     sortData.slice(0, 30).foreach(x => {
                         var obj = Map[String, Any]()
-                        obj = obj + ("storyid" -> x._1)
+                        obj = obj + ("storyid" -> x._1.reverse.padTo(9, 0).reverse.mkString)
                         obj = obj + ("cheadline" -> x._2)
                         dataList = dataList :+ obj
 
