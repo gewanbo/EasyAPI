@@ -1,6 +1,5 @@
 package com.wanbo.easyapi.server.lib
 
-import com.alibaba.fastjson.JSONObject
 import com.wanbo.easyapi.server.database.Driver
 
 /**
@@ -12,7 +11,9 @@ trait ISeeder {
 
     var driver: Driver = _
 
+    var manager: SeederManager = _
+
     var isUpdateCache = false
 
-    def onHandle(seed: JSONObject): JSONObject
+    def onHandle(seed: Map[String, Any]): EasyOutput
 }

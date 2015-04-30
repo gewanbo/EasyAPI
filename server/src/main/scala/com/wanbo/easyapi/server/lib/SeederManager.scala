@@ -15,7 +15,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
     private var messageid: String = _
     private var transactionType: String = _
 
-    private var _seed: JSONObject = _
+    private var _seed: Map[String, Any] = _
     private var _fruit: JSONObject = _
 
     private def loadSeed(): Unit = {
@@ -39,7 +39,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
                 throw new Exception("The transaction type is not supported.")
 
 
-            _seed = seedBox.getJSONObject("body").getJSONObject("ielement")
+            _seed = EasyConverts.json2map(seedBox.getJSONObject("body").getJSONObject("ielement"))
 
             if(_seed == null)
                 throw new Exception("Can't find the input element.")
@@ -69,11 +69,16 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
         try {
 
-            var fruits: JSONObject = null
+            var fruits: EasyOutput = null
 
             val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + transactionType)
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
+
+            if (seederObj == null)
+                throw new Exception("The transaction type is not supported.")
+
+            seederObj.manager = this
 
             seederObj.driver match {
                 case MysqlDriver() =>
@@ -84,20 +89,16 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             fruits = seederObj.onHandle(_seed)
 
-            if (fruits == null)
-                throw new Exception("The transaction type is not supported.")
-
-
-            val _eCode = fruits.getString("errorcode").toInt
+            val _eCode = fruits.oelement.get("errorcode").get.toInt
             if(_eCode == 0) {
-                body.put("odatalist", fruits.getJSONArray("data"))
+                body.put("odatalist", EasyConverts.list2json(fruits.odata))
 
-                if(fruits.containsKey("fromcache"))
-                    oelement.put("fromcache", fruits.getString("fromcache"))
+                if(fruits.oelement.contains("fromcache"))
+                    oelement.put("fromcache", fruits.oelement.getOrElse("fromcache",""))
 
                 throw new EasyException("0")
             } else {
-                val msg = fruits.getString("errormsg")
+                val msg = fruits.oelement.getOrElse("errormsg", "")
                 if(msg != null && msg != "")
                     throw new EasyException(_eCode.toString, msg)
                 else
@@ -108,8 +109,12 @@ class SeederManager(conf: EasyConfig, seed: String) {
             case ee: EasyException =>
                 oelement.put("errorcode", ee.getCode)
                 oelement.put("errormsg", ee.getMessage)
+            case cnfe: ClassNotFoundException =>
+                log.error("Seeder not found Exception:", cnfe)
+                oelement.put("errorcode", "10011")
+                oelement.put("errormsg", cnfe.getMessage)
             case e: Exception =>
-                e.printStackTrace()
+                log.error("SeederManager Exception:", e)
                 oelement.put("errorcode", "99999")
                 oelement.put("errormsg", e.getMessage)
         }
@@ -121,4 +126,32 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
         _fruit.toJSONString
     }
+
+    def transform(seeder: String, seed: Map[String, Any]): EasyOutput ={
+
+        var fruits: EasyOutput = new EasyOutput
+
+        try {
+            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + seeder)
+
+            val seederObj = cla.newInstance().asInstanceOf[ISeeder]
+
+            seederObj.driver match {
+                case MysqlDriver() =>
+                    seederObj.driver.setConfiguration(conf)
+                case HBaseDriver() =>
+                    seederObj.driver.setConfiguration(conf)
+            }
+
+            fruits = seederObj.onHandle(seed)
+
+        } catch {
+            case ee: ClassNotFoundException =>
+                log.error("Seeder not found Exception:", ee)
+            case e: Exception =>
+        }
+
+        fruits
+    }
+
 }
