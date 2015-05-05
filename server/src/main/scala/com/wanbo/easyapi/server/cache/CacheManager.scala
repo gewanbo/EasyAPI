@@ -16,6 +16,8 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
 
     private val log = LoggerFactory.getLogger(classOf[CacheManager])
 
+    var ttl: Long = _
+
     init()
 
     def init() {
@@ -65,8 +67,10 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
 
                 if(getData == null)
                     output = null
-                else
+                else {
                     output = ObjectSerialization.objectDecode(getData).asInstanceOf[EasyOutput]
+                    ttl = cacher.ttl
+                }
             }
 
         } catch {

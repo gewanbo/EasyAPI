@@ -95,6 +95,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
                 if(fruits.oelement.contains("fromcache"))
                     oelement.put("fromcache", fruits.oelement.getOrElse("fromcache",""))
+                if(fruits.oelement.contains("ttl"))
+                    oelement.put("ttl", fruits.oelement.getOrElse("ttl",""))
 
                 throw new EasyException("0")
             } else {

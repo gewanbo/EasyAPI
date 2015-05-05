@@ -5,6 +5,7 @@ package com.wanbo.easyapi.server.cache
  * Created by wanbo on 15/4/27.
  */
 abstract class EasyCache {
+    var ttl: Long = _
     def get(name: String): String
     def set(name: String, data: String, expire: Int = 60): Boolean
     def del(name: String): Boolean
