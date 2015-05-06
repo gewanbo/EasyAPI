@@ -31,7 +31,9 @@ class Worker(conf: EasyConfig) extends Actor {
 
             val fruits = process(msgBody)
 
-            sender() ! Write(ByteString.fromString(fruits, "UTF-8"))
+            val responseBody = "HTTP/1.1 200 OK\nContent-Type: application/json\n" + "\n" + fruits
+
+            sender() ! Write(ByteString.fromString(responseBody, "UTF-8"))
             sender() ! Close
         case PeerClosed =>
             context stop self
