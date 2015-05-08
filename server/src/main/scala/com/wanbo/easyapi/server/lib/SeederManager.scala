@@ -41,6 +41,14 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             _seed = EasyConverts.json2map(seedBox.getJSONObject("body").getJSONObject("ielement"))
 
+            val uuId = head.getString("uuid")
+            if(uuId != null && uuId != "")
+                _seed = _seed + ("uuid" -> uuId)
+
+            val cookieId = head.getString("cookieid")
+            if(cookieId != null && cookieId != "")
+                _seed = _seed + ("cookieid" -> cookieId)
+
             if(_seed == null)
                 throw new Exception("Can't find the input element.")
 
@@ -156,4 +164,32 @@ class SeederManager(conf: EasyConfig, seed: String) {
         fruits
     }
 
+    def updateCache(seeder: String, seed: Map[String, Any]): EasyOutput ={
+
+        var fruits: EasyOutput = new EasyOutput
+
+        try {
+            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + seeder)
+
+            val seederObj = cla.newInstance().asInstanceOf[ISeeder]
+
+            seederObj.driver match {
+                case MysqlDriver() =>
+                    seederObj.driver.setConfiguration(conf)
+                case HBaseDriver() =>
+                    seederObj.driver.setConfiguration(conf)
+            }
+
+            seederObj.isUpdateCache = true
+
+            fruits = seederObj.onHandle(seed)
+
+        } catch {
+            case ee: ClassNotFoundException =>
+                log.error("Seeder not found Exception:", ee)
+            case e: Exception =>
+        }
+
+        fruits
+    }
 }
