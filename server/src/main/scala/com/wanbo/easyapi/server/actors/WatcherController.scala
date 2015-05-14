@@ -26,7 +26,7 @@ class WatcherController(conf: EasyConfig, manager: ActorRef) extends Actor {
                     seedWatcherBox = seedWatcherBox :+ seedWatcher
                 })
 
-                sender() ! ListenerRunning(null, context)
+                manager ! ListenerRunning(null, context)
             } else {
                 manager ! ListenerFailed
             }
