@@ -1,8 +1,8 @@
 package com.wanbo.easyapi.server.actors
 
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
 import com.wanbo.easyapi.server.lib.ZooKeeperManager
-import com.wanbo.easyapi.server.messages.{ListenerFailed, ListenerRunning, ShutDown, StartUp}
+import com.wanbo.easyapi.server.messages._
 import org.slf4j.LoggerFactory
 
 /**
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 class WorkerTracker extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[WorkerTracker])
-    
+
     override def receive: Receive = {
         case StartUp =>
             log.info("Starting up ...")
@@ -34,15 +34,9 @@ class WorkerTracker extends Actor {
                     log.info("Port - " + port + " isn't working")
             })
 
-//            Thread.sleep(3000)
-
-//            self ! ListenerRunning(ports, workers)
-
             if(conf.zkEnable) {
-                val workerList = conf.workersPort.map(port => conf.serverHost + ":" + port)
-                val zkManager = new ZooKeeperManager(conf.zkHosts)
-
-                zkManager.registerWorkers(workerList)
+                val workerUpdate = context.actorOf(Props(new ZooKeeperManager(conf)), "worker_updater")
+                workerUpdate ! ""
             }
 
         case ListenerFailed =>
