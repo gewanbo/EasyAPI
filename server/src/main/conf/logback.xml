@@ -14,8 +14,7 @@
         <sift>
             <appender name="FILE-${destination}" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <File>../logs/${destination}/${destination}.log</File>
-                <rollingPolicy
-                        class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <!-- rollover daily -->
                     <fileNamePattern>../logs/${destination}/%d{yyyy-MM-dd}/${destination}-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
                     <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -33,12 +32,12 @@
         </sift>
     </appender>
 
-    <logger name="com.wanbo.easyapi.server" additivity="false">
+    <logger name="com.wanbo.easyapi.server.EasyServer" additivity="false">
         <level value="INFO" />
         <appender-ref ref="EASY-ROOT" />
     </logger>
 
-    <root level="WARN">
+    <root level="INFO">
         <!--
         <appender-ref ref="STDOUT"/>
         -->

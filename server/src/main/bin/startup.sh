@@ -90,7 +90,7 @@ then
 	echo LOG CONFIGURATION : $logback_configurationFile
 	echo Easy conf : $easy_conf
 	echo CLASSPATH :$CLASSPATH
-	$JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $EASY_OPTS -classpath .:$CLASSPATH com.wanbo.easyapi.server.EasyServer 1>>$base/logs/sys.log 2>&1 &
+	$JAVA $JAVA_OPTS $JAVA_DEBUG_OPT $EASY_OPTS -classpath .:$CLASSPATH com.wanbo.easyapi.server.EasyServer 1>>$base/logs/out.log 2>&1 &
 	echo $! > $base/bin/easyapi.pid
 	
 	echo "cd to $current_path for continue"

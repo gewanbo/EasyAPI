@@ -3,6 +3,7 @@ package com.wanbo.easyapi.server
 import akka.actor.{Props, ActorSystem}
 import com.wanbo.easyapi.server.actors.{Manager, WorkerTracker}
 import com.wanbo.easyapi.server.messages.StartUp
+import org.slf4j.LoggerFactory
 
 /**
  * The server of EasyAPI
@@ -10,7 +11,11 @@ import com.wanbo.easyapi.server.messages.StartUp
  */
 object EasyServer {
 
+    private val log = LoggerFactory.getLogger(EasyServer.getClass.getSimpleName)
+
     def main(args: Array[String]) {
+
+        log.info("Starting up .........----------------------")
 
         val system = ActorSystem("System")
 
