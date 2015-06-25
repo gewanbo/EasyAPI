@@ -48,7 +48,6 @@ final class Seeder_10003 extends Seeder with ISeeder {
             if(_topNum > 30)
                 _topNum = 30
 
-
             // Cache
             val cache_name = this.getClass.getSimpleName + _days + _topNum
 
@@ -58,7 +57,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
                 dataList = cacheData.odata
-                fruits.oelement = fruits.oelement + ("fromcache" -> "true")
+                fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
             } else {
 
                 val data = onDBHandle()
@@ -105,7 +104,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
             val calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"))
             calendar.add(Calendar.DATE, _days * -1)
 
-            val sql = "SELECT c.storyid,s.cheadline,count(storyid) views FROM `comment` c, `story` s where c.`ischecked`=1 and c.dnewdate > %d and s.publish_status='publish' and c.storyid=s.id group by c.storyid order by views desc limit %d".format(calendar.getTimeInMillis / 1000, _topNum)
+            val sql = "SELECT c.storyid,s.cheadline,count(storyid) views FROM `comment` c, `story` s where c.`ischecked`=1 and c.dnewdate > from_unixtime(%d) and s.publish_status='publish' and c.storyid=s.id group by c.storyid order by views desc limit %d".format(calendar.getTimeInMillis / 1000, _topNum)
 
             val ps = conn.prepareStatement(sql)
             val rs = ps.executeQuery()
