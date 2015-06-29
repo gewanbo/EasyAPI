@@ -18,8 +18,6 @@ class CacheManager(conf: EasyConfig) extends Actor {
 
     val log = LoggerFactory.getLogger(classOf[CacheManager])
 
-    MDC.put("destination", "cache")
-
     override def receive: Receive = {
 
         case "init" =>
@@ -27,6 +25,7 @@ class CacheManager(conf: EasyConfig) extends Actor {
             system.scheduler.schedule(10 seconds, 200 seconds, self, UpdateCache("10003", Map("days" ->"7", "num" ->"10")))
 
         case UpdateCache(x, y) =>
+            MDC.put("destination", "cache")
             log.info("Update cache ....")
 
             log.info("-----" + x + " " + y)
@@ -34,5 +33,6 @@ class CacheManager(conf: EasyConfig) extends Actor {
             val seederManager = new SeederManager(conf, "")
             val ret = seederManager.updateCache(x, y)
             log.info(ret.oelement.toString())
+            MDC.clear()
     }
 }
