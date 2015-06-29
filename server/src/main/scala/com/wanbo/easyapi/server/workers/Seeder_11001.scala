@@ -26,6 +26,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
         var dataList = List[Map[String, Any]]()
 
         try {
+            val startRunTime = System.currentTimeMillis()
 
             // Cache
             val cache_name = this.getClass.getSimpleName
@@ -56,7 +57,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
                 }
             }
 
-            fruits.oelement = fruits.oelement.updated("errorcode", "0")
+            fruits.oelement = fruits.oelement.updated("errorcode", "0").+("duration" -> (System.currentTimeMillis() - startRunTime).toString)
             fruits.odata = dataList
         } catch {
             case ee: EasyException =>
