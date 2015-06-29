@@ -3,7 +3,7 @@ package com.wanbo.easyapi.server.actors
 import akka.actor.{Props, Actor}
 import com.wanbo.easyapi.server.lib.ZooKeeperManager
 import com.wanbo.easyapi.server.messages._
-import org.slf4j.LoggerFactory
+import org.slf4j.{MDC, LoggerFactory}
 
 /**
  * Worker tracker
@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory
 class WorkerTracker extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[WorkerTracker])
+
+    MDC.put("destination", "system")
 
     override def receive: Receive = {
         case StartUp =>
