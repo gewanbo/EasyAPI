@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server.lib
 
 import com.alibaba.fastjson.{JSONException, JSONObject, JSON}
 import com.wanbo.easyapi.server.database.{HBaseDriver, MysqlDriver}
-import org.slf4j.LoggerFactory
+import org.slf4j.{MDC, LoggerFactory}
 
 /**
  * The manager of all types workers
@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 class SeederManager(conf: EasyConfig, seed: String) {
 
     private val log = LoggerFactory.getLogger(classOf[SeederManager])
+
+    MDC.put("destination", "system")
 
     private var messageid: String = _
     private var transactionType: String = _
@@ -105,6 +107,14 @@ class SeederManager(conf: EasyConfig, seed: String) {
                     oelement.put("fromcache", fruits.oelement.getOrElse("fromcache",""))
                 if(fruits.oelement.contains("ttl"))
                     oelement.put("ttl", fruits.oelement.getOrElse("ttl",""))
+                if(fruits.oelement.contains("duration"))
+                    oelement.put("duration", fruits.oelement.getOrElse("duration",""))
+
+                if(fruits.oelement.contains("itemtotal"))
+                    oelement.put("itemtotal", fruits.oelement.getOrElse("itemtotal",""))
+
+                if(fruits.oelement.contains("pagetotal"))
+                    oelement.put("pagetotal", fruits.oelement.getOrElse("pagetotal",""))
 
                 throw new EasyException("0")
             } else {
