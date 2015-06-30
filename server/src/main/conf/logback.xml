@@ -21,7 +21,7 @@
                         <!-- or whenever the file size reaches 100MB -->
                         <maxFileSize>512MB</maxFileSize>
                     </timeBasedFileNamingAndTriggeringPolicy>
-                    <maxHistory>60</maxHistory>
+                    <maxHistory>3</maxHistory>
                 </rollingPolicy>
                 <encoder>
                     <pattern>
@@ -33,6 +33,11 @@
     </appender>
 
     <logger name="com.wanbo.easyapi.server.EasyServer" additivity="false">
+        <level value="INFO" />
+        <appender-ref ref="EASY-ROOT" />
+    </logger>
+
+    <logger name="com.wanbo.easyapi.server.actors.CacheManager" additivity="false">
         <level value="INFO" />
         <appender-ref ref="EASY-ROOT" />
     </logger>
