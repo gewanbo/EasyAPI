@@ -32,6 +32,7 @@ class CacheManager(conf: EasyConfig) extends Actor {
 
             val seederManager = new SeederManager(conf, "")
             val ret = seederManager.updateCache(x, y)
+            MDC.put("destination", "cache")
             log.info(ret.oelement.toString())
             MDC.clear()
     }
