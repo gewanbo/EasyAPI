@@ -123,7 +123,7 @@ final class Seeder_11006 extends Seeder with ISeeder {
 
             val sql = "SELECT s.`id`, s.`cheadline`, s.`clongleadbody`, s.`cshortleadbody`, s.`tag`, " +
                 "s.`column`, s.`pubdate` from story s ,(select id from channel_detail c where c.`chaid` in (%d) and c.`type`=1 order by c.addtime desc limit %d,%d) b ".format(_chanelId, (_pageIndex - 1) * _pageSize + 1, _pageSize) +
-                "where s.id= b.id and s.publish_status='publish' order by s.pubdate desc;"
+                "where s.id= b.id and s.publish_status='publish' order by s.pubdate desc, s.id desc;"
 
             val ps = conn.prepareStatement(sql)
             val rs = ps.executeQuery()
