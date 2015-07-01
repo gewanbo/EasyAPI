@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.{Props, Actor}
-import com.wanbo.easyapi.server.lib.ZooKeeperManager
+import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
 import org.slf4j.{MDC, LoggerFactory}
 
@@ -13,6 +13,8 @@ class WorkerTracker extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[WorkerTracker])
 
+    var _conf: EasyConfig = null
+
     MDC.put("destination", "system")
 
     override def receive: Receive = {
@@ -20,6 +22,9 @@ class WorkerTracker extends Actor {
             log.info("Starting up ...")
         case ListenerRunning(conf, workers) =>
             log.info("Listener is running ...")
+
+            _conf = conf
+
             conf.workersPort.foreach(port => {
                 var isWorking = false
 
@@ -45,9 +50,14 @@ class WorkerTracker extends Actor {
             log.info("Listener starting failed ...")
             context.system.shutdown()
         case ShutDown(msg) =>
-            log.info("Shutting down ... ")
+            log.info("[%s] Shutting down ... ".format(classOf[WorkerTracker]))
+
             if(msg != null)
                 log.info(msg)
+
+            if(_conf.zkEnable){
+                context.child("worker_updater").get ! "shutdown"
+            }
 
             Thread.sleep(3000)
 
