@@ -1,6 +1,7 @@
-package com.wanbo.easyapi.server.lib
+package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
+import com.wanbo.easyapi.server.lib.{EasyConfig, ZookeeperClient}
 import org.apache.zookeeper.CreateMode
 import org.slf4j.LoggerFactory
 
