@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server
 
 import akka.actor.{Props, ActorSystem}
 import com.wanbo.easyapi.server.actors.{Manager, WorkerTracker}
-import com.wanbo.easyapi.server.messages.StartUp
+import com.wanbo.easyapi.server.messages.{ShutDown, StartUp}
 import org.slf4j.LoggerFactory
 
 /**
@@ -24,6 +24,13 @@ object EasyServer {
         val manager = system.actorOf(Props(new Manager(workTracker)), name = "manager")
 
         manager ! StartUp
+
+        Runtime.getRuntime.addShutdownHook(new Thread(){
+            override def run(): Unit = {
+                log.info("Shutting down ......")
+                manager ! ShutDown("Shut down by kill.")
+            }
+        })
 
     }
 }
