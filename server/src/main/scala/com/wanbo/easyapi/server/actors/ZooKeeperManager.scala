@@ -56,5 +56,11 @@ class ZooKeeperManager(conf: EasyConfig) extends Actor{
     override def receive: Receive = {
         case "" =>
             // Do something
+        case "shutdown" =>
+            if(_zk != null) {
+                log.info("Shutting down the zk...")
+                _zk.close()
+            }
+            context.stop(self)
     }
 }
