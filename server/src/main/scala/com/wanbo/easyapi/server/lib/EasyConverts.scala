@@ -43,6 +43,8 @@ object EasyConverts {
                         y
                     case y: List[_] =>
                         list2json(y.asInstanceOf[List[Map[String, Any]]])
+                    case null =>
+                        ""
                 }
 
                 obj.put(x._1, data)
