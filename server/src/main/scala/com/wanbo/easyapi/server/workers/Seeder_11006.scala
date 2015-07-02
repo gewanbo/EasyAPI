@@ -121,9 +121,7 @@ final class Seeder_11006 extends Seeder with ISeeder {
             driver.setDB("cmstmp01")
             val conn = driver.getConnector
 
-            val sql = "SELECT s.`id`, s.`cheadline`, s.`clongleadbody`, s.`cshortleadbody`, s.`tag`, " +
-                "s.`column`, s.`pubdate` from story s ,(select id from channel_detail c where c.`chaid` in (%d) and c.`type`=1 order by c.addtime desc limit %d,%d) b ".format(_chanelId, (_pageIndex - 1) * _pageSize + 1, _pageSize) +
-                "where s.id= b.id and s.publish_status='publish' order by s.pubdate desc, s.id desc;"
+            val sql = "SELECT k.*,m.`clongleadbody` FROM (SELECT s.`id`, s.`cheadline`, s.`cshortleadbody`, s.`tag`, s.`column`, s.`pubdate` FROM story s, (SELECT id FROM channel_detail c WHERE c.`chaid` IN (%d) AND c.`type` = 1 ORDER BY c.addtime DESC LIMIT %d,%d) b WHERE s.id = b.id AND s.publish_status = 'publish') k LEFT JOIN story_metadata m ON k.id = m.storyid ORDER BY k.pubdate DESC , k.id DESC;".format(_chanelId, (_pageIndex - 1) * _pageSize + 1, _pageSize)
 
             val ps = conn.prepareStatement(sql)
             val rs = ps.executeQuery()
@@ -132,11 +130,11 @@ final class Seeder_11006 extends Seeder with ISeeder {
                 var tmpMap = Map[String, String]()
                 tmpMap = tmpMap + ("id" -> rs.getString(1))
                 tmpMap = tmpMap + ("cheadline" -> rs.getString(2))
-                tmpMap = tmpMap + ("clongleadbody" -> rs.getString(3))
-                tmpMap = tmpMap + ("cshortleadbody" -> rs.getString(4))
-                tmpMap = tmpMap + ("tag" -> rs.getString(5))
-                tmpMap = tmpMap + ("column" -> rs.getString(6))
-                tmpMap = tmpMap + ("pubdate" -> rs.getString(7))
+                tmpMap = tmpMap + ("clongleadbody" -> rs.getString(7))
+                tmpMap = tmpMap + ("cshortleadbody" -> rs.getString(3))
+                tmpMap = tmpMap + ("tag" -> rs.getString(4))
+                tmpMap = tmpMap + ("column" -> rs.getString(5))
+                tmpMap = tmpMap + ("pubdate" -> rs.getString(6))
 
                 dataList = dataList :+ tmpMap
             }
