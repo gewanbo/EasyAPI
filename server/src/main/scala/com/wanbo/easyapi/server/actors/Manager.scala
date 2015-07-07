@@ -20,7 +20,6 @@ class Manager(workTracker: ActorRef) extends Actor {
     private val log = LoggerFactory.getLogger(classOf[Manager])
 
     val watcherController = context.actorOf(Props(new WatcherController(conf, self)), name = "watcher_controller")
-    val cacheManger = context.actorOf(Props(new CacheManager(conf)), name = "Cache_manager")
 
     MDC.put("destination", "system")
 
@@ -52,8 +51,6 @@ class Manager(workTracker: ActorRef) extends Actor {
 
             watcherController ! ListenerStart
 
-            cacheManger ! "init"
-
         case ListenerRunning(null, workers) =>
             workTracker ! ListenerRunning(conf, workers)
 
@@ -71,7 +68,6 @@ class Manager(workTracker: ActorRef) extends Actor {
         case ShutDown(msg) =>
             workTracker ! ShutDown(msg)
             watcherController ! WatcherStop
-            context stop cacheManger
             context.stop(self)
     }
 

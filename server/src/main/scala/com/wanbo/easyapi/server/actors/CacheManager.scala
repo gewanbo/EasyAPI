@@ -18,11 +18,23 @@ class CacheManager(conf: EasyConfig) extends Actor {
 
     val log = LoggerFactory.getLogger(classOf[CacheManager])
 
+    private var cacheList = List[(String, Map[String, String], Int)]()
+
+    override def preStart(){
+        cacheList = cacheList :+ ("10003", Map("days" ->"7", "num" ->"10"), 200)
+    }
+
     override def receive: Receive = {
 
         case "init" =>
+            MDC.put("destination", "cache")
+            log.info("Start to initialize the cache list which need to update.")
 
-            system.scheduler.schedule(10 seconds, 200 seconds, self, UpdateCache("10003", Map("days" ->"7", "num" ->"10")))
+            cacheList.foreach(x => {
+                system.scheduler.schedule(10 seconds, x._3 seconds, self, UpdateCache(x._1, x._2))
+            })
+
+            MDC.clear()
 
         case UpdateCache(x, y) =>
             MDC.put("destination", "cache")
