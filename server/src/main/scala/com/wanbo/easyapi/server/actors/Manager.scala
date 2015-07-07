@@ -32,6 +32,7 @@ class Manager(workTracker: ActorRef) extends Actor {
             val configFile = System.getProperty("easy.conf", "config.properties")
             confProps.load(new FileInputStream(configFile))
 
+            conf.serverId = confProps.getProperty("server.id", "0")
             conf.serverHost = confProps.getProperty("server.host", "localhost")
             conf.serverPort = confProps.getProperty("server.port", "8800").toInt
 

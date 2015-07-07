@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
  * Created by wanbo on 15/4/8.
  */
 class EasyConfig() {
+    var serverId: String = _
     var serverHost: String = _
     var serverPort: Int = _
 
