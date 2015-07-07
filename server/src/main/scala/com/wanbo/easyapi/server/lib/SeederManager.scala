@@ -64,6 +64,10 @@ class SeederManager(conf: EasyConfig, seed: String) {
         }
     }
 
+    /**
+     * The farmer, to produce fruits.
+     * @return
+     */
     def farming(): String ={
 
         loadSeed()
