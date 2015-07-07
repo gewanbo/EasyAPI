@@ -6,27 +6,30 @@ import org.apache.zookeeper.CreateMode
 import org.slf4j.LoggerFactory
 
 /**
- * The worker register.
- *
- * Register workers or re-register
- *
- * @author wanbo<gewanbo@gmail.com>
- * @param conf System configuration.
- */
-class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor{
+  * Elect a leader from cluster, and control the cache updating.
+  * Created by wanbo on 15/7/1.
+  */
+class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
+
+     private val leader_root = "/cache_leader"
 
      private val _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
 
-     private val log = LoggerFactory.getLogger(classOf[WorkerRegister])
+     private val log = LoggerFactory.getLogger(classOf[CacheLeader])
 
      init()
 
      def init(): Unit ={
+
          if(!_zk.exists(server_root)){
              _zk.createPath(server_root)
          }
          if(!_zk.exists(client_root)){
              _zk.createPath(client_root)
+         }
+
+         if(!_zk.exists(leader_root)){
+             _zk.createPath(leader_root)
          }
      }
 
