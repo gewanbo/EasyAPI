@@ -147,6 +147,12 @@ class SeederManager(conf: EasyConfig, seed: String) {
         _fruit.toJSONString
     }
 
+    /**
+     * To call another seeder inside.
+     * @param seeder The name of seeder.
+     * @param seed   The input map.
+     * @return
+     */
     def transform(seeder: String, seed: Map[String, Any]): EasyOutput ={
 
         var fruits: EasyOutput = new EasyOutput
