@@ -42,8 +42,10 @@ class WorkerTracker extends Actor {
             })
 
             if(conf.zkEnable) {
-                val workerUpdate = context.actorOf(Props(new ZooKeeperManager(conf)), "worker_updater")
+                val workerUpdate = context.actorOf(Props(new WorkerRegister(conf)), "worker_register")
                 workerUpdate ! ""
+                val cacheLeader = context.actorOf(Props(new CacheLeader(conf)), "cache_leader")
+                cacheLeader ! ""
             }
 
         case ListenerFailed =>
@@ -56,7 +58,8 @@ class WorkerTracker extends Actor {
                 log.info(msg)
 
             if(_conf.zkEnable){
-                context.child("worker_updater").get ! "shutdown"
+                context.child("worker_register").get ! "shutdown"
+                context.child("cache_leader").get ! "shutdown"
             }
 
             Thread.sleep(3000)
