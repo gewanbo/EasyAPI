@@ -24,16 +24,23 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
 
         val eConf = new EasyConfig
 
-        cacheType match {
-            case "redis" =>
-                _cacheType = cacheType
+        try {
 
-                val hosts = eConf.getConfigure("cache.redis.hosts")
-                val ports = eConf.getConfigure("cache.redis.ports")
-                cacher = new CacheRedis(hosts, ports.toInt)
+            cacheType match {
+                case "redis" =>
+                    _cacheType = cacheType
 
-            case _ =>
+                    val hosts = eConf.getConfigure("cache.redis.hosts")
+                    val ports = eConf.getConfigure("cache.redis.ports")
+                    cacher = new CacheRedis(hosts, ports.toInt)
+
+                case _ =>
                 // Didn't match the type of cache.
+            }
+
+        } catch {
+            case e: Exception =>
+                log.error("Throws exception when initialize cache manager:", e)
         }
     }
 
