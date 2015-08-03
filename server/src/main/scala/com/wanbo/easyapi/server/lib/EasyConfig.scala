@@ -20,6 +20,8 @@ class EasyConfig() {
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
 
+    var cache_type = "redis"
+
     var driver_mysql = Map[String, String]()
 
     private val log = LoggerFactory.getLogger(classOf[EasyConfig])
