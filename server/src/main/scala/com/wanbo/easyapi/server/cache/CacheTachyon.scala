@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server.cache
 
 import org.slf4j.LoggerFactory
 import tachyon.TachyonURI
-import tachyon.client.{WriteType, ReadType, TachyonFS}
+import tachyon.client.{TachyonFile, WriteType, ReadType, TachyonFS}
 import tachyon.conf.TachyonConf
 
 import scala.io.Source
@@ -67,7 +67,15 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
 
             val cacheFile = getFileURI(name)
 
-            val fs = cacheClient.getFile(cacheFile)
+            var fs: TachyonFile = null
+
+            if(!cacheClient.exist(cacheFile)){
+                val fId = cacheClient.createFile(cacheFile)
+                fs = cacheClient.getFile(fId)
+            } else {
+                fs = cacheClient.getFile(cacheFile)
+            }
+
             val os = fs.getOutStream(WriteType.MUST_CACHE)
 
             os.write(data.toCharArray.map(_.toByte))
