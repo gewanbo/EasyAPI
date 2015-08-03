@@ -67,15 +67,13 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
 
             val cacheFile = getFileURI(name)
 
-            var fs: TachyonFile = null
-
-            if(!cacheClient.exist(cacheFile)){
-                val fId = cacheClient.createFile(cacheFile)
-                fs = cacheClient.getFile(fId)
-            } else {
-                fs = cacheClient.getFile(cacheFile)
+            // Delete first
+            if(cacheClient.exist(cacheFile)){
+                cacheClient.delete(cacheFile, false)
             }
 
+            val fId = cacheClient.createFile(cacheFile)
+            val fs = cacheClient.getFile(fId)
             val os = fs.getOutStream(WriteType.MUST_CACHE)
 
             os.write(data.toCharArray.map(_.toByte))
