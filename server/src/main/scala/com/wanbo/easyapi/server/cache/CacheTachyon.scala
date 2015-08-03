@@ -102,7 +102,8 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
 
             val cacheFile = getFileURI(name)
 
-            cacheClient.delete(cacheFile, false)
+            if(cacheClient.exist(cacheFile))
+                cacheClient.delete(cacheFile, false)
 
             ret = true
         } catch {
