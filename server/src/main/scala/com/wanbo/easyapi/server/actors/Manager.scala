@@ -44,6 +44,8 @@ class Manager(workTracker: ActorRef) extends Actor {
             conf.zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
             conf.zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
 
+            conf.cache_type = confProps.getProperty("cache.type", "redis")
+
             conf.driver_mysql = conf.driver_mysql.+("mysql.db.host" -> confProps.getProperty("mysql.db.host", "localhost"))
             conf.driver_mysql = conf.driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
             conf.driver_mysql = conf.driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
