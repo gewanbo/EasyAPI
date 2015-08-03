@@ -8,11 +8,13 @@ import org.slf4j.LoggerFactory
  * The manager of all type caches.
  * Created by wanbo on 15/4/27.
  */
-class CacheManager(cacheType: String = "redis", expire: Int = 60) {
+class CacheManager(cacheType: String = "", expire: Int = 60) {
+
+    private val _systemCacheTypes = Array("redis", "tachyon")
 
     private var _cacheType = "redis"
 
-    private var cacher: EasyCache = _
+    private var easyCache: EasyCache = _
 
     private val log = LoggerFactory.getLogger(classOf[CacheManager])
 
@@ -26,13 +28,24 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
 
         try {
 
-            cacheType match {
-                case "redis" =>
-                    _cacheType = cacheType
+            _cacheType = eConf.getConfigure("cache.type")
 
-                    val hosts = eConf.getConfigure("cache.redis.hosts")
-                    val ports = eConf.getConfigure("cache.redis.ports")
-                    cacher = new CacheRedis(hosts, ports.toInt)
+            // Set the cache type by Seeder custom.
+            if(cacheType != "" && cacheType != _cacheType && _systemCacheTypes.contains(cacheType))
+                _cacheType = cacheType
+
+            _cacheType match {
+                case "redis" =>
+
+                    val redis_hosts = eConf.getConfigure("cache.redis.hosts")
+                    val redis_ports = eConf.getConfigure("cache.redis.ports")
+                    easyCache = new CacheRedis(redis_hosts, redis_ports.toInt)
+
+                case "tachyon" =>
+
+                    val tachyon_hosts = eConf.getConfigure("cache.tachyon.hosts")
+                    val tachyon_ports = eConf.getConfigure("cache.tachyon.ports")
+                    easyCache = new CacheTachyon(tachyon_hosts, tachyon_ports.toInt)
 
                 case _ =>
                 // Didn't match the type of cache.
@@ -58,25 +71,25 @@ class CacheManager(cacheType: String = "redis", expire: Int = 60) {
 
             println("------Cache name is:" + cache_name)
 
-            if (cacher == null)
+            if (easyCache == null)
                 throw new Exception("There is no cache can use.")
 
             if(data == null) {
                 // Delete cache
-                cacher.del(cache_name)
+                easyCache.del(cache_name)
             } else if (data.odata != null || data.oelement.size > 2) {
                 // Set cache
-                cacher.set(cache_name, ObjectSerialization.objectEncode(data), expire)
+                easyCache.set(cache_name, ObjectSerialization.objectEncode(data), expire)
                 output = data
             } else {
                 // Get cache
-                val getData = cacher.get(cache_name)
+                val getData = easyCache.get(cache_name)
 
                 if(getData == null)
                     output = null
                 else {
                     output = ObjectSerialization.objectDecode(getData).asInstanceOf[EasyOutput]
-                    ttl = cacher.ttl
+                    ttl = easyCache.ttl
                 }
             }
 
