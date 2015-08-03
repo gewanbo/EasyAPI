@@ -51,7 +51,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
             // Cache
             val cache_name = this.getClass.getSimpleName + _days + _topNum
 
-            val cacher = new CacheManager(expire = 600)
+            val cacher = new CacheManager(cacheType = "tachyon", expire = 600)
 
             val cacheData = cacher.cacheData(cache_name)
 
