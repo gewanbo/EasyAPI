@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -34,6 +34,7 @@
         <org.springframework.version>3.2.5.RELEASE</org.springframework.version>
         <org.mysql-connector-java.version>5.1.27</org.mysql-connector-java.version>
         <org.apache.hadoop.hbase.version>0.98.3-hadoop2</org.apache.hadoop.hbase.version>
+        <org.tachyonproject.version>0.7.0</org.tachyonproject.version>
         <file_encoding>UTF-8</file_encoding>
     </properties>
 
@@ -53,6 +54,17 @@
                 <groupId>com.typesafe.akka</groupId>
                 <artifactId>akka-actor_2.10</artifactId>
                 <version>${akka.version}</version>
+            </dependency>
+            <!-- Tachyon -->
+            <dependency>
+                <groupId>org.tachyonproject</groupId>
+                <artifactId>tachyon-client</artifactId>
+                <version>${org.tachyonproject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tachyonproject</groupId>
+                <artifactId>tachyon-underfs-local</artifactId>
+                <version>${org.tachyonproject.version}</version>
             </dependency>
             <!-- Zookeeper -->
             <dependency>
