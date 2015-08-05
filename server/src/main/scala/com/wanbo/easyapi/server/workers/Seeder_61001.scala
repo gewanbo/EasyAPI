@@ -91,10 +91,9 @@ final class Seeder_61001 extends Seeder with ISeeder {
 
         try {
 
-            val conf = HBaseConfiguration.create
-            conf.set("hbase.zookeeper.quorum", "BJtest223")
+            val driver = this.driver.asInstanceOf[HBaseDriver]
 
-            val table = new HTable(conf, Bytes.toBytes("user_recommend_stories"))
+            val table = new HTable(driver.getHConf, Bytes.toBytes("user_recommend_stories"))
 
             val scan = new Scan()
             scan.addFamily(Bytes.toBytes("c"))
