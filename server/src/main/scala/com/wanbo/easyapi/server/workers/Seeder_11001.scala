@@ -31,7 +31,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
             // Cache
             val cache_name = this.getClass.getSimpleName
 
-            val cacher = new CacheManager(cacheType = "tachyon", expire = 86400)
+            val cacher = new CacheManager(expire = 86400)
 
             val cacheData = cacher.cacheData(cache_name)
 
@@ -79,7 +79,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
             driver.setDB("cmstmp01")
             val conn = driver.getConnector
 
-            val sql = "SELECT id,reid,`code`,`name`,`type`,`link`,haschildren FROM `channel`  ORDER BY `reid` DESC,`id`"
+            val sql = "SELECT id,reid,`code`,`name`,`type`,`link`,haschildren FROM `channel`  ORDER BY priority,`reid` DESC,`id`"
 
             val ps = conn.prepareStatement(sql)
             val rs = ps.executeQuery()
