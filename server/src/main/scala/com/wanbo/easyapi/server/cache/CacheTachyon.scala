@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server.cache
 
 import org.slf4j.LoggerFactory
 import tachyon.TachyonURI
-import tachyon.client.{TachyonFile, WriteType, ReadType, TachyonFS}
+import tachyon.client.{WriteType, ReadType, TachyonFS}
 import tachyon.conf.TachyonConf
 
 import scala.io.Source
