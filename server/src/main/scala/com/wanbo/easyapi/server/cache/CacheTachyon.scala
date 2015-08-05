@@ -42,7 +42,7 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
             if(cacheClient.exist(cacheFile)){
                 val tmp = cacheClient.getFile(cacheFile)
                 if(tmp != null) {
-                    val is = tmp.getInStream(ReadType.CACHE)
+                    val is = tmp.getInStream(ReadType.NO_CACHE)
                     val bytes = Source.fromInputStream(is)
                     data = bytes.mkString
                     is.close()
