@@ -3,7 +3,6 @@ package com.wanbo.easyapi.server.workers
 import com.wanbo.easyapi.server.cache.CacheManager
 import com.wanbo.easyapi.server.database.HBaseDriver
 import com.wanbo.easyapi.server.lib.{EasyOutput, EasyException, ISeeder, Seeder}
-import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Scan, HTable}
 import org.apache.hadoop.hbase.filter.PrefixFilter
 import org.apache.hadoop.hbase.util.Bytes
