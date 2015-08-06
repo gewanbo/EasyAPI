@@ -47,6 +47,9 @@ final class Seeder_61001 extends Seeder with ISeeder {
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
                 dataList = cacheData.odata
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
+                if(cacher.ttl < 0){
+                    log.info("----------- Ready to update cache.")
+                }
             } else {
 
                 val data = onDBHandle()
