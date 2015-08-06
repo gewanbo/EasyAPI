@@ -48,7 +48,7 @@ class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache 
                         log.info("The cache named " + name + " was expired, need to update!!!")
                     }
 
-                    val is = cacheFile.getInStream(ReadType.NO_CACHE)
+                    val is = cacheFile.getInStream(ReadType.CACHE)
                     val bytes = Source.fromInputStream(is)
                     data = bytes.mkString
                     is.close()
@@ -130,5 +130,10 @@ class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache 
         if(ttl < 0)
             ret = true
         ret
+    }
+
+    override def close(): Unit = {
+        if(cacheClient != null)
+            cacheClient.close()
     }
 }
