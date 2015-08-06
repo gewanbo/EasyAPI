@@ -9,4 +9,5 @@ abstract class EasyCache {
     def get(name: String): String
     def set(name: String, data: String): Boolean
     def del(name: String): Boolean
+    def close()
 }
