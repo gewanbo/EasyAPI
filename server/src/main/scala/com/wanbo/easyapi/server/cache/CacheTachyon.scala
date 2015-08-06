@@ -2,7 +2,7 @@ package com.wanbo.easyapi.server.cache
 
 import org.slf4j.LoggerFactory
 import tachyon.TachyonURI
-import tachyon.client.{WriteType, ReadType, TachyonFS}
+import tachyon.client.{TachyonFile, WriteType, ReadType, TachyonFS}
 import tachyon.conf.TachyonConf
 
 import scala.io.Source
@@ -11,7 +11,7 @@ import scala.io.Source
  * Tachyon cache class.
  * Created by wanbo on 15/8/3.
  */
-class CacheTachyon(host: String, port: Int) extends EasyCache {
+class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
     private var cacheClient: TachyonFS = null
 
@@ -37,16 +37,21 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
 
         try {
 
-            val cacheFile = getFileURI(name)
+            val filePath = getFileURI(name)
 
-            if(cacheClient.exist(cacheFile)){
-                val tmp = cacheClient.getFile(cacheFile)
-                if(tmp != null) {
-                    val is = tmp.getInStream(ReadType.NO_CACHE)
+            if(cacheClient.exist(filePath)){
+                val cacheFile = cacheClient.getFile(filePath)
+
+                if(cacheFile != null) {
+
+                    if(isExpired(cacheFile)){
+                        log.info("The cache named " + name + " was expired, need to update!!!")
+                    }
+
+                    val is = cacheFile.getInStream(ReadType.NO_CACHE)
                     val bytes = Source.fromInputStream(is)
                     data = bytes.mkString
                     is.close()
-                    ttl = -1L
                 } else
                     data = null
             } else {
@@ -60,7 +65,7 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
         data
     }
 
-    override def set(name: String, data: String, expire: Int = 60): Boolean = {
+    override def set(name: String, data: String): Boolean = {
         var ret = false
 
         try {
@@ -80,8 +85,6 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
 
             os.flush()
             os.close()
-
-            // TODO: Set ttl of cache
 
             ret = true
 
@@ -115,5 +118,17 @@ class CacheTachyon(host: String, port: Int) extends EasyCache {
     private def getFileURI(name: String): TachyonURI ={
         val fileURI: TachyonURI = new TachyonURI(cacheRootPath + "/" + name)
         fileURI
+    }
+
+    private def isExpired(file: TachyonFile): Boolean ={
+        var ret = false
+        val createTime = file.getCreationTimeMs
+        val currentTime = System.currentTimeMillis()
+        val subTime = (currentTime - createTime) / 1000
+
+        ttl = expire - subTime
+        if(ttl < 0)
+            ret = true
+        ret
     }
 }
