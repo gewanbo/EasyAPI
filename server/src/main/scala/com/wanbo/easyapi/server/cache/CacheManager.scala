@@ -101,6 +101,18 @@ class CacheManager(cacheType: String = "", expire: Int = 60) {
         output
     }
 
+    def close(): Unit ={
+        try {
+
+            if(easyCache != null)
+                easyCache
+
+        } catch {
+            case e: Exception =>
+                log.error("Throws exception when initialize cache manager:", e)
+        }
+    }
+
     private def cacheName(name: String): String ={
         name.filter(_.isDigit).substring(0, 5) + new String(Hex.encodeHex(java.security.MessageDigest.getInstance("MD5").digest(name.getBytes("UTF-8"))))
     }
