@@ -62,7 +62,7 @@ class Worker(conf: EasyConfig) extends Actor {
         }
 
         log.info("Input message is:" + message)
-        log.info("Output message is:" + fruits)
+        log.info("Output message is:" + fruits.replaceFirst("\\[.*\\]", "[...more...]"))
 
         fruits
     }
