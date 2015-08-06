@@ -73,4 +73,6 @@ class CacheRedis(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
         ret
     }
+
+    override def close(): Unit = {}
 }
