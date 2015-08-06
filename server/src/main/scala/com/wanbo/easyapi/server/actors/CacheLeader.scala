@@ -70,7 +70,8 @@ class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
                                 openCacheUpdate()
                             } else {
                                 log.info("I am follower!!....")
-                                closeCacheUpdate()
+                                //closeCacheUpdate()
+                                openCacheUpdate()
                             }
                         }
                     } else {
