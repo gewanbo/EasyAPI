@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
  * Redis cache class.
  * Created by wanbo on 15/4/27.
  */
-class CacheRedis(host: String, port: Int) extends EasyCache {
+class CacheRedis(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
     private val redis = new RedisClient(host, port)
 
@@ -42,7 +42,7 @@ class CacheRedis(host: String, port: Int) extends EasyCache {
         data
     }
 
-    override def set(name: String, data: String, expire: Int = 60): Boolean = {
+    override def set(name: String, data: String): Boolean = {
         var ret = false
 
         try {
