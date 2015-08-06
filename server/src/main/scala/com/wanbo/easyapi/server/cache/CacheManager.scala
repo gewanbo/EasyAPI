@@ -39,13 +39,13 @@ class CacheManager(cacheType: String = "", expire: Int = 60) {
 
                     val redis_hosts = eConf.getConfigure("cache.redis.hosts")
                     val redis_ports = eConf.getConfigure("cache.redis.ports")
-                    easyCache = new CacheRedis(redis_hosts, redis_ports.toInt)
+                    easyCache = new CacheRedis(redis_hosts, redis_ports.toInt, expire)
 
                 case "tachyon" =>
 
                     val tachyon_hosts = eConf.getConfigure("cache.tachyon.hosts")
                     val tachyon_ports = eConf.getConfigure("cache.tachyon.ports")
-                    easyCache = new CacheTachyon(tachyon_hosts, tachyon_ports.toInt)
+                    easyCache = new CacheTachyon(tachyon_hosts, tachyon_ports.toInt, expire)
 
                 case _ =>
                 // Didn't match the type of cache.
@@ -79,7 +79,7 @@ class CacheManager(cacheType: String = "", expire: Int = 60) {
                 easyCache.del(cache_name)
             } else if (data.odata != null || data.oelement.size > 2) {
                 // Set cache
-                easyCache.set(cache_name, ObjectSerialization.objectEncode(data), expire)
+                easyCache.set(cache_name, ObjectSerialization.objectEncode(data))
                 output = data
             } else {
                 // Get cache
