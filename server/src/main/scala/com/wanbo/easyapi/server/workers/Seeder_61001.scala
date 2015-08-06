@@ -41,7 +41,7 @@ final class Seeder_61001 extends Seeder with ISeeder {
             // Cache
             val cache_name = this.getClass.getSimpleName + _uuId + _cookieId
 
-            val cacher = new CacheManager(expire = 600)
+            val cacher = new CacheManager(cacheType = "tachyon", expire = 600)
             val cacheData = cacher.cacheData(cache_name)
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
