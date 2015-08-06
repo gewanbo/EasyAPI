@@ -41,7 +41,7 @@ final class Seeder_61001 extends Seeder with ISeeder {
             // Cache
             val cache_name = this.getClass.getSimpleName + _uuId + _cookieId
 
-            val cacher = new CacheManager(cacheType = "tachyon", expire = 600)
+            val cacher = new CacheManager(cacheType = "tachyon", expire = 3600)
             val cacheData = cacher.cacheData(cache_name)
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
@@ -49,30 +49,25 @@ final class Seeder_61001 extends Seeder with ISeeder {
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
                 if(cacher.ttl < 0){
                     log.info("----------- Ready to update cache.")
+                    log.info("----------- ttl: " + cacher.ttl)
+                    new Runnable {
+                        override def run(): Unit = {
+                            try {
+
+                                updateCache(cacher, cache_name)
+
+                                log.info("----------- Cache update successful.")
+                            } catch {
+                                case e: Exception =>
+                                    log.error("Cache update exception:", e)
+                            }
+                        }
+                    }.run()
                 }
             } else {
-
-                val data = onDBHandle()
-
-                if (data.size < 1)
-                    throw new EasyException("20100")
-                else {
-                    val cache_data = new EasyOutput
-                    cache_data.odata = List[Map[String, Any]]()
-
-                    val sortData = data.sortBy(x => x._3)(Ordering.Double.reverse)
-                    sortData.slice(0, 30).foreach(x => {
-                        var obj = Map[String, Any]()
-                        obj = obj + ("storyid" -> x._1.reverse.padTo(9, 0).reverse.mkString)
-                        obj = obj + ("cheadline" -> x._2)
-                        dataList = dataList :+ obj
-
-                        cache_data.odata = cache_data.odata :+ obj
-                    })
-                    cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
-                    cacher.cacheData(cache_name, cache_data)
-                }
+                dataList = updateCache(cacher, cache_name)
             }
+            cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
             fruits.odata = dataList
@@ -86,6 +81,34 @@ final class Seeder_61001 extends Seeder with ISeeder {
         }
 
         fruits
+    }
+
+    private def updateCache(cacheManager: CacheManager, cache_name: String): List[Map[String, Any]] ={
+
+        var dataList = List[Map[String, Any]]()
+
+        val data = onDBHandle()
+
+        if (data.size < 1)
+            throw new EasyException("20100")
+        else {
+            val cache_data = new EasyOutput
+            cache_data.odata = List[Map[String, Any]]()
+
+            val sortData = data.sortBy(x => x._3)(Ordering.Double.reverse)
+            sortData.slice(0, 30).foreach(x => {
+                var obj = Map[String, Any]()
+                obj = obj + ("storyid" -> x._1.reverse.padTo(9, 0).reverse.mkString)
+                obj = obj + ("cheadline" -> x._2)
+                dataList = dataList :+ obj
+
+                cache_data.odata = cache_data.odata :+ obj
+            })
+            cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
+            cacheManager.cacheData(cache_name, cache_data)
+        }
+
+        dataList
     }
 
     override protected def onDBHandle(): List[(String, String, Double)] = {
