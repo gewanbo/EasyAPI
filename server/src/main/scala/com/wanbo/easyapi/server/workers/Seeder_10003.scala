@@ -79,6 +79,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
                     cacher.cacheData(cache_name, cache_data)
                 }
             }
+            cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
             fruits.odata = dataList
