@@ -88,6 +88,7 @@ final class Seeder_10008() extends Seeder with ISeeder {
                 cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
                 cacher.cacheData(cache_name, cache_data)
             }
+            cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
             fruits.odata = util.Random.shuffle(dataList).slice(0, 10)
