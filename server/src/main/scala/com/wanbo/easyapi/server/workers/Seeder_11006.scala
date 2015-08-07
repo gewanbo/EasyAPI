@@ -98,6 +98,7 @@ final class Seeder_11006 extends Seeder with ISeeder {
                     cacher.cacheData(cache_name, cache_data)
                 }
             }
+            cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0").+("duration" -> (System.currentTimeMillis() - startRunTime).toString)
             fruits.odata = dataList
