@@ -1,6 +1,5 @@
 package com.wanbo.easyapi.server.lib
 
-import java.io.FileInputStream
 import java.util.Properties
 
 import org.slf4j.LoggerFactory
@@ -24,19 +23,51 @@ class EasyConfig() {
 
     var driver_mysql = Map[String, String]()
 
+    private var _confProps: Properties = null
+
     private val log = LoggerFactory.getLogger(classOf[EasyConfig])
+
+    def parseConf(confProps: Properties): Unit ={
+
+        _confProps = confProps
+
+        serverId = confProps.getProperty("server.id", "0")
+        serverHost = confProps.getProperty("server.host", "localhost")
+        serverPort = confProps.getProperty("server.port", "8800").toInt
+
+        val workers_port = confProps.getProperty("server.worker.port", "8801")
+
+        workersPort = workers_port.split(";").toList.map(_.toInt)
+
+        workersMaxThreads = confProps.getProperty("server.worker.max_threads", "10").toInt
+
+        zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
+        zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
+
+        cache_type = confProps.getProperty("cache.type", "redis")
+
+        driver_mysql = driver_mysql.+("mysql.db.host" -> confProps.getProperty("mysql.db.host", "localhost"))
+        driver_mysql = driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
+        driver_mysql = driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
+        driver_mysql = driver_mysql.+("mysql.db.password" -> confProps.getProperty("mysql.db.password", ""))
+    }
+
+    def verifyConf(): Boolean ={
+        var result = true
+
+        if(serverId == "")
+            result = false
+
+        result
+    }
 
     def getConfigure(key: String): String ={
         var value = ""
 
         try {
 
-            val confProps = new Properties()
-            val configFile = System.getProperty("easy.conf", "config.properties")
-            confProps.load(new FileInputStream(configFile))
-
-            if(confProps.containsKey(key))
-                value = confProps.getProperty(key, "")
+            if(_confProps != null && _confProps.containsKey(key))
+                value = _confProps.getProperty(key, "")
 
         } catch {
             case e: Exception =>
