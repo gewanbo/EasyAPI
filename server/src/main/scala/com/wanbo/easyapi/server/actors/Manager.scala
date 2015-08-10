@@ -31,27 +31,18 @@ class Manager(workTracker: ActorRef) extends Actor {
             val configFile = System.getProperty("easy.conf", "config.properties")
             confProps.load(new FileInputStream(configFile))
 
-            conf.serverId = confProps.getProperty("server.id", "0")
-            conf.serverHost = confProps.getProperty("server.host", "localhost")
-            conf.serverPort = confProps.getProperty("server.port", "8800").toInt
+            // Load configuration
+            conf.parseConf(confProps)
 
-            val workers_port = confProps.getProperty("server.worker.port", "8801")
+            // Verify configuration.
+            val confVerification = conf.verifyConf()
 
-            conf.workersPort = workers_port.split(";").toList.map(_.toInt)
-
-            conf.workersMaxThreads = confProps.getProperty("server.worker.max_threads", "10").toInt
-
-            conf.zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
-            conf.zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
-
-            conf.cache_type = confProps.getProperty("cache.type", "redis")
-
-            conf.driver_mysql = conf.driver_mysql.+("mysql.db.host" -> confProps.getProperty("mysql.db.host", "localhost"))
-            conf.driver_mysql = conf.driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
-            conf.driver_mysql = conf.driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
-            conf.driver_mysql = conf.driver_mysql.+("mysql.db.password" -> confProps.getProperty("mysql.db.password", ""))
-
-            watcherController ! ListenerStart
+            if(confVerification)
+                watcherController ! ListenerStart
+            else {
+                log.error("Load configure file failed. Please check it.")
+                context.stop(self)
+            }
 
         case ListenerRunning(null, workers) =>
             workTracker ! ListenerRunning(conf, workers)
