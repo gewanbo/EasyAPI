@@ -92,6 +92,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
             if (seederObj == null)
                 throw new Exception("The transaction type is not supported.")
 
+            seederObj._conf = conf
+
             seederObj.manager = this
 
             seederObj.driver match {
@@ -165,8 +167,6 @@ class SeederManager(conf: EasyConfig, seed: String) {
             val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + seeder)
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
-
-            seederObj._conf = conf
 
             seederObj.driver match {
                 case MysqlDriver() =>
