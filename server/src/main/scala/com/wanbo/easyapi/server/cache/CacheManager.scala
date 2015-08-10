@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
  * The manager of all type caches.
  * Created by wanbo on 15/4/27.
  */
-class CacheManager(cacheType: String = "", expire: Int = 60) {
+class CacheManager(conf: EasyConfig, cacheType: String = "", expire: Int = 60) {
 
     private val _systemCacheTypes = Array("redis", "tachyon")
 
@@ -24,11 +24,9 @@ class CacheManager(cacheType: String = "", expire: Int = 60) {
 
     def init() {
 
-        val eConf = new EasyConfig
-
         try {
 
-            _cacheType = eConf.getConfigure("cache.type")
+            _cacheType = conf.cache_type
 
             // Set the cache type by Seeder custom.
             if(cacheType != "" && cacheType != _cacheType && _systemCacheTypes.contains(cacheType))
@@ -37,14 +35,14 @@ class CacheManager(cacheType: String = "", expire: Int = 60) {
             _cacheType match {
                 case "redis" =>
 
-                    val redis_hosts = eConf.getConfigure("cache.redis.hosts")
-                    val redis_ports = eConf.getConfigure("cache.redis.ports")
+                    val redis_hosts = conf.getConfigure("cache.redis.hosts")
+                    val redis_ports = conf.getConfigure("cache.redis.ports")
                     easyCache = new CacheRedis(redis_hosts, redis_ports.toInt, expire)
 
                 case "tachyon" =>
 
-                    val tachyon_hosts = eConf.getConfigure("cache.tachyon.hosts")
-                    val tachyon_ports = eConf.getConfigure("cache.tachyon.ports")
+                    val tachyon_hosts = conf.getConfigure("cache.tachyon.hosts")
+                    val tachyon_ports = conf.getConfigure("cache.tachyon.ports")
                     easyCache = new CacheTachyon(tachyon_hosts, tachyon_ports.toInt, expire)
 
                 case _ =>
