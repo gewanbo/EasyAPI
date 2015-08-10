@@ -195,6 +195,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
 
+            seederObj._conf = conf
+
             seederObj.driver match {
                 case MysqlDriver() =>
                     seederObj.driver.setConfiguration(conf)
