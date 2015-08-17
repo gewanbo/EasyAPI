@@ -23,13 +23,12 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.10</artifactId>
         </dependency>
-
+        <!-- easyapi.shared -->
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
             <version>1.0.13-SNAPSHOT</version>
         </dependency>
-
         <!-- Tachyon -->
         <dependency>
             <groupId>org.tachyonproject</groupId>

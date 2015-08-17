@@ -1,4 +1,4 @@
-package com.wanbo.easyapi.server.lib
+package com.wanbo.easyapi.shared.common.libs
 
 import java.util.Properties
 
@@ -9,12 +9,15 @@ import org.slf4j.LoggerFactory
  * Created by wanbo on 15/4/8.
  */
 class EasyConfig() {
+
+    // Common
+    var zkEnable: Boolean = true
+    var zkHosts: String = _
+
+    // Server
     var serverId: String = _
     var serverHost: String = _
     var serverPort: Int = _
-
-    var zkEnable: Boolean = true
-    var zkHosts: String = _
 
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
@@ -23,11 +26,14 @@ class EasyConfig() {
 
     var driver_mysql = Map[String, String]()
 
+    // Client
+    var clientId: String = _
+
     private var _confProps: Properties = null
 
     private val log = LoggerFactory.getLogger(classOf[EasyConfig])
 
-    def parseConf(confProps: Properties): Unit ={
+    def parseServerConf(confProps: Properties): Unit ={
 
         _confProps = confProps
 
@@ -50,6 +56,17 @@ class EasyConfig() {
         driver_mysql = driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
         driver_mysql = driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
         driver_mysql = driver_mysql.+("mysql.db.password" -> confProps.getProperty("mysql.db.password", ""))
+    }
+
+    def parseClientConf(confProps: Properties): Unit ={
+
+        _confProps = confProps
+
+        clientId = confProps.getProperty("client.id", "0")
+
+        zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
+        zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
+
     }
 
     def verifyConf(): Boolean ={

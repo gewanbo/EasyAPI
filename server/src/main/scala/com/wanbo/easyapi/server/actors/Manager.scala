@@ -5,8 +5,8 @@ import java.net.Socket
 import java.util.Properties
 
 import akka.actor.{ActorRef, Props, Actor}
-import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
 
 /**
@@ -32,7 +32,7 @@ class Manager(workTracker: ActorRef) extends Actor {
             confProps.load(new FileInputStream(configFile))
 
             // Load configuration
-            conf.parseConf(confProps)
+            conf.parseServerConf(confProps)
 
             // Verify configuration.
             val confVerification = conf.verifyConf()
