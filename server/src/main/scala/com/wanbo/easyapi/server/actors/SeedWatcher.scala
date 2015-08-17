@@ -1,13 +1,13 @@
 package com.wanbo.easyapi.server.actors
 
-import java.net.{InetSocketAddress, ServerSocket}
+import java.net.InetSocketAddress
 
 import akka.actor.{Props, Actor}
 import akka.io.Tcp._
 import akka.io.{Tcp, IO}
 import akka.routing.{DefaultResizer, RoundRobinRouter}
-import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
  * Listener
