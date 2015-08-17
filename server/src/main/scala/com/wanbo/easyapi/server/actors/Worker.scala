@@ -3,8 +3,9 @@ package com.wanbo.easyapi.server.actors
 import akka.actor.Actor
 import akka.io.Tcp.{Close, PeerClosed, Write, Received}
 import akka.util.ByteString
-import com.wanbo.easyapi.server.lib.{EasyConfig, SeederManager}
+import com.wanbo.easyapi.server.lib.SeederManager
 import com.wanbo.easyapi.server.messages.Seed
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
 
 /**
