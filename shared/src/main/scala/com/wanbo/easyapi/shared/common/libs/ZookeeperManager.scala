@@ -1,4 +1,4 @@
-package com.wanbo.easyapi.server.lib
+package com.wanbo.easyapi.shared.common.libs
 
 /**
  * The manager of Zookeeper.
