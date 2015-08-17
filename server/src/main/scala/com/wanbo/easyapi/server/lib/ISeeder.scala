@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.lib
 
 import com.wanbo.easyapi.server.database.Driver
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
  * The trait of workers
