@@ -1,6 +1,6 @@
 package com.wanbo.easyapi.server.database
 
-import com.wanbo.easyapi.server.lib.EasyConfig
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.slf4j.LoggerFactory
