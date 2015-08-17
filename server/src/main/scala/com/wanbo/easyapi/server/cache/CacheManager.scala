@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.cache
 
-import com.wanbo.easyapi.server.lib.{ObjectSerialization, EasyConfig, EasyOutput}
+import com.wanbo.easyapi.server.lib.{ObjectSerialization, EasyOutput}
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 
