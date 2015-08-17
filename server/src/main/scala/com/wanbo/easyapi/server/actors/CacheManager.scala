@@ -1,8 +1,9 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
-import com.wanbo.easyapi.server.lib.{SeederManager, EasyConfig}
+import com.wanbo.easyapi.server.lib.SeederManager
 import com.wanbo.easyapi.server.messages.UpdateCache
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
 
 import scala.concurrent.duration._
