@@ -28,6 +28,8 @@ class EasyConfig() {
 
     // Client
     var clientId: String = _
+    var clientHost: String = _
+    var clientPort: Int = _
 
     private var _confProps: Properties = null
 
@@ -63,6 +65,8 @@ class EasyConfig() {
         _confProps = confProps
 
         clientId = confProps.getProperty("client.id", "0")
+        clientHost = confProps.getProperty("client.host", "localhost")
+        clientPort = confProps.getProperty("client.port", "8890").toInt
 
         zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
         zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
