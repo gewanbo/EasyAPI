@@ -2,6 +2,7 @@ package com.wanbo.easyapi.server.lib
 
 import com.alibaba.fastjson.{JSONException, JSONObject, JSON}
 import com.wanbo.easyapi.server.database.{HBaseDriver, MysqlDriver}
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
 
 /**
