@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.server.messages
 
 import akka.actor.ActorContext
-import com.wanbo.easyapi.server.lib.EasyConfig
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
  * Listener running message
