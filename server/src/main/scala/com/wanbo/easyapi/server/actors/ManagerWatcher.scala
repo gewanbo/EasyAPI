@@ -3,8 +3,8 @@ package com.wanbo.easyapi.server.actors
 import java.net.ServerSocket
 
 import akka.actor.{ActorRef, Actor}
-import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
 
 /**
