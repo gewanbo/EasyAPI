@@ -1,8 +1,8 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.{Props, ActorRef, Actor}
-import com.wanbo.easyapi.server.lib.EasyConfig
 import com.wanbo.easyapi.server.messages._
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
  * The controller of watchers
