@@ -1,17 +1,16 @@
-package com.wanbo.easyapi.server.lib
+package com.wanbo.easyapi.shared.common.utils
 
 import java.util.concurrent.CountDownLatch
 
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
 import org.apache.zookeeper.ZooDefs.Ids
-import org.apache.zookeeper._
 import org.apache.zookeeper.data.Stat
+import org.apache.zookeeper._
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Seq
 import scala.collection.mutable
-import scala.collection.mutable._
 
 /**
  * The client of Zookeeper
@@ -49,7 +48,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         log.info("Zookeeper event: %s".format(event))
         assignLatch.await()
         event.getState match {
-            case KeeperState.SyncConnected => {
+            case KeeperState.SyncConnected =>
                 try {
                     watcher.map(fn => fn(this))
                 } catch {
@@ -57,11 +56,9 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
                         log.error("Exception during zookeeper connection established callback", e)
                 }
                 connectionLatch.countDown()
-            }
-            case KeeperState.Expired => {
+            case KeeperState.Expired =>
                 // Session was expired; create a new zookeeper connection
                 connect()
-            }
             case _ => // Disconnected -- zookeeper library will handle reconnects
         }
     }
@@ -87,7 +84,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         zk.getChildren(makeNodePath(path), false).asScala.toList
     }
 
-    def close() = zk.close
+    def close() = zk.close()
 
     def isAlive: Boolean = {
         // If you can get the root, then we're alive.
@@ -108,7 +105,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
                 log.debug("Creating path in createPath: %s", path)
                 zk.create(path, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
             } catch {
-                case _:KeeperException.NodeExistsException => {} // ignore existing nodes
+                case _:KeeperException.NodeExistsException =>  // ignore existing nodes
             }
         }
     }
@@ -144,34 +141,33 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
     def watchNode(node : String, onDataChanged : Option[Array[Byte]] => Unit) {
         log.debug("Watching node %s", node)
         val path = makeNodePath(node)
-        def updateData {
+        def updateData() {
             try {
                 onDataChanged(Some(zk.getData(path, dataGetter, null)))
             } catch {
-                case e:KeeperException => {
+                case e:KeeperException =>
                     log.warn("Failed to read node %s: %s".format(path, e))
-                    deletedData
-                }
+                    deletedData()
             }
         }
 
-        def deletedData {
+        def deletedData() {
             onDataChanged(None)
             if (zk.exists(path, dataGetter) != null) {
                 // Node was re-created by the time we called zk.exist
-                updateData
+                updateData()
             }
         }
         def dataGetter = new Watcher {
             def process(event : WatchedEvent) {
                 if (event.getType == EventType.NodeDataChanged || event.getType == EventType.NodeCreated) {
-                    updateData
+                    updateData()
                 } else if (event.getType == EventType.NodeDeleted) {
-                    deletedData
+                    deletedData()
                 }
             }
         }
-        updateData
+        updateData()
     }
 
     /**
@@ -193,12 +189,11 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
             val children = zk.getChildren(path, childWatcher).asScala.toList
             updateChildren(children)
         } catch {
-            case e:KeeperException => {
+            case e:KeeperException =>
                 // Node was deleted -- fire a watch on node re-creation
                 log.warn("Failed to read node %s: %s".format(path, e))
                 updateChildren(List())
                 zk.exists(path, childWatcher)
-            }
         }
     }
 
@@ -223,19 +218,18 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
                                          deserialize: Array[Byte] => T, notifier: Option[String => Unit]) {
         def nodeChanged(child : String)(childData : Option[Array[Byte]]) {
             childData match {
-                case Some(data) => {
+                case Some(data) =>
                     watchMap.synchronized {
                         watchMap(child) = deserialize(data)
                     }
                     notifier.map(f => f(child))
-                }
                 case None => // deletion handled via parent watch
             }
         }
 
         def parentWatcher(children : Seq[String]) {
-            val childrenSet = Set(children : _*)
-            val watchedKeys = Set(watchMap.keySet.toSeq : _*)
+            val childrenSet = mutable.Set(children : _*)
+            val watchedKeys = mutable.Set(watchMap.keySet.toSeq : _*)
             val removedChildren = watchedKeys -- childrenSet
             val addedChildren = childrenSet -- watchedKeys
             watchMap.synchronized {
