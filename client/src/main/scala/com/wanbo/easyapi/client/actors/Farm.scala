@@ -27,7 +27,7 @@ class Farm extends Actor {
             // return the best one
             var serverText = ""
 
-            if(servers.size > 0) {
+            if(servers != null && servers.size > 0) {
                 serverText = Random.shuffle(servers).head
             }
 
