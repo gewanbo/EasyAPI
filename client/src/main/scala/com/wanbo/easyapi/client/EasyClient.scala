@@ -16,16 +16,6 @@ object EasyClient {
 
         log.info("Easyapi client start up ...")
 
-        // ### Todo list
-
-        // Initialize zk watcher
-
-        // Initialize server list
-
-        // Register client to zk
-
-        // Register socket service
-
         val system = ActorSystem("System")
         val farmWatcher = system.actorOf(Props(new FarmWatcher()), name = "FarmWatcher")
 
