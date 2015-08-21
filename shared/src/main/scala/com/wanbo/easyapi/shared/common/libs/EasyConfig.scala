@@ -18,6 +18,7 @@ class EasyConfig() {
     var serverId: String = _
     var serverHost: String = _
     var serverPort: Int = _
+    var serverUIPort: Int = _
 
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
@@ -41,7 +42,8 @@ class EasyConfig() {
 
         serverId = confProps.getProperty("server.id", "0")
         serverHost = confProps.getProperty("server.host", "localhost")
-        serverPort = confProps.getProperty("server.port", "8800").toInt
+        serverPort = confProps.getProperty("server.port", "8860").toInt
+        serverUIPort = confProps.getProperty("server.port", "8800").toInt
 
         val workers_port = confProps.getProperty("server.worker.port", "8801")
 
