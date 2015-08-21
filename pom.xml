@@ -23,6 +23,7 @@
     <modules>
         <module>server</module>
         <module>client</module>
+        <module>ui</module>
         <module>shared</module>
     </modules>
 
@@ -128,6 +129,11 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
+                <version>${org.eclipse.jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
                 <version>${org.eclipse.jetty.version}</version>
             </dependency>
             <!-- mysql -->
