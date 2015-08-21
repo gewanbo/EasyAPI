@@ -90,6 +90,11 @@
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-protocol</artifactId>
         </dependency>
+        <!-- Jetty -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+        </dependency>
         <!-- mysql -->
         <dependency>
             <groupId>mysql</groupId>
