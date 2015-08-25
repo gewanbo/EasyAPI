@@ -1,16 +1,18 @@
 package com.wanbo.easyapi.ui.lib
 
+import java.net.InetSocketAddress
+
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
+import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
-import org.eclipse.jetty.server.{Server, ServerConnector}
 import org.eclipse.jetty.servlet.ServletContextHandler
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * An http server.
- * Created by wanbo on 15/8/21.
- */
+* An http server.
+* Created by wanbo on 15/8/21.
+*/
 class HttpServer(conf: EasyConfig) {
 
     private var _server: Server = null
@@ -32,16 +34,7 @@ class HttpServer(conf: EasyConfig) {
     private def doStart(): Unit ={
 
         // The server
-        _server = new Server()
-
-        // The HTTP connector
-        val http = new ServerConnector(_server)
-        http.setHost(conf.serverHost)
-        http.setPort(_port)
-        http.setIdleTimeout(30000)
-
-        // Set the connector
-        _server.addConnector(http)
+        _server = new Server(new InetSocketAddress(conf.serverHost, _port))
 
         // Set handlers
         if(_handlers.size > 0) {
