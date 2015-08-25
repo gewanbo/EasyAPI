@@ -43,7 +43,7 @@ class EasyConfig() {
         serverId = confProps.getProperty("server.id", "0")
         serverHost = confProps.getProperty("server.host", "localhost")
         serverPort = confProps.getProperty("server.port", "8860").toInt
-        serverUIPort = confProps.getProperty("server.port", "8800").toInt
+        serverUIPort = confProps.getProperty("server.ui.port", "8800").toInt
 
         val workers_port = confProps.getProperty("server.worker.port", "8801")
 
