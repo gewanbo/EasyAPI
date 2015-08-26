@@ -11,6 +11,7 @@ private[easyapi] object UIUtils {
     def commonHeaderNodes: Seq[Node] = {
             <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
             <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css"/>
+            <link rel="stylesheet" href="/static/css/common.css" type="text/css"/>
             <script src="/static/jquery-1.11.3.min.js"></script>
     }
 
