@@ -44,7 +44,7 @@ object EasyUI {
 
         val context = new ServletContextHandler()
         context.setContextPath("/")
-        context.setHandler(new HomeHandler)
+        context.setHandler(new HomeHandler(conf))
 
         server.attachHandler(context)
         server.start()
