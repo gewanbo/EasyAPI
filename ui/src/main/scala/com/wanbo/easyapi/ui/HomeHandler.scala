@@ -2,6 +2,7 @@ package com.wanbo.easyapi.ui
 
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
+import com.wanbo.easyapi.ui.lib.UIUtils
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.handler.AbstractHandler
 
@@ -16,7 +17,7 @@ class HomeHandler(greeting: String = "Hello World!") extends AbstractHandler {
         httpServletResponse.setStatus(HttpServletResponse.SC_OK)
 
         val out = httpServletResponse.getWriter
-        out.println("<h1>%s</h1>".format(greeting))
+        out.println(UIUtils.commonNavigationPage("Home"))
 
         request.setHandled(true)
     }
