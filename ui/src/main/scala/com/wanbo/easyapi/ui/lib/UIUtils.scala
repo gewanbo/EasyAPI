@@ -15,7 +15,8 @@ private[easyapi] object UIUtils {
             <script src="/static/jquery-1.11.3.min.js"></script>
     }
 
-    def commonNavigationPage(title: String): Seq[Node] ={
+    def commonNavigationPage(title: String, content: Seq[Node]): Seq[Node] ={
+
         <html>
             <head>
                 {commonHeaderNodes}
@@ -44,7 +45,7 @@ private[easyapi] object UIUtils {
                         </div>
                     </div>
                 </nav>
-
+                <div class="container">{content}</div>
                 <footer class="footer">
                     <div class="container">
                         <p class="text-muted">Easy to distribute data.</p>
