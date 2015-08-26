@@ -33,7 +33,7 @@ object EasyUI {
         val server = new HttpServer(conf)
 
         val resourceHandler = new ResourceHandler
-        resourceHandler.setDirectoriesListed(true)
+        resourceHandler.setDirectoriesListed(false)
         resourceHandler.setResourceBase("../webapp/static")
 
         val staticContext = new ServletContextHandler()
@@ -42,10 +42,15 @@ object EasyUI {
 
         server.attachHandler(staticContext)
 
+        val defaultContext = new ServletContextHandler()
+        defaultContext.setContextPath("/")
+        defaultContext.setHandler(new HomeHandler(conf))
+
         val context = new ServletContextHandler()
-        context.setContextPath("/")
+        context.setContextPath("/servers")
         context.setHandler(new HomeHandler(conf))
 
+        server.attachHandler(defaultContext)
         server.attachHandler(context)
         server.start()
 
