@@ -5,6 +5,7 @@ import java.util.Properties
 
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import com.wanbo.easyapi.ui.lib.HttpServer
+import org.eclipse.jetty.server.handler.ResourceHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.slf4j.LoggerFactory
 
@@ -30,6 +31,16 @@ object EasyUI {
         conf.parseServerConf(confProps)
 
         val server = new HttpServer(conf)
+
+        val resourceHandler = new ResourceHandler
+        resourceHandler.setDirectoriesListed(true)
+        resourceHandler.setResourceBase("../webapp/static")
+
+        val staticContext = new ServletContextHandler()
+        staticContext.setContextPath("/static")
+        staticContext.setHandler(resourceHandler)
+
+        server.attachHandler(staticContext)
 
         val context = new ServletContextHandler()
         context.setContextPath("/")
