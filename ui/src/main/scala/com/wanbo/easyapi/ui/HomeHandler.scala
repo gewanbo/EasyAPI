@@ -40,15 +40,18 @@ class HomeHandler(conf: EasyConfig) extends AbstractHandler with Logging {
 
         servers.map(s => {
             var hitNum = 0
-            val hits = zk.get(serverNode + "/" + s).mkString
+            val hitData = zk.get(serverNode + "/" + s)
 
-            try {
+            if(hitData != null) {
+                try {
+                    val hits = new String(hitData)
 
-                log.info("Server [%s] - hits [%s] --------".format(s, hits))
+                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
 
-                hitNum = hits.toInt
-            } catch {
-                case e: Exception =>
+                    hitNum = hits.toInt
+                } catch {
+                    case e: Exception =>
+                }
             }
 
             serverList = serverList :+ (s, hitNum)
@@ -68,7 +71,7 @@ class HomeHandler(conf: EasyConfig) extends AbstractHandler with Logging {
         })
 
         <h2>Server List</h2>
-        <p>All the active servers.</p>
+        <p>All the available servers.</p>
         <table class="table table-striped">
             <thead>
                 <tr>
