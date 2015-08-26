@@ -44,6 +44,11 @@ private[easyapi] object UIUtils {
                     </div>
                 </nav>
 
+                <footer class="footer">
+                    <div class="container">
+                        <p class="text-muted">Easy to distribute data.</p>
+                    </div>
+                </footer>
             </body>
         </html>
     }
