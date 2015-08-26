@@ -2,12 +2,12 @@ package com.wanbo.easyapi.ui
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import com.wanbo.easyapi.ui.lib.UIUtils
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.handler.AbstractHandler
-import org.slf4j.LoggerFactory
 
 import scala.xml.Node
 
@@ -15,9 +15,7 @@ import scala.xml.Node
  * Home handler
  * Created by wanbo on 15/8/21.
  */
-class HomeHandler(conf: EasyConfig) extends AbstractHandler {
-
-    private val log = LoggerFactory.getLogger(classOf[HomeHandler])
+class HomeHandler(conf: EasyConfig) extends AbstractHandler with Logging {
 
     override def handle(s: String, request: Request, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Unit = {
         httpServletResponse.setContentType("text/html; charset=utf-8")
