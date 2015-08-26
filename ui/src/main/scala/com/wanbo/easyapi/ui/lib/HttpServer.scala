@@ -5,6 +5,7 @@ import java.net.InetSocketAddress
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
+import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 
 import scala.collection.mutable.ArrayBuffer
@@ -39,7 +40,14 @@ class HttpServer(conf: EasyConfig) {
         // Set handlers
         if(_handlers.size > 0) {
             val collection = new ContextHandlerCollection
-            collection.setHandlers(_handlers.toArray)
+
+            val gzipHandlers = _handlers.map(h => {
+                val gzipHandler = new GzipHandler
+                gzipHandler.setHandler(h)
+                gzipHandler
+            })
+
+            collection.setHandlers(gzipHandlers.toArray)
 
             _server.setHandler(collection)
         }
