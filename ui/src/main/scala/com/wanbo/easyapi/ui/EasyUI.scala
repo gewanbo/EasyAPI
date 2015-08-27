@@ -3,9 +3,10 @@ package com.wanbo.easyapi.ui
 import java.io.FileInputStream
 import java.util.Properties
 
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import com.wanbo.easyapi.ui.lib.HttpServer
-import org.eclipse.jetty.server.handler.ResourceHandler
+import com.wanbo.easyapi.ui.lib.{EasyUI, HttpServer}
+import org.eclipse.jetty.server.handler.{ContextHandler, ResourceHandler}
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.slf4j.LoggerFactory
 
@@ -13,9 +14,7 @@ import org.slf4j.LoggerFactory
  * The UI of api server.
  * Created by wanbo on 15/8/21.
  */
-object EasyUI {
-
-    private val log = LoggerFactory.getLogger(EasyUI.getClass.getSimpleName)
+object EasyUI extends Logging {
 
     def main(args: Array[String]) {
 
@@ -30,33 +29,14 @@ object EasyUI {
         // Load configuration
         conf.parseServerConf(confProps)
 
-        val server = new HttpServer(conf)
+        val easyUI = new EasyUI(conf)
 
-        server.attachHandler(new RedirectHandler("/", "/servers"))
-
-        val resourceHandler = new ResourceHandler
-        resourceHandler.setDirectoriesListed(false)
-        resourceHandler.setResourceBase("../webapp/static")
-
-        val staticContext = new ServletContextHandler()
-        staticContext.setContextPath("/static")
-        staticContext.setHandler(resourceHandler)
-
-        server.attachHandler(staticContext)
-
-        val context = new ServletContextHandler()
-        context.setContextPath("/servers")
-        context.setHandler(new HomeHandler(conf))
-
-        server.attachHandler(context)
-
-        // Start server
-        server.start()
+        easyUI.start()
 
         Runtime.getRuntime.addShutdownHook(new Thread(){
             override def run(): Unit = {
                 log.info("Shutting down ......")
-                server.stop()
+                easyUI.stop()
             }
         })
     }
