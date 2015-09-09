@@ -70,7 +70,7 @@ final class Seeder_61009 extends Seeder with ISeeder {
             cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
-            fruits.odata = dataList
+            fruits.odata = util.Random.shuffle(dataList).slice(0, 10)
         } catch {
             case ee: EasyException =>
                 fruits.oelement = fruits.oelement.updated("errorcode", ee.getCode)
