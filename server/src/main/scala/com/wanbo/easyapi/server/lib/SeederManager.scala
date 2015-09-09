@@ -139,7 +139,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
             case cnfe: ClassNotFoundException =>
                 log.error("Seeder not found Exception:", cnfe)
                 oelement.put("errorcode", "10011")
-                oelement.put("errormsg", cnfe.getMessage)
+                oelement.put("errormsg", "The transaction type [%s] is not supported.".format(transactionType))
             case e: Exception =>
                 log.error("SeederManager Exception:", e)
                 oelement.put("errorcode", "99999")
