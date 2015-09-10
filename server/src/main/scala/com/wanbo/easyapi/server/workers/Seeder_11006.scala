@@ -119,8 +119,7 @@ final class Seeder_11006 extends Seeder with ISeeder {
 
         try {
             val driver = this.driver.asInstanceOf[MysqlDriver]
-            driver.setDB("cmstmp01")
-            val conn = driver.getConnector
+            val conn = driver.getConnector("cmstmp01")
 
             val sql = "SELECT k.*,m.`clongleadbody` FROM (SELECT s.`id`, s.`cheadline`, s.`cshortleadbody`, s.`tag`, s.`column`, s.`pubdate` FROM story s, (SELECT id FROM channel_detail c WHERE c.`chaid` IN (%d) AND c.`type` = 1 ORDER BY c.addtime DESC LIMIT %d,%d) b WHERE s.id = b.id AND s.publish_status = 'publish') k LEFT JOIN story_metadata m ON k.id = m.storyid ORDER BY k.pubdate DESC , k.id DESC;".format(_chanelId, (_pageIndex - 1) * _pageSize + 1, _pageSize)
 

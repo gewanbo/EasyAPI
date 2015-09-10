@@ -74,8 +74,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
 
         try {
             val driver = this.driver.asInstanceOf[MysqlDriver]
-            driver.setDB("cmstmp01")
-            val conn = driver.getConnector
+            val conn = driver.getConnector("cmstmp01")
 
             val sql = "SELECT id,reid,`code`,`name`,`type`,`link`,haschildren FROM `channel`  ORDER BY priority,`reid` DESC,`id`"
 

@@ -109,8 +109,7 @@ final class Seeder_10008() extends Seeder with ISeeder {
 
         try {
             val driver = this.driver.asInstanceOf[MysqlDriver]
-            driver.setDB("cmstmp01")
-            val conn = driver.getConnector
+            val conn = driver.getConnector(dbName = "cmstmp01")
 
             var storyList = List[String]()
 

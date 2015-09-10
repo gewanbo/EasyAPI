@@ -99,8 +99,7 @@ final class Seeder_10003 extends Seeder with ISeeder {
 
         try {
             val driver = this.driver.asInstanceOf[MysqlDriver]
-            driver.setDB("cmstmp01")
-            val conn = driver.getConnector
+            val conn = driver.getConnector("cmstmp01")
 
             val calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"))
             calendar.add(Calendar.DATE, _days * -1)
