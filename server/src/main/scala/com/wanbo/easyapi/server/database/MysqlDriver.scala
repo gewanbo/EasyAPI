@@ -12,27 +12,20 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 case class MysqlDriver() extends Driver {
 
-//    private var db_host: String = _
-//    private var db_port: String = _
-//    private var db_username: String = _
-//    private var db_password: String = _
-
-//    private var _dataSource: DataSource = null
-//    private var _conn:Connection = null
+    private var _conn:Connection = null
 
     override def setConfiguration(conf: EasyConfig): Unit = {
 
     }
 
     def getConnector(dbName: String = "test", writable: Boolean = false): Connection ={
-        var conn: Connection = null
 
         try {
 
             val sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable).toList
 
             if(sourceList.size > 0) {
-                conn = util.Random.shuffle(sourceList).apply(0)._2.getConnection
+                _conn = util.Random.shuffle(sourceList).apply(0)._2.getConnection
             } else {
                 throw new Exception("Didn't find the available database source.")
             }
@@ -42,13 +35,13 @@ case class MysqlDriver() extends Driver {
                 throw e
         }
 
-        conn
+        _conn
     }
 
     protected def close(): Unit ={
         try{
-//            if(_conn != null)
-//                _conn.close()
+            if(_conn != null)
+                _conn.close()
         } catch {
             case e: Exception =>
         }
