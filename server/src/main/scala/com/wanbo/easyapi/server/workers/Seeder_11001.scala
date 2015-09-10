@@ -87,6 +87,7 @@ final class Seeder_11001 extends Seeder with ISeeder {
 
             rs.close()
             ps.close()
+            conn.close()
 
         } catch {
             case e: Exception =>

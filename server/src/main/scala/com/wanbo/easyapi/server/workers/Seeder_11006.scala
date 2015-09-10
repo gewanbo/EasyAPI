@@ -154,6 +154,8 @@ final class Seeder_11006 extends Seeder with ISeeder {
             trs.close()
             tps.close()
 
+            conn.close()
+
         } catch {
             case e: Exception =>
                 throw e
