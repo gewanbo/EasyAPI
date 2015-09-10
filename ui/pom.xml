@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.wanbo.easyapi</groupId>
         <artifactId>easyapi</artifactId>
-        <version>1.0.13-SNAPSHOT</version>
+        <version>1.0.14-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.0.13-SNAPSHOT</version>
+            <version>1.0.14-SNAPSHOT</version>
         </dependency>
         <!-- Zookeeper -->
         <dependency>
@@ -67,6 +67,10 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-rewrite</artifactId>
         </dependency>
         <!-- mysql -->
         <dependency>

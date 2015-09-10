@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.0.13-SNAPSHOT</version>
+    <version>1.0.14-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -134,6 +134,11 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
+                <version>${org.eclipse.jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-rewrite</artifactId>
                 <version>${org.eclipse.jetty.version}</version>
             </dependency>
             <!-- mysql -->
