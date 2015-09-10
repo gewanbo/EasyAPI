@@ -1,8 +1,11 @@
 package com.wanbo.easyapi.shared.common.libs
 
+import java.io.File
 import java.util.Properties
 
 import org.slf4j.LoggerFactory
+
+import scala.xml.XML
 
 /**
  * The configuration of EasyApi
@@ -25,7 +28,7 @@ class EasyConfig() {
 
     var cache_type = "redis"
 
-    var driver_mysql = Map[String, String]()
+    var driverSettings = Map[String, Map[String, String]]()
 
     // Client
     var clientId: String = _
@@ -56,10 +59,49 @@ class EasyConfig() {
 
         cache_type = confProps.getProperty("cache.type", "redis")
 
-        driver_mysql = driver_mysql.+("mysql.db.host" -> confProps.getProperty("mysql.db.host", "localhost"))
-        driver_mysql = driver_mysql.+("mysql.db.port" -> confProps.getProperty("mysql.db.port", "3306"))
-        driver_mysql = driver_mysql.+("mysql.db.username" -> confProps.getProperty("mysql.db.username", "root"))
-        driver_mysql = driver_mysql.+("mysql.db.password" -> confProps.getProperty("mysql.db.password", ""))
+        val dbConf = confProps.getProperty("database.conf", "database.xml")
+        
+        try {
+            val confFile = new File("../conf/" + dbConf)
+            
+            if(confFile.exists()){
+                val xml = XML.loadFile(confFile)
+
+                for (node <- xml \ "property") {
+                    val dbType = (node \ "@type").text
+                    dbType match {
+                        case "mysql" =>
+
+                            val settings = Map(
+                                "type" -> dbType,
+                                "host" -> (node \\ "host").text,
+                                "port" -> (node \\ "port").text,
+                                "uname" -> (node \\ "uname").text,
+                                "upswd" -> (node \\ "upswd").text,
+                                "dbname" -> (node \\ "dbname").text,
+                                "writable" -> (node \ "@writable").text
+                            )
+
+                            val settingKey = settings.hashCode().toString
+
+                            driverSettings = driverSettings.+(settingKey -> settings)
+
+                        case "hbase" =>
+
+                            val settings = Map("type" -> dbType, "zk" -> (node \\ "zookeeper").text)
+
+                            val settingKey = settings.hashCode().toString
+
+                            driverSettings = driverSettings.+(settingKey -> settings)
+
+                        case _ => // Ignore setup error.
+                    }
+                }
+            }
+        } catch {
+            case e: Exception => // Ignore the file opening exceptions.
+        }
+        
     }
 
     def parseClientConf(confProps: Properties): Unit ={
@@ -79,6 +121,9 @@ class EasyConfig() {
         var result = true
 
         if(serverId == "")
+            result = false
+
+        if(driverSettings.size < 1)
             result = false
 
         result
