@@ -12,61 +12,80 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 case class MysqlDriver() extends Driver {
 
-    private var db_host: String = _
-    private var db_port: String = _
-    private var db_username: String = _
-    private var db_password: String = _
+//    private var db_host: String = _
+//    private var db_port: String = _
+//    private var db_username: String = _
+//    private var db_password: String = _
 
-    private var _dataSource: DataSource = null
-    private var _conn:Connection = null
+//    private var _dataSource: DataSource = null
+//    private var _conn:Connection = null
 
     override def setConfiguration(conf: EasyConfig): Unit = {
-        db_host = conf.driver_mysql.get("mysql.db.host").get
-        db_port = conf.driver_mysql.get("mysql.db.port").get
-        db_username = conf.driver_mysql.get("mysql.db.username").get
-        db_password = conf.driver_mysql.get("mysql.db.password").get
-    }
-
-    def setDB(dbName: String) {
-        val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
-
-        val ds: DataSource = ctx.getBean(classOf[DataSource])
-        ds.setUrl("jdbc:mysql://%s:%s/%s?characterEncoding=utf-8".format(db_host, db_port, dbName))
-        ds.setUsername(db_username)
-        ds.setPassword(db_password)
-
-        _dataSource = ds
 
     }
 
-    def getConnector: Connection ={
-        connect()
-        _conn
-    }
+    def getConnector(dbName: String = "test", writable: Boolean = false): Connection ={
+        var conn: Connection = null
 
-    /**
-     * Get database connection
-     */
-    protected def connect() {
-        try{
+        try {
 
-            if(_dataSource == null)
-                throw new Exception("DataSource is empty!")
+            val sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable).toList
 
-            _conn = _dataSource.getConnection
+            if(sourceList.size > 0) {
+                conn = util.Random.shuffle(sourceList).apply(0)._2.getConnection
+            } else {
+                throw new Exception("Didn't find the available database source.")
+            }
 
         } catch {
             case e: Exception =>
                 throw e
         }
+
+        conn
     }
 
     protected def close(): Unit ={
         try{
-            if(_conn != null)
-                _conn.close()
+//            if(_conn != null)
+//                _conn.close()
         } catch {
             case e: Exception =>
         }
     }
+}
+
+object MysqlDriver {
+
+    private var dataSourceList: List[((String, Boolean), DataSource)] = List[((String, Boolean), DataSource)]()
+
+    /**
+     * Initialize all available data source.
+     *
+     * Called by manager when it start up.
+     */
+    def initializeDataSource(settings: List[Map[String, String]]): Unit ={
+
+        if (settings.size > 0) {
+            settings.foreach(x => {
+                val db_host = x.getOrElse("host", "")
+                val db_port = x.getOrElse("port", "")
+                val db_username = x.getOrElse("uname", "")
+                val db_password = x.getOrElse("upswd", "")
+                val db_name = x.getOrElse("dbname", "")
+                val db_writable = if (x.get("writable").get.toLowerCase == "true") true else false
+
+                val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
+
+                val ds: DataSource = ctx.getBean(classOf[DataSource])
+                ds.setUrl("jdbc:mysql://%s:%s/%s?characterEncoding=utf-8".format(db_host, db_port, db_name))
+                ds.setUsername(db_username)
+                ds.setPassword(db_password)
+
+                MysqlDriver.dataSourceList = MysqlDriver.dataSourceList :+ ((db_name, db_writable), ds)
+            })
+        }
+
+    }
+
 }

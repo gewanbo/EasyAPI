@@ -5,6 +5,7 @@ import java.net.Socket
 import java.util.Properties
 
 import akka.actor.{ActorRef, Props, Actor}
+import com.wanbo.easyapi.server.database.MysqlDriver
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
@@ -37,9 +38,16 @@ class Manager(workTracker: ActorRef) extends Actor {
             // Verify configuration.
             val confVerification = conf.verifyConf()
 
-            if(confVerification)
+            if(confVerification) {
+
+                log.info("Initialize MySQL database configuration.")
+                // Initialize Mysql database resources.
+                val mysqlSettings = conf.driverSettings.filter(x => x._2.get("type").get == "mysql").toList.map(_._2)
+                MysqlDriver.initializeDataSource(mysqlSettings)
+
+
                 watcherController ! ListenerStart
-            else {
+            } else {
                 log.error("Load configure file failed. Please check it.")
                 context.stop(self)
             }
