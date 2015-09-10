@@ -16,7 +16,14 @@ case class HBaseDriver() extends Driver {
 
     override def setConfiguration(conf: EasyConfig): Unit = {
 
-        db_zq = conf.getConfigure("hbase.zookeeper.quorum")
+        val settings = conf.driverSettings.filter(x => x._2.get("type").get == "hbase").toList.map(_._2)
+
+        if(settings.size > 0){
+            db_zq = settings.apply(0).getOrElse("zk", "")
+        }
+
+        if(db_zq == "")
+            log.warn("The Zookeeper host for HBase is not found ---------- !!!")
     }
 
     def getHConf: Configuration ={
