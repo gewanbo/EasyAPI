@@ -10,11 +10,13 @@ object ErrorConstant {
     errorList = errorList.+("ERROR_UNDEFINED" -> "Undefined exception.")
 
     errorList = errorList.+("0" -> "Successful.")
+    errorList = errorList.+("10011" -> "The transaction type is not supported.")
     errorList = errorList.+("12002" -> "Undefined exception.")
 
     errorList = errorList.+("20001" -> "The input parameters were wrong.")
     errorList = errorList.+("20010" -> "The length of UserName was wrong.")
     errorList = errorList.+("20100" -> "There is no data in results data set.")
+    errorList = errorList.+("20101" -> "The data you submit was exists.")
 
     errorList = errorList.+("40001" -> "The database connect failed.")
     errorList = errorList.+("40002" -> "The database operation throws exception.")
