@@ -1,12 +1,10 @@
 package com.wanbo.easyapi.ui.lib
 
-import java.net.InetSocketAddress
-
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.ContextHandlerCollection
+import org.eclipse.jetty.server.{ServerConnector, Server}
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.server.handler.{ContextHandler, ContextHandlerCollection}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -14,12 +12,12 @@ import scala.collection.mutable.ArrayBuffer
 * An http server.
 * Created by wanbo on 15/8/21.
 */
-class HttpServer(conf: EasyConfig) {
+class HttpServer(conf: EasyConfig) extends Logging {
 
     private var _server: Server = null
     private val _port: Int = conf.serverUIPort
 
-    private var _handlers: ArrayBuffer[ServletContextHandler] = ArrayBuffer[ServletContextHandler]()
+    private var _handlers: ArrayBuffer[ContextHandler] = ArrayBuffer[ContextHandler]()
 
     def start(): Unit ={
         if(_server != null)
@@ -35,7 +33,13 @@ class HttpServer(conf: EasyConfig) {
     private def doStart(): Unit ={
 
         // The server
-        _server = new Server(new InetSocketAddress(conf.serverHost, _port))
+        _server = new Server()
+
+        val connector = new ServerConnector(_server)
+        connector.setHost(conf.serverHost)
+        connector.setPort(_port)
+
+        _server.addConnector(connector)
 
         // Set handlers
         if(_handlers.size > 0) {
@@ -57,7 +61,7 @@ class HttpServer(conf: EasyConfig) {
         _server.join()
     }
 
-    def attachHandler(handler: ServletContextHandler): Unit ={
+    def attachHandler(handler: ContextHandler): Unit ={
         _handlers += handler
     }
 

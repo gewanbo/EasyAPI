@@ -1,5 +1,7 @@
 package com.wanbo.easyapi.ui.lib
 
+import com.wanbo.easyapi.ui.pages.WebPage
+
 import scala.xml.Node
 
 /**
@@ -12,15 +14,19 @@ private[easyapi] object UIUtils {
             <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
             <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css"/>
             <link rel="stylesheet" href="/static/css/common.css" type="text/css"/>
-            <script src="/static/jquery-1.11.3.min.js"></script>
+            <script src="/static/js/jquery-1.11.3.min.js"></script>
     }
 
-    def commonNavigationPage(title: String, content: Seq[Node]): Seq[Node] ={
+    def commonNavigationPage(page: WebPage): Seq[Node] ={
+
+        val navItem = page._tabs.map(i => {
+            <li><a href={i.uri}>{i.name}</a></li>
+        })
 
         <html>
             <head>
                 {commonHeaderNodes}
-                <title>{title}</title>
+                <title>{page.title}</title>
             </head>
             <body>
                 <nav class="navbar navbar-default navbar-static-top">
@@ -32,12 +38,11 @@ private[easyapi] object UIUtils {
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand" href="#">EasyAPI</a>
+                            <a class="navbar-brand" href="/">EasyAPI</a>
                         </div>
                         <div id="navbar" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav">
-                                <li class="active"><a href="#">Servers</a></li>
-                                <li><a href="#">Clients</a></li>
+                                {navItem}
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
                                 <li><a href="#">Help</a></li>
@@ -45,7 +50,7 @@ private[easyapi] object UIUtils {
                         </div>
                     </div>
                 </nav>
-                <div class="container">{content}</div>
+                <div class="container">{page.content}</div>
                 <footer class="footer">
                     <div class="container">
                         <p class="text-muted">Easy to distribute data.</p>
