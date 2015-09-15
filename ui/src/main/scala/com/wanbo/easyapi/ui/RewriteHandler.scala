@@ -4,6 +4,9 @@ import org.eclipse.jetty.rewrite.handler.RewritePatternRule
 
 /**
  * Rewrite handler
+ *
+ * @todo Have not been tested.
+ *
  * Created by wanbo on 15/8/26.
  */
 class RewriteHandler(basePath: String, replacePath: String) extends org.eclipse.jetty.rewrite.handler.RewriteHandler {
