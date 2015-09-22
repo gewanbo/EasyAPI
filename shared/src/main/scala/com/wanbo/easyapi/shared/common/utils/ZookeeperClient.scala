@@ -63,6 +63,8 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         }
     }
 
+    def getSessionId = zk.getSessionId
+
     /**
      * Given a string representing a path, return each subpath
      * Ex. subPaths("/a/b/c", "/") == ["/a", "/a/b", "/a/b/c"]
