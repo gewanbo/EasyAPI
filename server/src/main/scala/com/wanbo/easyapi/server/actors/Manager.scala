@@ -91,10 +91,20 @@ class Manager(workTracker: ActorRef) extends Actor {
 
             message = in.readLine()
 
-            println("Manager command is :" + message)
-
-            // Response message
-            out.println("OK")
+            message match {
+                case "workcount" =>
+                    var dataStr = ""
+                    var split = ""
+                    WorkCounter.getSummary.foreach(x => {
+                        dataStr += split + "%s=%d".format(x._1, x._2)
+                        split = "|"
+                    })
+                    out.println(dataStr)
+                case _ =>
+                    println("Manager command is :" + message)
+                    // Response message
+                    out.println("OK")
+            }
 
             out.close()
             in.close()
