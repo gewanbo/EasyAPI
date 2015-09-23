@@ -6,6 +6,7 @@ import akka.actor.{Props, Actor}
 import akka.io.Tcp._
 import akka.io.{Tcp, IO}
 import akka.routing.{DefaultResizer, RoundRobinRouter}
+import com.wanbo.easyapi.server.lib.WorkCounter
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
@@ -34,6 +35,11 @@ class SeedWatcher(conf: EasyConfig, port: Int) extends Actor {
             sender() ! ListenerFailed
 
         case c @ Connected(remoteAddress, localAddress) =>
+            try {
+                WorkCounter.push(conf.serverHost + ":" + localAddress.getPort)
+            } catch {
+                case e: Exception => // Ignore
+            }
             sender() ! Register(worker)
 
 
