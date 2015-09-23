@@ -30,19 +30,19 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
             try {
 
                 if (WorkCounter.workQueue.size > 300 || System.currentTimeMillis() - timeMark > 30000) {
-                    var countList = Map[String, Long]()
+                    var countList = List[(String, Long)]()
                     while (WorkCounter.workQueue.size > 0) {
                         val worker = WorkCounter.pull()
                         if(worker != "")
-                            countList += (worker -> 1)
+                            countList :+= (worker, 1L)
                     }
                     timeMark = System.currentTimeMillis()
                     // write counter to ZK
-                    log.info("Current size ------------------- :" + countList.size)
+                    log.info("Current batch ------------------- :" + countList)
 
                     WorkCounter.updateSummary(countList)
 
-                    log.info("Current summary size ------------------- :" + WorkCounter.getSummary.size)
+                    log.info("Current summary ------------------- :" + WorkCounter.getSummary)
                     WorkCounter.getSummary.foreach(println)
 
                 } else {
@@ -84,7 +84,7 @@ object WorkCounter {
         summary
     }
 
-    def updateSummary(list: Map[String, Long]): Unit ={
+    def updateSummary(list: List[(String, Long)]): Unit ={
         summary.synchronized{
             list.foreach(item => {
                 var num = 0L
