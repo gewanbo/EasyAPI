@@ -8,6 +8,7 @@ import akka.io.{Tcp, IO}
 import akka.routing.{DefaultResizer, RoundRobinRouter}
 import com.wanbo.easyapi.server.lib.WorkCounter
 import com.wanbo.easyapi.server.messages._
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
@@ -15,7 +16,7 @@ import com.wanbo.easyapi.shared.common.libs.EasyConfig
  *
  * Created by wanbo on 15/4/3.
  */
-class SeedWatcher(conf: EasyConfig, port: Int) extends Actor {
+class SeedWatcher(conf: EasyConfig, port: Int) extends Actor with Logging {
 
     import context.system
 
@@ -38,7 +39,8 @@ class SeedWatcher(conf: EasyConfig, port: Int) extends Actor {
             try {
                 WorkCounter.push(conf.serverHost + ":" + localAddress.getPort)
             } catch {
-                case e: Exception => // Ignore
+                case e: Exception =>
+                    log.error("Error when update work count:", e)
             }
             sender() ! Register(worker)
 
