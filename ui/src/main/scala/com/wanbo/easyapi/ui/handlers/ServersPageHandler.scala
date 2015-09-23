@@ -1,5 +1,7 @@
 package com.wanbo.easyapi.ui.handlers
 
+import java.io._
+import java.net.Socket
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
 import com.wanbo.easyapi.shared.common.Logging
@@ -25,8 +27,22 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
             val out = httpServletResponse.getWriter
 
+            var serverList = Map[String, Long]()
+            val servers = availableServers
+
+            servers.foreach(s => {
+                val info = getSummary(s)
+                if(info != "") {
+                    try {
+                        info.split("\\|").map(_.split("=")).foreach(i => {
+                            serverList += i(0) -> i(1).toLong
+                        })
+                    }
+                }
+            })
+
             page.title = "Servers"
-            page.content = makeTable(availableServers)
+            page.content = makeTable(serverList.toSeq)
 
             log.info("Response contents ------------ server")
             out.println(UIUtils.commonNavigationPage(page))
@@ -39,38 +55,58 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     this.setContextPath(contextPath)
     this.setHandler(handler)
 
-    private def availableServers: Seq[(String, Int)] = {
-        var serverList = Seq[(String, Int)]()
+    private def availableServers: Seq[String] = {
+        var serverList = Seq[String]()
         val zk = new ZookeeperClient(conf.zkHosts)
 
         val serverNode = "/easyapi/servers"
 
         val servers = zk.getChildren(serverNode)
 
-        servers.map(s => {
-            var hitNum = 0
-            val hitData = zk.get(serverNode + "/" + s)
-
-            if (hitData != null) {
-                try {
-                    val hits = new String(hitData)
-
-                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
-
-                    hitNum = hits.toInt
-                } catch {
-                    case e: Exception =>
-                }
-            }
-
-            serverList = serverList :+(s, hitNum)
-        })
+        serverList = servers.map(_.split(":")(0)).toSeq
 
         zk.close()
-        serverList
+        serverList.distinct
     }
 
-    private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
+    private def getSummary(host: String): String ={
+        var info = ""
+
+        try {
+            val socket = new Socket(host, 8860)
+
+            val outStream = socket.getOutputStream
+
+            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outStream)))
+
+            val inStream = new InputStreamReader(socket.getInputStream)
+            val in = new BufferedReader(inStream)
+
+            out.println("workcount")
+            out.flush()
+
+            val msg = in.readLine()
+
+            info = msg
+
+            println(msg)
+
+            out.close()
+            outStream.close()
+
+            in.close()
+            inStream.close()
+
+            socket.close()
+        } catch {
+            case e: Exception =>
+                log.error("Error:", e)
+        }
+
+        info
+    }
+
+    private def makeTable(data: Seq[(String, Long)]): Seq[Node] = {
 
         val rows = data.map(r => {
             <tr>
