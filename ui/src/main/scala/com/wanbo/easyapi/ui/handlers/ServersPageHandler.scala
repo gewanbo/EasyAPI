@@ -35,8 +35,12 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
                 if(info != "") {
                     try {
                         info.split("\\|").map(_.split("=")).foreach(i => {
-                            serverList += i(0) -> i(1).toLong
+                            if(i.size > 1)
+                                serverList += i(0) -> i(1).toLong
                         })
+                    } catch {
+                        case e: Exception =>
+                            log.error("Throws exception when parse server information.", e)
                     }
                 }
             })
