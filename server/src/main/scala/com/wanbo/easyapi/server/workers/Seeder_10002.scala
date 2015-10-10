@@ -106,14 +106,26 @@ final class Seeder_10002 extends Seeder with ISeeder {
             val ps = conn.prepareStatement(sql)
             val rs = ps.executeQuery()
 
-            // TODO Don't support all fields.
-            while (rs.next()){
-                var tmpMap = Map[String, String]()
-                tmpMap = tmpMap + ("id" -> rs.getString(1))
-                tmpMap = tmpMap + ("cheadline" -> rs.getString(2))
-                tmpMap = tmpMap + ("cauthor" -> rs.getString(3))
+            if(_type == "all") {
+                val metaData = ps.getMetaData
+                val columnCount = metaData.getColumnCount
+                while (rs.next()) {
+                    var tmpMap = Map[String, String]()
+                    for(i <- Range(1, columnCount + 1)) {
+                        tmpMap = tmpMap + (metaData.getColumnLabel(i) -> rs.getString(i))
+                    }
 
-                dataList = dataList :+ tmpMap
+                    dataList = dataList :+ tmpMap
+                }
+            } else {
+                while (rs.next()) {
+                    var tmpMap = Map[String, String]()
+                    tmpMap = tmpMap + ("id" -> rs.getString(1))
+                    tmpMap = tmpMap + ("cheadline" -> rs.getString(2))
+                    tmpMap = tmpMap + ("cauthor" -> rs.getString(3))
+
+                    dataList = dataList :+ tmpMap
+                }
             }
 
             rs.close()
