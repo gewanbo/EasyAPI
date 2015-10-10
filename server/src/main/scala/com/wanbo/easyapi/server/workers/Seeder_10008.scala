@@ -34,7 +34,7 @@ final class Seeder_10008() extends Seeder with ISeeder {
             // Cache
             val cache_name = this.getClass.getSimpleName + _storyId
 
-            val cacher = new CacheManager(_conf)
+            val cacher = new CacheManager(_conf, expire = 600)
             val cacheData = cacher.cacheData(cache_name)
 
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
@@ -42,7 +42,7 @@ final class Seeder_10008() extends Seeder with ISeeder {
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
             } else {
 
-                val dataList = onDBHandle()
+                dataList = onDBHandle()
 
                 if (dataList.size < 1)
                     throw new EasyException("20100")
@@ -57,7 +57,7 @@ final class Seeder_10008() extends Seeder with ISeeder {
             cacher.close()
 
             fruits.oelement = fruits.oelement.updated("errorcode", "0")
-            fruits.odata = util.Random.shuffle(dataList).slice(0, 10)
+            fruits.odata = dataList
         } catch {
             case ee: EasyException =>
                 fruits.oelement = fruits.oelement.updated("errorcode", ee.getCode)
@@ -102,13 +102,12 @@ final class Seeder_10008() extends Seeder with ISeeder {
 
                 while (rs.next()){
                     val tmpStoryId = rs.getString(1)
-                    var tmpMap = Map[String, String]()
                     if(_storyId != tmpStoryId) {
+                        var tmpMap = Map[String, String]()
                         tmpMap = tmpMap + ("storyid" -> rs.getString(1))
                         tmpMap = tmpMap + ("cheadline" -> rs.getString(2))
+                        dataList = dataList :+ tmpMap
                     }
-
-                    dataList = dataList :+ tmpMap
                 }
 
             } else {
