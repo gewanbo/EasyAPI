@@ -16,7 +16,7 @@ final class Seeder_10002 extends Seeder with ISeeder {
 
     driver = new MysqlDriver
 
-    private var _idSet: Set[String] = _
+    private var _idSet: Set[String] = Set()
     private var _type: String = "info"
 
     private val log = LoggerFactory.getLogger(classOf[Seeder_10002])
@@ -27,9 +27,6 @@ final class Seeder_10002 extends Seeder with ISeeder {
 
         try {
             val storyIdStr: String = seed.getOrElse("storyid", "").toString
-
-            if (storyIdStr != null && !storyIdStr.forall(_.isDigit))
-                throw new EasyException("20001")
 
             val storyArr = storyIdStr.split(",")
 
@@ -62,13 +59,13 @@ final class Seeder_10002 extends Seeder with ISeeder {
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
             } else {
 
-                val data = onDBHandle()
+                dataList = onDBHandle()
 
-                if (data.size < 1)
+                if (dataList.size < 1)
                     throw new EasyException("20100")
                 else {
                     val cache_data = new EasyOutput
-                    cache_data.odata = data
+                    cache_data.odata = dataList
 
                     cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
                     cacher.cacheData(cache_name, cache_data)
