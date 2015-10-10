@@ -23,10 +23,13 @@ final class Seeder_10008() extends Seeder with ISeeder {
 
         try {
 
-            val storyId = seed.getOrElse("storyid", "")
+            val storyId = seed.getOrElse("storyid", "").toString
+
+            if (storyId != null && !storyId.forall(_.isDigit))
+                throw new EasyException("20001")
 
             if(storyId != null)
-                _storyId = storyId.toString
+                _storyId = storyId
 
             // Cache
             val cache_name = this.getClass.getSimpleName + _storyId
