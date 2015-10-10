@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Get story info by id.
- * Created by wanbo on 15/4/16.
+ * Created by wanbo on 10/10/15.
  */
 final class Seeder_10002 extends Seeder with ISeeder {
 
