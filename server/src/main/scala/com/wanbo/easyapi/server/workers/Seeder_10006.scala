@@ -7,8 +7,9 @@ import org.slf4j.LoggerFactory
 
 
 /**
- * Number 10006 seeder
- * Created by wanbo on 29/6/16.
+ * Get the picture of story.
+ *
+ * Created by wanbo on 29/6/15.
  */
 final class Seeder_10006 extends Seeder with ISeeder {
 
