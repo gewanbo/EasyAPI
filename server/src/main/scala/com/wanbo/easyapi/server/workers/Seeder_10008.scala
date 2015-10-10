@@ -14,9 +14,6 @@ final class Seeder_10008() extends Seeder with ISeeder {
     name = "10008"
     driver = new MysqlDriver
 
-    private var _uuId = ""
-    private var _cookieId = ""
-
     private var _storyId = ""
 
     private val log = LoggerFactory.getLogger(classOf[Seeder_10008])
@@ -26,24 +23,13 @@ final class Seeder_10008() extends Seeder with ISeeder {
 
         try {
 
-            val uuId = seed.getOrElse("uuid", "")
-            val cookieId = seed.getOrElse("cookieid", "")
             val storyId = seed.getOrElse("storyid", "")
-
-            if(uuId != null)
-                _uuId = uuId.toString
-
-            if(cookieId != null)
-                _cookieId = cookieId.toString
 
             if(storyId != null)
                 _storyId = storyId.toString
 
-            if(_uuId == "" && _cookieId == "" && _storyId == "")
-                throw new EasyException("20001")
-
             // Cache
-            val cache_name = this.getClass.getSimpleName + _uuId + _cookieId + _storyId
+            val cache_name = this.getClass.getSimpleName + _storyId
 
             val cacher = new CacheManager(_conf)
             val cacheData = cacher.cacheData(cache_name)
@@ -53,40 +39,17 @@ final class Seeder_10008() extends Seeder with ISeeder {
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
             } else {
 
-                // From 61001
-                var data_61001: EasyOutput = new EasyOutput
+                val dataList = onDBHandle()
 
-                if(_uuId != "")
-                    data_61001 = this.manager.transform("61001", Map("uuid" -> _uuId))
-                else if (_cookieId != "")
-                    data_61001 = this.manager.transform("61001", Map("cookieid" -> _cookieId))
-
-                if(data_61001.oelement.get("errorcode").get == "0" && data_61001.odata.size > 0){
-                    dataList = dataList ++ data_61001.odata
-                }
-
-                // From 10008 self
-                if(dataList.size < 10) {
-                    val data = onDBHandle()
-
-                    if (data.size > 0) {
-                        data.foreach(x => {
-                            var obj = Map[String, Any]()
-                            obj = obj + ("storyid" -> x._1)
-                            obj = obj + ("cheadline" -> x._2)
-                            dataList = dataList :+ obj
-                        })
-                    }
-                }
-
-                if(dataList.size < 1)
+                if (dataList.size < 1)
                     throw new EasyException("20100")
+                else {
+                    val cache_data = new EasyOutput
+                    cache_data.odata = dataList
 
-                val cache_data = new EasyOutput
-                cache_data.odata = dataList
-
-                cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
-                cacher.cacheData(cache_name, cache_data)
+                    cache_data.oelement = cache_data.oelement.updated("errorcode", "0")
+                    cacher.cacheData(cache_name, cache_data)
+                }
             }
             cacher.close()
 
@@ -104,8 +67,8 @@ final class Seeder_10008() extends Seeder with ISeeder {
         fruits
     }
 
-    override protected def onDBHandle(): List[(String, String)] = {
-        var dataList = List[(String, String)]()
+    override protected def onDBHandle(): List[Map[String, String]] = {
+        var dataList = List[Map[String, String]]()
 
         try {
             val driver = this.driver.asInstanceOf[MysqlDriver]
@@ -136,9 +99,13 @@ final class Seeder_10008() extends Seeder with ISeeder {
 
                 while (rs.next()){
                     val tmpStoryId = rs.getString(1)
+                    var tmpMap = Map[String, String]()
                     if(_storyId != tmpStoryId) {
-                        dataList = dataList :+ (tmpStoryId, rs.getString(2))
+                        tmpMap = tmpMap + ("storyid" -> rs.getString(1))
+                        tmpMap = tmpMap + ("cheadline" -> rs.getString(2))
                     }
+
+                    dataList = dataList :+ tmpMap
                 }
 
             } else {
