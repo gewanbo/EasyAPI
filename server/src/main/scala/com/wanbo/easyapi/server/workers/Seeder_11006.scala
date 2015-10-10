@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 
 /**
- * Number 11006 seeder
+ * Get stories by channel id.
  * Created by wanbo on 2015/6/26.
  */
 final class Seeder_11006 extends Seeder with ISeeder {
