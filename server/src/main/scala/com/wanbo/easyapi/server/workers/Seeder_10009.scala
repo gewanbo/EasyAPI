@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Get the related video by story id.
- * Created by wanbo on 10/10/15.
+ * Created by wanbo on 2015/10/10.
  */
 final class Seeder_10009 extends Seeder with ISeeder {
 

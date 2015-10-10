@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Submit campaign data.
- * Created by wanbo on 10/9/15.
+ * Created by wanbo on 2015/9/10.
  */
 final class Seeder_20008() extends Seeder with ISeeder {
 
