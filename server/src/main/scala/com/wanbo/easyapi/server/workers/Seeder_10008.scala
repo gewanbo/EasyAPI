@@ -111,6 +111,8 @@ final class Seeder_10008() extends Seeder with ISeeder {
                 }
 
             } else {
+                rs.close()
+                ps.close()
                 throw new EasyException("20100")
             }
             rs.close()
