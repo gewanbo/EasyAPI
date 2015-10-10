@@ -9,7 +9,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.slf4j.LoggerFactory
 
 /**
- * Number 61009 seeder
+ * Recommend stories for users. (Base on access history)
  * Created by wanbo on 15/4/17.
  */
 final class Seeder_61009 extends Seeder with ISeeder {
