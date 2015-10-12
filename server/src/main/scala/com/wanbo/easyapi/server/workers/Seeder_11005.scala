@@ -5,7 +5,6 @@ import com.wanbo.easyapi.server.database.MysqlDriver
 import com.wanbo.easyapi.server.lib.{EasyException, EasyOutput, ISeeder, Seeder}
 import org.slf4j.LoggerFactory
 
-
 /**
  * Get stories by channel id.
  * Created by wanbo on 2015/10/10.
@@ -38,10 +37,11 @@ final class Seeder_11005 extends Seeder with ISeeder {
 
             val chaCode: String = seed.getOrElse("code", "").toString
 
-//            if (chaCode != "" && !chaCode.forall(_.isDigit))
-//                throw new EasyException("20001")
+            val pattern = "^[A-Za-z0-9-_]+$".r
 
-            // todo "'^[A-Za-z0-9-_]+$'"
+            if(pattern.findAllIn(chaCode).size < 1)
+                throw new EasyException("20001")
+
             _chanelCode = chaCode
 
             // Cache
