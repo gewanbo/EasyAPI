@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Get stories by channel id.
- * Created by wanbo on 2015/6/26.
+ * Created by wanbo on 2015/10/10.
  */
 final class Seeder_11005 extends Seeder with ISeeder {
 
@@ -31,15 +31,15 @@ final class Seeder_11005 extends Seeder with ISeeder {
 
             val chaId: String = seed.getOrElse("id", "").toString
 
-            if (chaId != null && !chaId.forall(_.isDigit))
+            if (chaId != "" && !chaId.forall(_.isDigit))
                 throw new EasyException("20001")
 
             _chanelId = chaId
 
             val chaCode: String = seed.getOrElse("code", "").toString
 
-            if (chaCode != null && !chaCode.forall(_.isDigit))
-                throw new EasyException("20001")
+//            if (chaCode != "" && !chaCode.forall(_.isDigit))
+//                throw new EasyException("20001")
 
             // todo "'^[A-Za-z0-9-_]+$'"
             _chanelCode = chaCode
@@ -53,8 +53,6 @@ final class Seeder_11005 extends Seeder with ISeeder {
             if (cacheData != null && cacheData.oelement.get("errorcode").get == "0" && !isUpdateCache) {
                 dataList = cacheData.odata
                 fruits.oelement = fruits.oelement + ("fromcache" -> "true") + ("ttl" -> cacher.ttl.toString)
-                fruits.oelement = fruits.oelement + ("itemtotal" -> cacheData.oelement.getOrElse("itemtotal", "0"))
-                fruits.oelement = fruits.oelement + ("pagetotal" -> cacheData.oelement.getOrElse("pagetotal", "0"))
             } else {
                 dataList = onDBHandle()
 
