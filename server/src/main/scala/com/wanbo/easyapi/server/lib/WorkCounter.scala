@@ -1,8 +1,7 @@
 package com.wanbo.easyapi.server.lib
 
 import com.wanbo.easyapi.shared.common.Logging
-import com.wanbo.easyapi.shared.common.libs.{DistributedLock, EasyConfig}
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 import scala.collection.mutable
 
