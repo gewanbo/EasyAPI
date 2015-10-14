@@ -24,7 +24,7 @@ object Utils {
      * @param tabPrefix    Prefix of table name.
      * @return             The formatted string.
      */
-    def formatTablesNameByDate(days: Int, format: String = "Y_m_d", tabPrefix: String = ""): Set[String] ={
+    def formatTablesNameByDate(days: Int, format: String = "yyyy_MM_dd", tabPrefix: String = ""): Set[String] ={
         var tabSet = Set[String]()
 
         val calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"))
