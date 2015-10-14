@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.wanbo.easyapi</groupId>
         <artifactId>easyapi</artifactId>
-        <version>1.0.15-SNAPSHOT</version>
+        <version>1.0.16-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.0.15-SNAPSHOT</version>
+            <version>1.0.16-SNAPSHOT</version>
         </dependency>
         <!-- logging -->
         <dependency>
