@@ -25,6 +25,7 @@ class EasyConfig() {
 
     var workersPort: List[Int] = _
     var workersMaxThreads: Int = _
+    var workersClasses: String = _
 
     var cache_type = "redis"
 
@@ -53,6 +54,8 @@ class EasyConfig() {
         workersPort = workers_port.split(";").toList.map(_.toInt)
 
         workersMaxThreads = confProps.getProperty("server.worker.max_threads", "10").toInt
+
+        workersClasses = confProps.getProperty("server.worker.classes", "com.wanbo.easyapi.server.workers.Seeder_")
 
         zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
         zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
