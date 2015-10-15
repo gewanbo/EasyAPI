@@ -86,7 +86,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             var fruits: EasyOutput = null
 
-            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + transactionType)
+            val cla = Class.forName(conf.workersClasses + transactionType)
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
 
@@ -165,7 +165,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
         var fruits: EasyOutput = new EasyOutput
 
         try {
-            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + seeder)
+            val cla = Class.forName(conf.workersClasses + seeder)
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
 
@@ -194,7 +194,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
         var fruits: EasyOutput = new EasyOutput
 
         try {
-            val cla = Class.forName("com.wanbo.easyapi.server.workers.Seeder_" + seeder)
+            val cla = Class.forName(conf.workersClasses + seeder)
 
             val seederObj = cla.newInstance().asInstanceOf[ISeeder]
 
