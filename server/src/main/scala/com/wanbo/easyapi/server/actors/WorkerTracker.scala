@@ -41,7 +41,7 @@ class WorkerTracker extends Actor {
                     log.info("Port - " + port + " isn't working")
             })
 
-            if(conf.zkEnable) {
+            if(conf.serverMode == "Cluster" && conf.zkEnable) {
                 val workerUpdate = context.actorOf(Props(new WorkerRegister(conf)), "worker_register")
                 workerUpdate ! ""
                 val cacheLeader = context.actorOf(Props(new CacheLeader(conf)), "cache_leader")
