@@ -21,6 +21,7 @@ class EasyConfig() {
     var serverId: String = _
     var serverHost: String = _
     var serverPort: Int = _
+    var serverMode: String = _
     var serverUIPort: Int = _
 
     var workersPort: List[Int] = _
@@ -48,6 +49,8 @@ class EasyConfig() {
         serverHost = confProps.getProperty("server.host", "localhost")
         serverPort = confProps.getProperty("server.port", "8860").toInt
         serverUIPort = confProps.getProperty("server.ui.port", "8800").toInt
+
+        serverMode = confProps.getProperty("server.mode", "Standalone")
 
         val workers_port = confProps.getProperty("server.worker.port", "8801")
 
