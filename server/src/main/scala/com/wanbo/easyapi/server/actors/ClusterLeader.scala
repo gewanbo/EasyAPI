@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory
  * Elect a leader from cluster, and control the cache updating.
  * Created by wanbo on 15/7/1.
  */
-class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
+private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
     private val leader_root = "/cache_leader"
 
     private var _zk: ZookeeperClient = null
 
-    private val log = LoggerFactory.getLogger(classOf[CacheLeader])
+    private val log = LoggerFactory.getLogger(classOf[ClusterLeader])
 
     private var _serverId = ""
 
@@ -42,7 +42,7 @@ class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
             zk.watchChildren(leader_root, (nodes: Seq[String]) => {
 
                 try {
-                    if (nodes != null && nodes.length > 0) {
+                    if (nodes != null && nodes.nonEmpty) {
 
                         log.info("Total number of workers:" + nodes.length)
 
@@ -60,19 +60,23 @@ class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
                             zk.create("%s/%s-".format(leader_root, _serverId), Array("1".toByte), CreateMode.EPHEMERAL_SEQUENTIAL)
                         } else {
 
-                            val tmpLeader = serverList(0)._1
+                            val headNode = serverList.head._1
 
-                            log.info("Tmp leader is:" + tmpLeader)
+                            log.info("Tmp leader is:" + headNode)
+                            log.info("The smallest one is:" + headNode)
 
-                            log.info("The smallest one is:" + tmpLeader)
+                            if (headNode == _serverId) {
 
-                            if (tmpLeader == _serverId) {
-                                log.info("I am the leader!!!")
-                                openCacheUpdate()
+                                if(!ClusterLeader.isLeader) {
+                                    log.info("I became the leader!!!")
+                                    ClusterLeader.isLeader = true
+                                    getLeader()
+                                } else {
+                                    log.info("I had already become the leader!!!")
+                                }
                             } else {
-                                log.info("I am follower!!....")
-                                //closeCacheUpdate()
-                                openCacheUpdate()
+                                log.info("I became the follower!!....")
+                                loseLeader()
                             }
                         }
                     } else {
@@ -86,13 +90,21 @@ class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
         }
     }
 
+    private def getLeader() ={
+        log.info("Start to do the leading work.")
+    }
+
+    private def loseLeader(): Unit ={
+        log.info("Stop doing the leading work.")
+    }
+
     private def openCacheUpdate(): Unit ={
 
         log.info("------------- I'm ready to update cache -----")
 
         val cacheOption = context.child("cache_manager")
 
-        if(!cacheOption.isDefined) {
+        if(cacheOption.isEmpty) {
             val cacheManager = context.actorOf(Props(new CacheManager(conf)), name = "cache_manager")
             cacheManager ! "init"
         }
@@ -128,4 +140,8 @@ class CacheLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
             }
             context.stop(self)
     }
+}
+
+private[server] object ClusterLeader{
+    private var isLeader = false
 }
