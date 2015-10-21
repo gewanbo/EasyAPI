@@ -43,6 +43,8 @@ object EasyConverts {
                         y
                     case y: List[_] =>
                         list2json(y.asInstanceOf[List[Map[String, Any]]])
+                    case z: Map[_, _] =>
+                        map2json(z.asInstanceOf[Map[String, Any]])
                     case null =>
                         ""
                 }
@@ -51,6 +53,16 @@ object EasyConverts {
             })
 
             json.add(obj)
+        })
+
+        json
+    }
+
+    def map2json(map: Map[String, Any]): JSONObject ={
+        val json = new JSONObject()
+
+        map.foreach(x => {
+            json.put(x._1, x._2)
         })
 
         json

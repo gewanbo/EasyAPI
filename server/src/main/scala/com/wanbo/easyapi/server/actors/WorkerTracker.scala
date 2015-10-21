@@ -44,7 +44,7 @@ class WorkerTracker extends Actor {
             if(conf.serverMode == "Cluster" && conf.zkEnable) {
                 val workerUpdate = context.actorOf(Props(new WorkerRegister(conf)), "worker_register")
                 workerUpdate ! ""
-                val cacheLeader = context.actorOf(Props(new CacheLeader(conf)), "cache_leader")
+                val cacheLeader = context.actorOf(Props(new ClusterLeader(conf)), "cache_leader")
                 cacheLeader ! ""
             }
 
