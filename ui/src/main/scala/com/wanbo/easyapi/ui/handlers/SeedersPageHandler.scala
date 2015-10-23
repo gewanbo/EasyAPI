@@ -125,17 +125,17 @@ class SeedersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
         val rows = data.map(r => {
             <tr>
                 <td>{r._1}</td>
-                <td>{r._2}</td>
+                <td>{r._2} ms</td>
             </tr>
         })
 
-        <h2>Server List</h2>
+        <h2>Transaction performance metrics</h2>
             <p>All the available servers.</p>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Server</th>
-                        <th>Hits</th>
+                        <th>TransactionType</th>
+                        <th>AverageTime(ms)</th>
                     </tr>
                 </thead>
                 <tbody>
