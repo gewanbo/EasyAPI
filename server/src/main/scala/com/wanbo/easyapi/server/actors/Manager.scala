@@ -6,7 +6,7 @@ import java.util.Properties
 
 import akka.actor.{ActorRef, Props, Actor}
 import com.wanbo.easyapi.server.database.MysqlDriver
-import com.wanbo.easyapi.server.lib.WorkCounter
+import com.wanbo.easyapi.server.lib.{SeedCounter, WorkCounter}
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
@@ -49,6 +49,9 @@ class Manager(workTracker: ActorRef) extends Actor {
                 // Start up work counter
                 val workCounter = new WorkCounter(conf)
                 workCounter.start()
+
+                val seedCounter = new SeedCounter(conf)
+                seedCounter.start()
 
                 watcherController ! ListenerStart
 
@@ -96,6 +99,14 @@ class Manager(workTracker: ActorRef) extends Actor {
                     var dataStr = ""
                     var split = ""
                     WorkCounter.getSummary.foreach(x => {
+                        dataStr += split + "%s=%d".format(x._1, x._2)
+                        split = "|"
+                    })
+                    out.println(dataStr)
+                case "seedcount" =>
+                    var dataStr = ""
+                    var split = ""
+                    SeedCounter.getSummary.foreach(x => {
                         dataStr += split + "%s=%d".format(x._1, x._2)
                         split = "|"
                     })

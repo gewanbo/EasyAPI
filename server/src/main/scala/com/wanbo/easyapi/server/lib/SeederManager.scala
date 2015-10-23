@@ -71,6 +71,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
      */
     def farming(): String ={
 
+        val startTime = System.currentTimeMillis()
+
         loadSeed()
 
         _fruit = new JSONObject()
@@ -150,6 +152,8 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
         _fruit.put("head", head)
         _fruit.put("body", body)
+
+        SeedCounter.push((transactionType, startTime, System.currentTimeMillis()))
 
         _fruit.toJSONString
     }
