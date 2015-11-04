@@ -19,7 +19,7 @@ class Farm extends Actor {
     override def receive: Receive = {
         case Received(data) =>
 
-            log.info("Receive a request ...")
+            log.info("Received a request ...")
 
             // Get current server list
             val servers = AvailableServer.serverList

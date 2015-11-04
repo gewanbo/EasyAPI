@@ -25,15 +25,31 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
             if(workers.size > 0) {
                 AvailableServer.serverList = workers.toList
 
-                register()
             } else {
                 AvailableServer.serverList = null
-                unregister()
             }
         })
     }
 
-    private def register(){}
+    private def register(): Boolean ={
+        var ret = false
+        val clientNode = client_root + "/" + conf.clientId
+
+        try {
+            if (_zk.exists(clientNode)) {
+                log.error("The client [%s] has been registered. Can't register same client twice!")
+            } else {
+                val creNode = _zk.create(clientNode, Array("1".toByte), CreateMode.EPHEMERAL)
+                if (!creNode.isEmpty)
+                    ret = true
+            }
+        } catch {
+            case e: Exception =>
+                log.error("Error:", e)
+        }
+
+        ret
+    }
 
     private def unregister(){}
 
@@ -41,12 +57,17 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
         case "StartUp" =>
             log.info("I'm starting up ...")
 
-            while(AvailableServer.serverList == null){
-                Thread.sleep(3000)
-                log.info("Waiting for update ...")
-            }
+            if(!register()){
+                sender() ! "ShutDown"
+            } else {
 
-            sender() ! "Ready"
+                while (AvailableServer.serverList == null) {
+                    Thread.sleep(3000)
+                    log.info("Waiting for update ...")
+                }
+
+                sender() ! "Ready"
+            }
 
         case "ShutDown" =>
             unregister()

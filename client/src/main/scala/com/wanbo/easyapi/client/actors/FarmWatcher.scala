@@ -68,6 +68,10 @@ class FarmWatcher extends Actor {
         case "Failed" =>
             log.error("Socket bound failed!")
         case "ShutDown" =>
-            context stop _client
+            import context.system
+            IO(Tcp) ! Unbind
+            context stop farm
+            _client ! "ShutDown"
+            context stop self
     }
 }
