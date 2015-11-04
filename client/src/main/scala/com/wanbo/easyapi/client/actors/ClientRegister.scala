@@ -30,7 +30,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
 
                         val nodeBytes = zk.get(serverNode)
                         if (nodeBytes != null) {
-                            val nodeStr = nodeBytes.mkString
+                            val nodeStr = new String(nodeBytes)
 
                             if (nodeStr.isEmpty)
                                 AvailableServer.serverList :+=(server, 0L)
