@@ -77,7 +77,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
     }
 
     def exists(path: String): Boolean ={
-        zk.exists(path, false) != null
+        zk.exists(makeNodePath(path), false) != null
     }
 
     private def makeNodePath(path : String) = "%s/%s".format(basePath, path).replaceAll("//", "/")
