@@ -4,6 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
+import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import com.wanbo.easyapi.ui.lib.UIUtils
 import com.wanbo.easyapi.ui.pages.WebPage
 import org.eclipse.jetty.server.Request
@@ -38,36 +39,35 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     this.setContextPath(contextPath)
     this.setHandler(handler)
 
-    private def availableServers: Seq[(String, Int)] ={
-        //        var serverList = Seq[(String, Int)]()
-        //        val zk = new ZookeeperClient(conf.zkHosts)
-        //
-        //        val serverNode = "/easyapi/servers"
-        //
-        //        val servers = zk.getChildren(serverNode)
-        //
-        //        servers.map(s => {
-        //            var hitNum = 0
-        //            val hitData = zk.get(serverNode + "/" + s)
-        //
-        //            if(hitData != null) {
-        //                try {
-        //                    val hits = new String(hitData)
-        //
-        //                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
-        //
-        //                    hitNum = hits.toInt
-        //                } catch {
-        //                    case e: Exception =>
-        //                }
-        //            }
-        //
-        //            serverList = serverList :+ (s, hitNum)
-        //        })
+    private def availableServers: Seq[(String, Int)] = {
+        var clientList = Seq[(String, Int)]()
+        val zk = new ZookeeperClient(conf.zkHosts)
 
-        //        zk.close()
-        //        serverList
-        Seq[(String, Int)](("ser1", 8284), ("sr23", 3838))
+        val clientNode = "/easyapi/clients"
+
+        val clients = zk.getChildren(clientNode)
+
+        clients.map(s => {
+            var hitNum = 0
+            val hitData = zk.get(clientNode + "/" + s)
+
+            if (hitData != null) {
+                try {
+                    val hits = new String(hitData)
+
+                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
+
+                    hitNum = hits.toInt
+                } catch {
+                    case e: Exception =>
+                }
+            }
+
+            clientList = clientList :+(s, hitNum)
+        })
+
+        zk.close()
+        clientList
     }
 
     private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
