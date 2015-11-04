@@ -49,7 +49,7 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor{
                  lostWorkers.foreach(worker => {
                      val workerPath = server_root + "/" + worker
                      if(!zk.exists(workerPath))
-                         zk.create(workerPath, Array("1".toByte), CreateMode.EPHEMERAL)
+                         zk.create(workerPath, "".map(_.toByte).toArray, CreateMode.EPHEMERAL)
                  })
              }
          })
