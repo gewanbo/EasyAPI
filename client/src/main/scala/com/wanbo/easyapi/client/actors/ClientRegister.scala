@@ -18,15 +18,35 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
     private val log = LoggerFactory.getLogger(classOf[ClientRegister])
 
     def callback(zk: ZookeeperClient): Unit ={
+
         zk.watchChildren(server_root, (workers: Seq[String]) =>{
 
-            workers.foreach(println)
+            try {
 
-            if(workers.size > 0) {
-                AvailableServer.serverList = workers.toList
+                if (workers.size > 0) {
 
-            } else {
-                AvailableServer.serverList = null
+                    workers.foreach(server => {
+                        val serverNode = server_root + "/" + server
+
+                        val nodeBytes = zk.get(serverNode)
+                        if (nodeBytes != null) {
+                            val nodeStr = nodeBytes.mkString
+
+                            if (nodeStr.isEmpty)
+                                AvailableServer.serverList :+=(server, 0L)
+                            else
+                                AvailableServer.serverList :+=(server, nodeStr.toLong)
+                        } else {
+                            AvailableServer.serverList :+=(server, 0L)
+                        }
+                    })
+
+                } else {
+                    AvailableServer.serverList = null
+                }
+            } catch {
+                case e: Exception =>
+                    e.printStackTrace()
             }
         })
     }
@@ -39,7 +59,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
             if (_zk.exists(clientNode)) {
                 log.error("The client [%s] has been registered. Can't register same client twice!")
             } else {
-                val creNode = _zk.create(clientNode, Array("1".toByte), CreateMode.EPHEMERAL)
+                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
                 if (!creNode.isEmpty)
                     ret = true
             }
@@ -61,7 +81,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
                 sender() ! "ShutDown"
             } else {
 
-                while (AvailableServer.serverList == null) {
+                while (AvailableServer.serverList.size < 1) {
                     Thread.sleep(3000)
                     log.info("Waiting for update ...")
                 }

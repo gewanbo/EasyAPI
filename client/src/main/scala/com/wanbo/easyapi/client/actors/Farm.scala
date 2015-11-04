@@ -28,7 +28,14 @@ class Farm extends Actor {
             var serverText = ""
 
             if(servers != null && servers.size > 0) {
-                serverText = Random.shuffle(servers).head
+                if(servers.size > 2) {
+                    // Remove the biggest one, and random one form the rest.
+                    val biggest = servers.maxBy(_._2)
+                    val restServers = servers.filter(x => x != biggest)
+                    serverText = Random.shuffle(restServers).head._1
+                } else {
+                    serverText = Random.shuffle(servers).head._1
+                }
             }
 
             if(serverText == ""){

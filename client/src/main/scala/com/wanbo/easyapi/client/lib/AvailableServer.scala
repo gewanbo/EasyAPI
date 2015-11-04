@@ -5,5 +5,5 @@ package com.wanbo.easyapi.client.lib
  * Created by wanbo on 15/8/18.
  */
 object AvailableServer {
-    var serverList: List[String] = null
+    var serverList: List[(String, Long)] = List[(String, Long)]()
 }
