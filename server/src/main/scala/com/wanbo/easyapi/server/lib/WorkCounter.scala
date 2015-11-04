@@ -44,6 +44,7 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
                     log.info("Current summary ------------------- :" + WorkCounter.getSummary)
                     WorkCounter.getSummary.foreach(println)
 
+                    WorkCounterSync.sync(conf)
                 } else {
                     // Waiting for 3 seconds.
                     Thread.sleep(3000)
