@@ -31,7 +31,12 @@ class Farm extends Actor {
                 serverText = Random.shuffle(servers).head
             }
 
-            log.info("The best server is:" + serverText)
+            if(serverText == ""){
+                // Alarm
+                log.error("Didn't find available server!")
+            } else {
+                log.info("The best server is:" + serverText)
+            }
 
             val responseBody = "HTTP/1.1 200 OK\nContent-Type: application/json\n" + "\n" + serverText
 
