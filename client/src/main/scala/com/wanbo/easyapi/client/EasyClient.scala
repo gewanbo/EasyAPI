@@ -25,6 +25,11 @@ object EasyClient {
             override def run(): Unit = {
                 log.info("Shutting down ......")
                 farmWatcher ! "ShutDown"
+                try {
+                    Thread.sleep(3000)
+                } catch {
+                    case e: Exception => // Ignore
+                }
             }
         })
 
