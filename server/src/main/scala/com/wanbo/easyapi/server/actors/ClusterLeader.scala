@@ -92,10 +92,12 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
 
     private def getLeader() ={
         log.info("Start to do the leading work.")
+        openCacheUpdate()
     }
 
     private def loseLeader(): Unit ={
         log.info("Stop doing the leading work.")
+        closeCacheUpdate()
     }
 
     private def openCacheUpdate(): Unit ={
