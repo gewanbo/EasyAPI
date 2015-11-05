@@ -33,16 +33,30 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
                             val nodeStr = new String(nodeBytes)
 
                             if (nodeStr.isEmpty)
-                                AvailableServer.serverList :+=(server, 0L)
+                                AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
                             else
-                                AvailableServer.serverList :+=(server, nodeStr.toLong)
+                                AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
                         } else {
-                            AvailableServer.serverList :+=(server, 0L)
+                            AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
                         }
+
+                        zk.watchNode(serverNode, data => {
+
+                            if (data.isDefined && data.get != null) {
+                                val nodeStr = new String(data.get)
+
+                                if (nodeStr.isEmpty)
+                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
+                                else
+                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
+                            } else {
+                                // Ignore, because the servers are miss.
+                            }
+                        })
                     })
 
                 } else {
-                    AvailableServer.serverList = null
+                    AvailableServer.serverList = Map[String, Long]()
                 }
             } catch {
                 case e: Exception =>
@@ -56,10 +70,11 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
         val clientNode = client_root + "/" + conf.clientId
 
         try {
+
             if (_zk.exists(clientNode)) {
                 log.error("The client [%s] has been registered. Can't register same client twice!")
             } else {
-                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
+                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.PERSISTENT)
                 if (!creNode.isEmpty)
                     ret = true
             }
@@ -71,7 +86,22 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
         ret
     }
 
-    private def unregister(){}
+    private def unregister(): Unit ={
+
+        val clientNode = client_root + "/" + conf.clientId
+
+        try {
+            var retry = 3
+            println(_zk.exists(clientNode))
+            while (_zk.exists(clientNode) && retry > 0) {
+                _zk.delete(clientNode)
+                retry -= 1
+            }
+        } catch {
+            case e: Exception =>
+                log.error("Error:", e)
+        }
+    }
 
     override def receive: Receive = {
         case "StartUp" =>
