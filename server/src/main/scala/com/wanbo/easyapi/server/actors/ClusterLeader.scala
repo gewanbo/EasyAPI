@@ -70,13 +70,13 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
                                 if(!ClusterLeader.isLeader) {
                                     log.info("I became the leader!!!")
                                     ClusterLeader.isLeader = true
-                                    getLeader()
+                                    gotLeader()
                                 } else {
                                     log.info("I had already become the leader!!!")
                                 }
                             } else {
                                 log.info("I became the follower!!....")
-                                loseLeader()
+                                lostLeader()
                             }
                         }
                     } else {
@@ -90,12 +90,12 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
         }
     }
 
-    private def getLeader() ={
+    private def gotLeader() ={
         log.info("Start to do the leading work.")
         openCacheUpdate()
     }
 
-    private def loseLeader(): Unit ={
+    private def lostLeader(): Unit ={
         log.info("Stop doing the leading work.")
         closeCacheUpdate()
     }
