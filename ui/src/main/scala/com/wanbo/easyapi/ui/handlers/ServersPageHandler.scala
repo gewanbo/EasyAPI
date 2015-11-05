@@ -27,26 +27,8 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
             val out = httpServletResponse.getWriter
 
-            var serverList = Map[String, Long]()
-            val servers = availableServers
-
-            servers.foreach(s => {
-                val info = getSummary(s)
-                if(info != "") {
-                    try {
-                        info.split("\\|").map(_.split("=")).foreach(i => {
-                            if(i.size > 1)
-                                serverList += i(0) -> i(1).toLong
-                        })
-                    } catch {
-                        case e: Exception =>
-                            log.error("Throws exception when parse server information.", e)
-                    }
-                }
-            })
-
             page.title = "Servers"
-            page.content = makeTable(serverList.toSeq)
+            page.content = makeTable(availableServers)
 
             log.info("Response contents ------------ server")
             out.println(UIUtils.commonNavigationPage(page))
@@ -59,56 +41,74 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     this.setContextPath(contextPath)
     this.setHandler(handler)
 
-    private def availableServers: Seq[String] = {
-        var serverList = Seq[String]()
+    private def availableServers: Seq[(String, Long)] = {
+
+        var serverList = Seq[(String, Long)]()
         val zk = new ZookeeperClient(conf.zkHosts)
 
         val serverNode = "/easyapi/servers"
 
         val servers = zk.getChildren(serverNode)
 
-        serverList = servers.map(_.split(":")(0)).toSeq
+        servers.map(s => {
+            var hitNum = 0L
+            val hitData = zk.get(serverNode + "/" + s)
+
+            if (hitData != null) {
+                try {
+                    val hits = new String(hitData)
+
+                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
+
+                    hitNum = hits.toLong
+                } catch {
+                    case e: Exception =>
+                }
+            }
+
+            serverList = serverList :+(s, hitNum)
+        })
 
         zk.close()
-        serverList.distinct
+        serverList
     }
 
-    private def getSummary(host: String): String ={
-        var info = ""
-
-        try {
-            val socket = new Socket(host, 8860)
-
-            val outStream = socket.getOutputStream
-
-            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outStream)))
-
-            val inStream = new InputStreamReader(socket.getInputStream)
-            val in = new BufferedReader(inStream)
-
-            out.println("workcount")
-            out.flush()
-
-            val msg = in.readLine()
-
-            info = msg
-
-            println(msg)
-
-            out.close()
-            outStream.close()
-
-            in.close()
-            inStream.close()
-
-            socket.close()
-        } catch {
-            case e: Exception =>
-                log.error("Error:", e)
-        }
-
-        info
-    }
+//    private def getSummary(host: String): String ={
+//        var info = ""
+//
+//        try {
+//            val socket = new Socket(host, 8860)
+//
+//            val outStream = socket.getOutputStream
+//
+//            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outStream)))
+//
+//            val inStream = new InputStreamReader(socket.getInputStream)
+//            val in = new BufferedReader(inStream)
+//
+//            out.println("workcount")
+//            out.flush()
+//
+//            val msg = in.readLine()
+//
+//            info = msg
+//
+//            println(msg)
+//
+//            out.close()
+//            outStream.close()
+//
+//            in.close()
+//            inStream.close()
+//
+//            socket.close()
+//        } catch {
+//            case e: Exception =>
+//                log.error("Error:", e)
+//        }
+//
+//        info
+//    }
 
     private def makeTable(data: Seq[(String, Long)]): Seq[Node] = {
 
