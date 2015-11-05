@@ -28,7 +28,7 @@ object EasyServer {
         Runtime.getRuntime.addShutdownHook(new Thread(){
             override def run(): Unit = {
                 log.info("Shutting down ......")
-                manager ! ShutDown("Shut down by kill.")
+                manager ! ShutDown("Shut down by kill command.")
             }
         })
 
