@@ -32,9 +32,9 @@ class Farm extends Actor {
                     // Remove the biggest one, and random one form the rest.
                     val biggest = servers.maxBy(_._2)
                     val restServers = servers.filter(x => x != biggest)
-                    serverText = Random.shuffle(restServers).head._1
+                    serverText = Farm.randomUniqueOneServer(restServers)
                 } else {
-                    serverText = Random.shuffle(servers).head._1
+                    serverText = Farm.randomUniqueOneServer(servers)
                 }
             }
 
@@ -52,5 +52,31 @@ class Farm extends Actor {
 
         case PeerClosed =>
             context stop self
+    }
+}
+
+object Farm {
+    private var lastServer = ""
+
+    /**
+     * Generate a server name different with last time.
+     * @param serverList Server list.
+     * @return
+     */
+    private def randomUniqueOneServer(serverList: Map[String, Long]): String ={
+        var availableServer = ""
+
+        if(serverList.size > 0){
+            if(serverList.size == 1){
+                availableServer = serverList.head._1
+            } else {
+                val restList = serverList.filter(_._1 != lastServer)
+                availableServer = Random.shuffle(restList).head._1
+            }
+        }
+
+        lastServer = availableServer
+
+        availableServer
     }
 }
