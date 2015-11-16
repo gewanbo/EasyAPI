@@ -8,6 +8,7 @@ import akka.actor.{Props, ActorRef, Actor}
 import akka.io.Tcp._
 import akka.io.{Tcp, IO}
 import akka.routing.{RoundRobinRouter, DefaultResizer}
+import com.wanbo.easyapi.client.lib.WorkCounter
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
 
@@ -38,6 +39,10 @@ class FarmWatcher extends Actor {
 
             // Load configuration
             _conf.parseClientConf(confProps)
+
+            // Start up work counter.
+            val workCounter = new WorkCounter(_conf)
+            workCounter.start()
 
             // Initialize ClientRegister
             _client = context.actorOf(Props(new ClientRegister(_conf)), name = "ClientRegister")
