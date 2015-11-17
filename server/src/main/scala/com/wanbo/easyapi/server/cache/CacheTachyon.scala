@@ -13,6 +13,8 @@ import scala.io.Source
  */
 class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
+    _expire = expire
+
     private var cacheClient: TachyonFS = null
 
     private val cacheRootPath = "/easyapi"
@@ -65,10 +67,13 @@ class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache 
         data
     }
 
-    override def set(name: String, data: String): Boolean = {
+    override def set(name: String, data: String, inExpire: Int = -1): Boolean = {
         var ret = false
 
         try {
+
+            if(inExpire > 0)
+                _expire = inExpire
 
             val cacheFile = getFileURI(name)
 
@@ -126,7 +131,7 @@ class CacheTachyon(host: String, port: Int, expire: Int = 60) extends EasyCache 
         val currentTime = System.currentTimeMillis()
         val subTime = (currentTime - createTime) / 1000
 
-        ttl = expire - subTime
+        ttl = _expire - subTime
         if(ttl < 0)
             ret = true
         ret

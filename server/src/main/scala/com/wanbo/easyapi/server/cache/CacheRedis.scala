@@ -13,6 +13,8 @@ class CacheRedis(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
     private val log = LoggerFactory.getLogger(classOf[CacheRedis])
 
+    _expire = expire
+
     /**
      * Get cache data
      * @param name The name of cache
@@ -42,13 +44,15 @@ class CacheRedis(host: String, port: Int, expire: Int = 60) extends EasyCache {
         data
     }
 
-    override def set(name: String, data: String): Boolean = {
+    override def set(name: String, data: String, inExpire: Int = -1): Boolean = {
         var ret = false
 
         try {
+            if(inExpire > 0)
+                _expire = inExpire
 
             ret = redis.set(name, data)
-            redis.expire(name, expire)
+            redis.expire(name, _expire)
 
         } catch {
             case e: Exception =>

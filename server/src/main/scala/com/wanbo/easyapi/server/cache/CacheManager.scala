@@ -61,14 +61,12 @@ class CacheManager(conf: EasyConfig, cacheType: String = "", expire: Int = 60) {
      * @return EasyOutput The cache exists, or write the cache data successful.
      *         null   The cache doesn't exist.
      */
-    def cacheData(name: String, data: EasyOutput = new EasyOutput): EasyOutput ={
+    def cacheData(name: String, data: EasyOutput = new EasyOutput, inExpire: Int = -1): EasyOutput ={
 
         var output = new EasyOutput
 
         try {
             val cache_name = cacheName(name)
-
-            println("------Cache name is:" + cache_name)
 
             if (easyCache == null)
                 throw new Exception("There is no cache can use.")
@@ -78,7 +76,10 @@ class CacheManager(conf: EasyConfig, cacheType: String = "", expire: Int = 60) {
                 easyCache.del(cache_name)
             } else if (data.odata != null || data.oelement.size > 2) {
                 // Set cache
-                easyCache.set(cache_name, ObjectSerialization.objectEncode(data))
+                if(inExpire > 0)
+                    easyCache.set(cache_name, ObjectSerialization.objectEncode(data), inExpire)
+                else
+                    easyCache.set(cache_name, ObjectSerialization.objectEncode(data))
                 output = data
             } else {
                 // Get cache
