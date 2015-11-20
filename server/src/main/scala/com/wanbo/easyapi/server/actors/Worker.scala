@@ -58,7 +58,7 @@ class Worker(conf: EasyConfig) extends Actor {
 
         } catch {
             case e: Exception =>
-                fruits = """{"errorcode": 99999, "errormsg": %s}""".format(e.getMessage)
+                fruits = """{"errorcode": 99999, "errormsg": "%s"}""".format(e.getMessage)
                 log.error("Message worker process exception :", e)
         }
 
