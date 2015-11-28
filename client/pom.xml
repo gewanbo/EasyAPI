@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.0.16-SNAPSHOT</version>
+            <version>1.0.19-SNAPSHOT</version>
         </dependency>
         <!-- logging -->
         <dependency>
