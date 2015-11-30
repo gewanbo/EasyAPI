@@ -1,10 +1,10 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import org.apache.zookeeper.CreateMode
-import org.slf4j.LoggerFactory
 
 /**
  * The worker register.
@@ -14,20 +14,23 @@ import org.slf4j.LoggerFactory
  * @author wanbo<gewanbo@gmail.com>
  * @param conf System configuration.
  */
-class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor{
+class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with Logging {
 
-     private val _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
-
-     private val log = LoggerFactory.getLogger(classOf[WorkerRegister])
+     private var _zk: ZookeeperClient = null
 
      init()
 
      def init(): Unit ={
-         if(!_zk.exists(server_root)){
-             _zk.createPath(server_root)
-         }
-         if(!_zk.exists(client_root)){
-             _zk.createPath(client_root)
+
+         try {
+
+             this.initNodeTree(conf)
+
+             _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
+
+         } catch {
+             case e: Exception =>
+                 log.error("Error:", e)
          }
      }
 
