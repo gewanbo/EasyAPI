@@ -2,20 +2,18 @@ package com.wanbo.easyapi.client.actors
 
 import akka.actor.Actor
 import com.wanbo.easyapi.client.lib.AvailableServer
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import org.apache.zookeeper.CreateMode
-import org.slf4j.LoggerFactory
 
 /**
  * Client register
  * Created by wanbo on 15/8/17.
  */
-class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor {
+class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with Logging {
 
     private val _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
-
-    private val log = LoggerFactory.getLogger(classOf[ClientRegister])
 
     def callback(zk: ZookeeperClient): Unit ={
 
