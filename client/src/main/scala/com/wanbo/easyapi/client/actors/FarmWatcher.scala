@@ -23,7 +23,7 @@ class FarmWatcher extends Actor {
     private val _conf = new EasyConfig
     private var _client: ActorRef = null
 
-    val resizer = DefaultResizer(lowerBound=1, upperBound = 10)
+    val resizer = DefaultResizer(lowerBound=1, upperBound = 100)
 
     val farm = context.actorOf(Props(new Farm()).withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "farm")
 
