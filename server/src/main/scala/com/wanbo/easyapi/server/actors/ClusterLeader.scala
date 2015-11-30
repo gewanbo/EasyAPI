@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.{Props, Actor}
+import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import org.apache.zookeeper.CreateMode
@@ -10,12 +11,9 @@ import org.slf4j.LoggerFactory
  * Elect a leader from cluster, and control the cache updating.
  * Created by wanbo on 15/7/1.
  */
-private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager with Actor{
-    private val leader_root = "/cache_leader"
+private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager with Actor with Logging {
 
     private var _zk: ZookeeperClient = null
-
-    private val log = LoggerFactory.getLogger(classOf[ClusterLeader])
 
     private var _serverId = ""
 
@@ -27,13 +25,6 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
 
         _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
 
-        if(!_zk.exists(server_root)){
-            _zk.createPath(server_root)
-        }
-
-        if(!_zk.exists(leader_root)){
-            _zk.createPath(leader_root)
-        }
     }
 
     def callback(zk: ZookeeperClient): Unit ={
