@@ -37,6 +37,9 @@ class EasyConfig() {
     var clientHost: String = _
     var clientPort: Int = _
 
+    var minThreads: Int = _
+    var maxThreads: Int = _
+
     private var _confProps: Properties = null
 
     private val log = LoggerFactory.getLogger(classOf[EasyConfig])
@@ -117,6 +120,9 @@ class EasyConfig() {
         clientId = confProps.getProperty("client.id", "0")
         clientHost = confProps.getProperty("client.host", "localhost")
         clientPort = confProps.getProperty("client.port", "8890").toInt
+
+        minThreads = confProps.getProperty("client.min_threads", "10").toInt
+        maxThreads = confProps.getProperty("client.max_threads", "100").toInt
 
         zkEnable = confProps.getProperty("zookeeper.enable", "true").toBoolean
         zkHosts = confProps.getProperty("zookeeper.hosts", "localhost:2181")
