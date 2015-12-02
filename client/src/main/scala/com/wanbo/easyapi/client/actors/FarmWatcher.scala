@@ -1,13 +1,11 @@
 package com.wanbo.easyapi.client.actors
 
-import java.io.FileInputStream
 import java.net.InetSocketAddress
-import java.util.Properties
 
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.io.Tcp._
-import akka.io.{Tcp, IO}
-import akka.routing.{RoundRobinRouter, DefaultResizer}
+import akka.io.{IO, Tcp}
+import akka.routing.{DefaultResizer, RoundRobinRouter}
 import com.wanbo.easyapi.client.lib.WorkCounter
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
@@ -16,14 +14,13 @@ import org.slf4j.LoggerFactory
  * Farm watcher
  * Created by wanbo on 15/8/17.
  */
-class FarmWatcher extends Actor {
+class FarmWatcher(conf: EasyConfig) extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[FarmWatcher])
 
-    private val _conf = new EasyConfig
     private var _client: ActorRef = null
 
-    val resizer = DefaultResizer(lowerBound = _conf.minThreads, upperBound = _conf.maxThreads)
+    val resizer = DefaultResizer(lowerBound = conf.minThreads, upperBound = conf.maxThreads)
 
     val farm = context.actorOf(Props(new Farm()).withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "farm")
 
@@ -32,20 +29,12 @@ class FarmWatcher extends Actor {
 
             log.info("I'm starting up ...")
 
-            // Initialize configuration
-            val confProps = new Properties()
-            val configFile = System.getProperty("easy.conf", "config.properties")
-            confProps.load(new FileInputStream(configFile))
-
-            // Load configuration
-            _conf.parseClientConf(confProps)
-
             // Start up work counter.
-            val workCounter = new WorkCounter(_conf)
+            val workCounter = new WorkCounter(conf)
             workCounter.start()
 
             // Initialize ClientRegister
-            _client = context.actorOf(Props(new ClientRegister(_conf)), name = "ClientRegister")
+            _client = context.actorOf(Props(new ClientRegister(conf)), name = "ClientRegister")
 
             _client ! "StartUp"
 
@@ -54,7 +43,7 @@ class FarmWatcher extends Actor {
             log.info("Ready to bound socket...")
 
             import context.system
-            IO(Tcp) ! Bind(self, new InetSocketAddress(_conf.clientHost, _conf.clientPort))
+            IO(Tcp) ! Bind(self, new InetSocketAddress(conf.clientHost, conf.clientPort))
 
         case b @ Bound(localAddress) =>
             // Bound success
