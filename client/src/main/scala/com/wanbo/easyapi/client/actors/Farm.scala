@@ -16,73 +16,51 @@ class Farm extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[Farm])
 
+    private val jsonHeader = "HTTP/1.1 200 OK\nContent-Type: application/json\n"
+    private val textHeader = "HTTP/1.1 200 OK\nContent-Type: text/plain\n"
+
     override def receive: Receive = {
         case Received(data) =>
 
             log.info("Received a request ...")
 
-            var msgBody = data.decodeString("UTF-8")
-
             val msgData = data.decodeString("UTF-8")
-            msgData.split("\r").foreach(x => {
-                val body = x.trim
-                if(body.startsWith("{") && body.endsWith("}"))
-                    msgBody = body
-            })
 
             try {
 
-                if (msgBody.startsWith("{miss")) {
+                var responseBody = ""
 
-                    var server = ""
-                    val fields = msgBody.substring(1, msgBody.size -1).split("#")
 
-                    if (fields.size > 1) {
-                        server = fields(1)
 
-                        AvailableServer.serverList.foreach(println)
+                var msgBody = ""
 
-                        if (server != "" && AvailableServer.serverList.contains(server)) {
-                            // Get current server list
-                            WorkCounter.push(server)
-                        }
-                    }
+                log.info("---------------Body:" + msgData)
 
-                    val responseBody = "HTTP/1.1 200 OK\nContent-Type: application/json\n" + "\n"
+                var mark = false
+                msgData.split("\r").foreach(x => {
+                    val body = x.trim
+                    if(body.isEmpty)
+                        mark = true
+                    if (mark)
+                        msgBody += body
+                })
 
-                    sender() ! Write(ByteString.fromString(responseBody, "UTF-8"))
-                    sender() ! Close
+                log.info("---------------K:" + msgBody)
+                log.info("---------------K:" + msgBody.isEmpty)
+
+                if (msgBody.isEmpty) {
+                    responseBody = onAvailableServer()
                 } else {
 
-                    // Get current server list
-                    val servers = AvailableServer.serverList
-
-                    // return the best one
-                    var serverText = ""
-
-                    if (servers != null && servers.size > 0) {
-                        if (servers.size > 2) {
-                            // Remove the biggest one, and random one form the rest.
-                            val biggest = servers.maxBy(_._2)
-                            val restServers = servers.filter(x => x != biggest)
-                            serverText = Farm.randomUniqueOneServer(restServers)
-                        } else {
-                            serverText = Farm.randomUniqueOneServer(servers)
-                        }
+                    if (msgBody.startsWith("{miss")) {
+                        responseBody = onMiss(msgBody)
                     }
 
-                    if (serverText == "") {
-                        // Alarm
-                        log.error("Didn't find available server!")
-                    } else {
-                        log.info("The best server is:" + serverText)
-                    }
-
-                    val responseBody = "HTTP/1.1 200 OK\nContent-Type: application/json\n" + "\n" + serverText
-
-                    sender() ! Write(ByteString.fromString(responseBody, "UTF-8"))
-                    sender() ! Close
                 }
+
+                sender() ! Write(ByteString.fromString(responseBody, "UTF-8"))
+                sender() ! Close
+
             } catch {
                 case e: Exception =>
                     log.error("Error:", e)
@@ -92,6 +70,53 @@ class Farm extends Actor {
 
         case PeerClosed =>
             context stop self
+    }
+
+    private def onAvailableServer(): String ={
+
+        // Get current server list
+        val servers = AvailableServer.serverList
+
+        // return the best one
+        var serverText = ""
+
+        if (servers != null && servers.size > 0) {
+            if (servers.size > 2) {
+                // Remove the biggest one, and random one form the rest.
+                val biggest = servers.maxBy(_._2)
+                val restServers = servers.filter(x => x != biggest)
+                serverText = Farm.randomUniqueOneServer(restServers)
+            } else {
+                serverText = Farm.randomUniqueOneServer(servers)
+            }
+        }
+
+        if (serverText == "") {
+            // Alarm
+            log.error("Didn't find available server!")
+        } else {
+            log.info("The best server is:" + serverText)
+        }
+
+        textHeader + "\n" + serverText
+    }
+
+    private def onMiss(msgBody: String): String = {
+        var server = ""
+        val fields = msgBody.substring(1, msgBody.size - 1).split("#")
+
+        if (fields.size > 1) {
+            server = fields(1)
+
+            AvailableServer.serverList.foreach(println)
+
+            if (server != "" && AvailableServer.serverList.contains(server)) {
+                // Get current server list
+                WorkCounter.push(server)
+            }
+        }
+
+        jsonHeader + "\n"
     }
 }
 
