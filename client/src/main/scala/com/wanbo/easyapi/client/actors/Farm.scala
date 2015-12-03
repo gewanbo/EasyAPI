@@ -30,23 +30,34 @@ class Farm extends Actor {
 
                 var responseBody = ""
 
-
-
                 var msgBody = ""
 
-                log.info("---------------Body:" + msgData)
-
+                var firstLine = true
+                var hasBody = false
                 var mark = false
                 msgData.split("\r").foreach(x => {
                     val body = x.trim
-                    if(body.isEmpty)
-                        mark = true
+
                     if (mark)
                         msgBody += body
-                })
+                    else {
 
-                log.info("---------------K:" + msgBody)
-                log.info("---------------K:" + msgBody.isEmpty)
+                        if (firstLine) {
+                            if (body.contains("GET") || body.contains("POST"))
+                                hasBody = true
+                        }
+
+                        if (hasBody) {
+                            if (body.isEmpty)
+                                mark = true
+                        } else {
+                            msgBody += body
+                        }
+
+                    }
+
+                    firstLine = false
+                })
 
                 if (msgBody.isEmpty) {
                     responseBody = onAvailableServer()
