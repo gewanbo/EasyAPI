@@ -21,7 +21,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
             try {
 
-                if (workers.size > 0) {
+                if (workers.nonEmpty) {
 
                     workers.foreach(server => {
                         val serverNode = server_root + "/" + server
@@ -72,7 +72,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
             if (_zk.exists(clientNode)) {
                 log.error("The client [%s] has been registered. Can't register same client twice!")
             } else {
-                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.PERSISTENT)
+                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
                 if (!creNode.isEmpty)
                     ret = true
             }

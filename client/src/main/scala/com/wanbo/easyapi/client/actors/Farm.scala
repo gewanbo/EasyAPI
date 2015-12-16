@@ -1,9 +1,12 @@
 package com.wanbo.easyapi.client.actors
 
 import akka.actor.Actor
-import akka.io.Tcp.{Close, Write, PeerClosed, Received}
+import akka.io.Tcp.{Close, PeerClosed, Received, Write}
 import akka.util.ByteString
-import com.wanbo.easyapi.client.lib.{WorkCounter, AvailableServer}
+import com.alibaba.fastjson.{JSON, JSONException, JSONObject}
+import com.wanbo.easyapi.client.lib.SeederStorage.SeedData
+import com.wanbo.easyapi.client.lib._
+import com.wanbo.easyapi.shared.common.utils.Utils
 import org.slf4j.LoggerFactory
 
 import scala.util.Random
@@ -16,9 +19,6 @@ class Farm extends Actor {
 
     private val log = LoggerFactory.getLogger(classOf[Farm])
 
-    private val jsonHeader = "HTTP/1.1 200 OK\nContent-Type: application/json\n"
-    private val textHeader = "HTTP/1.1 200 OK\nContent-Type: text/plain\n"
-
     override def receive: Receive = {
         case Received(data) =>
 
@@ -30,34 +30,7 @@ class Farm extends Actor {
 
                 var responseBody = ""
 
-                var msgBody = ""
-
-                var firstLine = true
-                var hasBody = false
-                var mark = false
-                msgData.split("\r").foreach(x => {
-                    val body = x.trim
-
-                    if (mark)
-                        msgBody += body
-                    else {
-
-                        if (firstLine) {
-                            if (body.contains("GET") || body.contains("POST"))
-                                hasBody = true
-                        }
-
-                        if (hasBody) {
-                            if (body.isEmpty)
-                                mark = true
-                        } else {
-                            msgBody += body
-                        }
-
-                    }
-
-                    firstLine = false
-                })
+                val msgBody = HttpUtility.parseBody(msgData)
 
                 if (msgBody.isEmpty) {
                     responseBody = onAvailableServer()
@@ -65,6 +38,8 @@ class Farm extends Actor {
 
                     if (msgBody.startsWith("{miss")) {
                         responseBody = onMiss(msgBody)
+                    } else {
+                        responseBody = onRedirect(msgBody)
                     }
 
                 }
@@ -75,7 +50,7 @@ class Farm extends Actor {
             } catch {
                 case e: Exception =>
                     log.error("Error:", e)
-                    sender() ! Write(ByteString.fromString("HTTP/1.1 200 OK\nContent-Type: application/json\n" + "\n", "UTF-8"))
+                    sender() ! Write(ByteString.fromString(HttpUtility.jsonHeader, "UTF-8"))
                     sender() ! Close
             }
 
@@ -91,7 +66,7 @@ class Farm extends Actor {
         // return the best one
         var serverText = ""
 
-        if (servers != null && servers.size > 0) {
+        if (servers != null && servers.nonEmpty) {
             if (servers.size > 2) {
                 // Remove the biggest one, and random one form the rest.
                 val biggest = servers.maxBy(_._2)
@@ -109,12 +84,12 @@ class Farm extends Actor {
             log.info("The best server is:" + serverText)
         }
 
-        textHeader + "\n" + serverText
+        HttpUtility.textHeader + serverText
     }
 
     private def onMiss(msgBody: String): String = {
         var server = ""
-        val fields = msgBody.substring(1, msgBody.size - 1).split("#")
+        val fields = msgBody.substring(1, msgBody.length - 1).split("#")
 
         if (fields.size > 1) {
             server = fields(1)
@@ -127,7 +102,91 @@ class Farm extends Actor {
             }
         }
 
-        jsonHeader + "\n"
+        HttpUtility.jsonHeader
+    }
+
+    private def onRedirect(msgBody: String): String ={
+
+        var responseMsg: String = ""
+        var seedBox: JSONObject = null
+
+        try {
+            // Parse message
+
+            seedBox = JSON.parseObject(msgBody)
+
+            val head = seedBox.getJSONObject("head")
+
+            // Get transaction type and parameters
+            val transactionType = head.getString("transactiontype")
+
+            if(transactionType == null || transactionType == "")
+                throw new Exception("Can't find the TransactionType!")
+            else if (!transactionType.forall(_.isDigit))
+                throw new Exception("The transaction type is not supported.")
+
+
+            var _seed: Map[String, Any] = EasyConverts.json2map(seedBox.getJSONObject("body").getJSONObject("ielement"))
+
+            val uuId = head.getString("uuid")
+            if(uuId != null && uuId != "")
+                _seed = _seed + ("uuid" -> uuId)
+
+            val cookieId = head.getString("cookieid")
+            if(cookieId != null && cookieId != "")
+                _seed = _seed + ("cookieid" -> cookieId)
+
+            if(_seed == null)
+                throw new Exception("Can't find the input element.")
+
+            // Generate unique key
+            val seedKey = Utils.MD5(transactionType + _seed.mkString)
+
+            val seed = SeederStorage.pull(seedKey)
+
+            if(seed.key.nonEmpty){
+                if(System.currentTimeMillis() - seed.time > 3000) {
+                    responseMsg = seed.data
+                } else {
+                    val response = HttpUtility.post(msgBody)
+
+                    if(response.nonEmpty){
+
+                        val resObj: JSONObject = JSON.parseObject(response)
+
+                        val oelement = resObj.getJSONObject("body").getJSONObject("oelement")
+
+                        if(oelement != null)
+
+                        responseMsg = response
+
+                        // Store to local storage
+                        SeederStorage.push(SeedData(seedKey, response))
+                    } else {
+                        responseMsg = seed.data
+                    }
+                }
+            } else {
+
+                val response = HttpUtility.post(msgBody)
+
+                if(response.nonEmpty){
+                    responseMsg = response
+
+                    // Store to local storage
+                    SeederStorage.push(SeedData(seedKey, response))
+                }
+            }
+
+        } catch {
+            case je: JSONException =>
+                log.warn("The seed string is :" + seedBox)
+                log.error("Throws exception when parse seed:", je)
+            case e: Exception =>
+                log.error("The seed string is :" + seedBox, e)
+        }
+
+        HttpUtility.jsonHeader + responseMsg
     }
 }
 
@@ -142,7 +201,7 @@ object Farm {
     private def randomUniqueOneServer(serverList: Map[String, Long]): String ={
         var availableServer = ""
 
-        if(serverList.size > 0){
+        if(serverList.nonEmpty){
             if(serverList.size == 1){
                 availableServer = serverList.head._1
             } else {
