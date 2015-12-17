@@ -47,7 +47,7 @@ object EasyClient {
                 log.info("Shutting down ......")
                 farmWatcher ! "ShutDown"
                 try {
-                    Thread.sleep(3000)
+                    Thread.sleep(1000)
                 } catch {
                     case e: Exception => // Ignore
                 }
