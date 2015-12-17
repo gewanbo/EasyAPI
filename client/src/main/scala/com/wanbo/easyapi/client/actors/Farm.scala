@@ -4,7 +4,7 @@ import akka.actor.Actor
 import akka.io.Tcp.{Close, PeerClosed, Received, Write}
 import akka.util.ByteString
 import com.alibaba.fastjson.{JSON, JSONException, JSONObject}
-import com.wanbo.easyapi.client.lib.SeederStorage.SeedData
+import com.wanbo.easyapi.client.lib.SeedStorage.SeedData
 import com.wanbo.easyapi.client.lib._
 import com.wanbo.easyapi.shared.common.utils.Utils
 import org.slf4j.LoggerFactory
@@ -60,6 +60,8 @@ class Farm extends Actor {
 
     private def onAvailableServer(): String ={
 
+        log.info("Calling onAvailableServer ...")
+
         // Get current server list
         val servers = AvailableServer.serverList
 
@@ -88,6 +90,9 @@ class Farm extends Actor {
     }
 
     private def onMiss(msgBody: String): String = {
+
+        log.info("Calling onMiss ...")
+
         var server = ""
         val fields = msgBody.substring(1, msgBody.length - 1).split("#")
 
@@ -107,7 +112,9 @@ class Farm extends Actor {
 
     private def onRedirect(msgBody: String): String ={
 
-        var responseMsg: String = ""
+        log.info("Calling onRedirect ...")
+
+        var responseMsg: String = "{\"body\":{\"oelement\":{\"errormsg\":\"\",\"errorcode\":\"30012\"}}}"
         var seedBox: JSONObject = null
 
         try {
@@ -119,6 +126,8 @@ class Farm extends Actor {
 
             // Get transaction type and parameters
             val transactionType = head.getString("transactiontype")
+
+            log.info("TransactionType-------:" + transactionType)
 
             if(transactionType == null || transactionType == "")
                 throw new Exception("Can't find the TransactionType!")
@@ -136,16 +145,20 @@ class Farm extends Actor {
             if(cookieId != null && cookieId != "")
                 _seed = _seed + ("cookieid" -> cookieId)
 
+            //log.info("uuid------------:" + uuId)
+            //log.info("cookieid----------:" + cookieId)
+            //log.info("seed------:" + _seed.size)
+
             if(_seed == null)
                 throw new Exception("Can't find the input element.")
 
             // Generate unique key
             val seedKey = Utils.MD5(transactionType + _seed.mkString)
 
-            val seed = SeederStorage.pull(seedKey)
+            val seed = SeedStorage.pull(seedKey)
 
             if(seed.key.nonEmpty){
-                if(System.currentTimeMillis() - seed.time > 3000) {
+                if(System.currentTimeMillis() - seed.time < 10000) {
                     responseMsg = seed.data
                 } else {
                     val response = HttpUtility.post(msgBody)
@@ -154,14 +167,16 @@ class Farm extends Actor {
 
                         val resObj: JSONObject = JSON.parseObject(response)
 
-                        val oelement = resObj.getJSONObject("body").getJSONObject("oelement")
+                        val oelement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
 
-                        if(oelement != null)
+                        val errorCode = oelement.getOrElse("errorcode", "-1")
+
+                        if(errorCode == "0"){
+                            // Store to local storage
+                            SeedStorage.push(SeedData(seedKey, response))
+                        }
 
                         responseMsg = response
-
-                        // Store to local storage
-                        SeederStorage.push(SeedData(seedKey, response))
                     } else {
                         responseMsg = seed.data
                     }
@@ -171,11 +186,21 @@ class Farm extends Actor {
                 val response = HttpUtility.post(msgBody)
 
                 if(response.nonEmpty){
-                    responseMsg = response
 
-                    // Store to local storage
-                    SeederStorage.push(SeedData(seedKey, response))
+                    val resObj: JSONObject = JSON.parseObject(response)
+
+                    val oelement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
+
+                    val errorCode = oelement.getOrElse("errorcode", "-1")
+
+                    if(errorCode == "0"){
+                        // Store to local storage
+                        SeedStorage.push(SeedData(seedKey, response))
+                    }
+
+                    responseMsg = response
                 }
+                //  } else { Response default error message. }
             }
 
         } catch {
