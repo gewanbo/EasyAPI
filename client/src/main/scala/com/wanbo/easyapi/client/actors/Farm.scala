@@ -9,8 +9,6 @@ import com.wanbo.easyapi.client.lib._
 import com.wanbo.easyapi.shared.common.utils.Utils
 import org.slf4j.LoggerFactory
 
-import scala.util.Random
-
 /**
  * Farm
  * Created by wanbo on 2015/8/17.
@@ -62,22 +60,8 @@ class Farm extends Actor {
 
         log.info("Calling onAvailableServer ...")
 
-        // Get current server list
-        val servers = AvailableServer.serverList
-
         // return the best one
-        var serverText = ""
-
-        if (servers != null && servers.nonEmpty) {
-            if (servers.size > 2) {
-                // Remove the biggest one, and random one form the rest.
-                val biggest = servers.maxBy(_._2)
-                val restServers = servers.filter(x => x != biggest)
-                serverText = Farm.randomUniqueOneServer(restServers)
-            } else {
-                serverText = Farm.randomUniqueOneServer(servers)
-            }
-        }
+        val serverText = AvailableServer.availableServer
 
         if (serverText == "") {
             // Alarm
@@ -212,31 +196,5 @@ class Farm extends Actor {
         }
 
         HttpUtility.jsonHeader + responseMsg
-    }
-}
-
-object Farm {
-    private var lastServer = ""
-
-    /**
-     * Generate a server name different with last time.
-     * @param serverList Server list.
-     * @return
-     */
-    private def randomUniqueOneServer(serverList: Map[String, Long]): String ={
-        var availableServer = ""
-
-        if(serverList.nonEmpty){
-            if(serverList.size == 1){
-                availableServer = serverList.head._1
-            } else {
-                val restList = serverList.filter(_._1 != lastServer)
-                availableServer = Random.shuffle(restList).head._1
-            }
-        }
-
-        lastServer = availableServer
-
-        availableServer
     }
 }
