@@ -21,7 +21,12 @@ object HttpUtility extends Logging {
 
             log.info("Post request to server with message:" + message)
 
-            val socket = new Socket("172.27.10.218", 8801)
+            val host = AvailableServer.availableServer.split(":")
+
+            if(host.size != 2)
+                throw new Exception("Can't bound host {%s} and port {%s} !".format(host(0), host(1)))
+
+            val socket = new Socket(host(0), host(1).toInt)
             socket.setSoTimeout(5000)
 
             val outStream = socket.getOutputStream
