@@ -70,7 +70,8 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
         try {
 
             if (_zk.exists(clientNode)) {
-                log.error("The client [%s] has been registered. Can't register same client twice!")
+                log.warn("The client [%s] has been registered. Can't register same client twice!")
+                ret = true
             } else {
                 val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
                 if (!creNode.isEmpty)
