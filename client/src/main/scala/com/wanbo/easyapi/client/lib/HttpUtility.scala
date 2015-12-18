@@ -66,6 +66,7 @@ object HttpUtility extends Logging {
 
         } catch {
             case e: Exception =>
+                // todo: Count the miss request.
                 log.error("Error:" + e)
         }
 
