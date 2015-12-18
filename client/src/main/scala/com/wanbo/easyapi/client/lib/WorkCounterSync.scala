@@ -3,7 +3,6 @@ package com.wanbo.easyapi.client.lib
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
-import org.apache.zookeeper.CreateMode
 
 import scala.util.parsing.json.JSONObject
 
@@ -32,8 +31,6 @@ object WorkCounterSync extends ZookeeperManager with Logging {
             val clientNode = client_root + "/" + conf.clientId
             if(zk.exists(clientNode)){
                 zk.set(clientNode, jsonData.toString().map(_.toByte).toArray)
-            } else {
-                zk.create(clientNode, jsonData.toString().map(_.toByte).toArray, CreateMode.EPHEMERAL)
             }
 
             zk.close()
