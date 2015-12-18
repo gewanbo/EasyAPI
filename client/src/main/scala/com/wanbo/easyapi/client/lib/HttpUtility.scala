@@ -26,6 +26,8 @@ object HttpUtility extends Logging {
             if(host.size != 2)
                 throw new Exception("Can't bound host {%s} and port {%s} !".format(host(0), host(1)))
 
+            log.info("Post request to host {%s} and port {%s} !".format(host(0), host(1)))
+
             val socket = new Socket(host(0), host(1).toInt)
             socket.setSoTimeout(5000)
 
