@@ -61,6 +61,20 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
                     e.printStackTrace()
             }
         })
+
+        zk.watchChildren(client_root, (clients: Seq[String]) => {
+            try {
+                if(clients.nonEmpty && clients.contains(conf.clientId)) {
+                    clients.foreach(log.info)
+                } else {
+                    val clientNode = client_root + "/" + conf.clientId
+                    zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
+                }
+            } catch {
+                case e: Exception =>
+                    e.printStackTrace()
+            }
+        })
     }
 
     private def register(): Boolean ={
