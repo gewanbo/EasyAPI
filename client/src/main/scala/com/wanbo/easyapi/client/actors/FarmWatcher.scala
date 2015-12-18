@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.io.Tcp._
 import akka.io.{IO, Tcp}
 import akka.routing.{DefaultResizer, RoundRobinRouter}
-import com.wanbo.easyapi.client.lib.WorkCounter
+import com.wanbo.easyapi.client.lib.{SeedStorage, WorkCounter}
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
 
@@ -32,6 +32,10 @@ class FarmWatcher(conf: EasyConfig) extends Actor {
             // Start up work counter.
             val workCounter = new WorkCounter(conf)
             workCounter.start()
+
+            // Start up storage cleaner.
+            val seederStorage = new SeedStorage(conf)
+            seederStorage.start()
 
             // Initialize ClientRegister
             _client = context.actorOf(Props(new ClientRegister(conf)), name = "ClientRegister")

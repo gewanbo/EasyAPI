@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.0.21-SNAPSHOT</version>
+    <version>1.0.22-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -174,7 +174,7 @@
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
         <resources>
             <resource>
                 <directory>${basedir}/src/main/resources</directory>

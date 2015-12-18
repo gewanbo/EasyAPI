@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.0.20-SNAPSHOT</version>
+            <version>1.0.21-SNAPSHOT</version>
         </dependency>
         <!-- Tachyon -->
         <dependency>

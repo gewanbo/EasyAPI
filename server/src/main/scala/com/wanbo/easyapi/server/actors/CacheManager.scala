@@ -22,8 +22,8 @@ class CacheManager(conf: EasyConfig) extends Actor {
     private var cacheList = List[(String, Map[String, String], Int)]()
 
     override def preStart(){
-        cacheList = cacheList :+ ("10003", Map("days" ->"7", "num" ->"10"), 200)
-        cacheList = cacheList :+ ("11001", Map[String, String](), 86000)
+        //cacheList = cacheList :+ ("10003", Map("days" ->"7", "num" ->"10"), 200)
+        //cacheList = cacheList :+ ("11001", Map[String, String](), 86000)
     }
 
     override def receive: Receive = {

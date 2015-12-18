@@ -28,9 +28,9 @@ object WorkCounterSync extends ZookeeperManager with Logging {
 
             val zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(this.callback))
 
-            val serverNode = client_root + "/" + conf.clientId
-            if(zk.exists(serverNode)){
-                zk.set(serverNode, jsonData.toString().map(_.toByte).toArray)
+            val clientNode = client_root + "/" + conf.clientId
+            if(zk.exists(clientNode)){
+                zk.set(clientNode, jsonData.toString().map(_.toByte).toArray)
             }
 
             zk.close()
