@@ -6,7 +6,7 @@ package com.wanbo.easyapi.ui.pages
  */
 class ClientsPage extends WebPage {
 
-    headers = {
+    htmlFooters = {
         <script src="/static/js/d3.v3.min.js"></script>
         <script src="/static/js/sankey.js"></script>
         <script src="/static/js/d3.chart.min.js"></script>
