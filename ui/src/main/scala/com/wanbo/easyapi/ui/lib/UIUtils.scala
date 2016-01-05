@@ -15,6 +15,7 @@ private[easyapi] object UIUtils {
             <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css"/>
             <link rel="stylesheet" href="/static/css/common.css" type="text/css"/>
             <script src="/static/js/jquery-1.11.3.min.js"></script>
+            <script src="/static/js/bootstrap.min.js"></script>
     }
 
     def commonNavigationPage(page: WebPage): Seq[Node] ={
@@ -26,6 +27,7 @@ private[easyapi] object UIUtils {
         <html>
             <head>
                 {commonHeaderNodes}
+                {page.headers}
                 <title>{page.title}</title>
             </head>
             <body>
