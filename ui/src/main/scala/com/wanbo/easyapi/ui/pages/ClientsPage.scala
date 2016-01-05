@@ -6,4 +6,10 @@ package com.wanbo.easyapi.ui.pages
  */
 class ClientsPage extends WebPage {
 
+    headers = {
+        <script src="/static/js/d3.v3.min.js"></script>
+        <script src="/static/js/sankey.js"></script>
+        <script src="/static/js/d3.chart.min.js"></script>
+        <script src="/static/js/d3.chart.sankey.min.js"></script>
+    }
 }
