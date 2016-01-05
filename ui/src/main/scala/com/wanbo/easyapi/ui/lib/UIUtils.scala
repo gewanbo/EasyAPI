@@ -14,6 +14,9 @@ private[easyapi] object UIUtils {
             <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
             <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css"/>
             <link rel="stylesheet" href="/static/css/common.css" type="text/css"/>
+    }
+
+    def commonFooterNodes: Seq[Node] = {
             <script src="/static/js/jquery-1.11.3.min.js"></script>
             <script src="/static/js/bootstrap.min.js"></script>
     }
@@ -27,7 +30,7 @@ private[easyapi] object UIUtils {
         <html>
             <head>
                 {commonHeaderNodes}
-                {page.headers}
+                {page.htmlHeaders}
                 <title>{page.title}</title>
             </head>
             <body>
@@ -58,6 +61,8 @@ private[easyapi] object UIUtils {
                         <p class="text-muted">Easy to distribute data.</p>
                     </div>
                 </footer>
+                {commonFooterNodes}
+                {page.htmlFooters}
             </body>
         </html>
     }
