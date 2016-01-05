@@ -11,5 +11,6 @@ class ClientsPage extends WebPage {
         <script src="/static/js/sankey.js"></script>
         <script src="/static/js/d3.chart.min.js"></script>
         <script src="/static/js/d3.chart.sankey.min.js"></script>
+        <script src="/static/js/clients.js"></script>
     }
 }
