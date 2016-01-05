@@ -2,6 +2,7 @@ package com.wanbo.easyapi.ui.handlers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import com.alibaba.fastjson.JSON
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
@@ -10,7 +11,9 @@ import com.wanbo.easyapi.ui.pages.WebPage
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.handler.{AbstractHandler, ContextHandler}
 
+
 import scala.xml.Node
+import scala.collection.JavaConverters._
 
 /**
  * The handler for server list page.
@@ -20,6 +23,10 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
     val handler = new AbstractHandler {
         override def handle(s: String, request: Request, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Unit = {
+
+            var urlPath = request.getHttpURI.getPath.split("/")
+
+
             httpServletResponse.setContentType("text/html; charset=utf-8")
             httpServletResponse.setStatus(HttpServletResponse.SC_OK)
 
@@ -28,9 +35,17 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             page.title = "Clients"
             page.content = makeTable(availableServers)
 
-            log.info("Response contents ------------ client")
-            out.println(UIUtils.commonNavigationPage(page))
-            log.info("Response contents ------------ client finish")
+            if(urlPath.size < 3)
+                urlPath :+= ""
+
+            urlPath.apply(2) match {
+                case "data" =>
+                    out.println("{\n\t\"nodes\": [\n\t\t{\n\t\t\t\"id\": \"a\",\n\t\t\t\"name\": \"A\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"b\",\n\t\t\t\"name\": \"B\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"c\",\n\t\t\t\"name\": \"C\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"d\",\n\t\t\t\"name\": \"D\"\n\t\t}\n\t],\n\t\"links\": [\n\t\t{\n\t\t\t\"source\": 0,\n\t\t\t\"target\": 1,\n\t\t\t\"value\": 0.3\n\t\t},\n\t\t{\n\t\t\t\"source\": 0,\n\t\t\t\"target\": 2,\n\t\t\t\"value\": 0.5\n\t\t},\n\t\t{\n\t\t\t\"source\": 3,\n\t\t\t\"target\": 2,\n\t\t\t\"value\": 0.5\n\t\t},\n\t\t{\n\t\t\t\"source\": 3,\n\t\t\t\"target\": 1,\n\t\t\t\"value\": 0.2\n\t\t}\n\t]\n}")
+                case _ =>
+                    log.info("Response contents ------------ client")
+                    out.println(UIUtils.commonNavigationPage(page))
+                    log.info("Response contents ------------ client finish")
+            }
 
             request.setHandled(true)
         }
@@ -47,9 +62,14 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
         val clients = zk.getChildren(clientNode)
 
+        var nodesSet = Set[String]()
+        var linksList = List[(String, String, Long)]()
+
         clients.map(s => {
             var hitNum = 0
             val hitData = zk.get(clientNode + "/" + s)
+
+            nodesSet += s
 
             if (hitData != null) {
                 try {
@@ -57,9 +77,26 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
                     log.info("Server [%s] - hits [%s] --------".format(s, hits))
 
-                    hitNum = hits.toInt
+                    val hitObj = JSON.parseObject(hits)
+
+                    val miss = hitObj.getString("miss")
+
+                    val missObj = JSON.parseObject(miss)
+
+                    val servers = missObj.keySet().asScala.toList
+
+                    servers.foreach(serverKey => {
+
+                        nodesSet += serverKey
+
+                        linksList :+= (s, serverKey, missObj.getLong(serverKey).toLong)
+                    })
+
+                    log.info("miss string-----:" + miss)
+
                 } catch {
                     case e: Exception =>
+                        log.error("Error:", e)
                 }
             }
 
@@ -79,6 +116,8 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             </tr>
         })
 
+
+
         <h2>Server List</h2>
             <p>All the available servers.</p>
             <table class="table table-striped">
@@ -92,5 +131,10 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
                     {rows}
                 </tbody>
             </table>
+        <div id="chart" class="box"></div>
+
     }
+
+    case class node(id: String, name: String)
+    case class link(source: Int, target: Int, value: Double)
 }
