@@ -17,6 +17,9 @@ abstract class WebPage {
     var title = ""
     var content = Seq[Node]()
 
+    // HTML Headers
+    var headers = Seq[Node]()
+
     def attachTab(tab: PageTab): Unit ={
         _tabs += tab
     }
