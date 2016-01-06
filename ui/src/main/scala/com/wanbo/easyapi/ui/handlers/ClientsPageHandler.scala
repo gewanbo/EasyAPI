@@ -193,8 +193,8 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     }
 
     private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
-        <h2>Server List</h2>
-        <p>All the available servers.</p>
+        <h2>Clients working stream</h2>
+        <p>All clients call from all available servers.</p>
         <div id="chart" class="box"></div>
     }
 
