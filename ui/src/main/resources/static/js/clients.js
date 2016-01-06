@@ -1,10 +1,11 @@
 var colors = {
-    'a':         '#edbd00',
-    'social':              '#367d85',
-    'animals':             '#97ba4c',
-    'health':              '#f5662b',
-    'research_ingredient': '#3f3e47',
-    'fallback':            '#9f9fa3'
+    '11':             '#edbd00',
+    '13':             '#367d85',
+    '15':             '#97ba4c',
+    '25':             '#f5662b',
+    '33':             '#3f3e47',
+    '100':            '#9f9fa3',
+    '112':            '#9f6fae'
 };
 d3.json("/clients/data", function(error, json) {
     var chart = d3.select("#chart").append("svg").chart("Sankey.Path");

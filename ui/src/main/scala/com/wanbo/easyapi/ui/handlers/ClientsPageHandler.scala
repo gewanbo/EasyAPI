@@ -2,7 +2,7 @@ package com.wanbo.easyapi.ui.handlers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.{JSONArray, JSONObject, JSON}
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
@@ -33,14 +33,14 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             val out = httpServletResponse.getWriter
 
             page.title = "Clients"
-            page.content = makeTable(availableServers)
+            page.content = makeTable(Seq[(String, Int)]())
 
             if(urlPath.size < 3)
                 urlPath :+= ""
 
             urlPath.apply(2) match {
                 case "data" =>
-                    out.println("{\n\t\"nodes\": [\n\t\t{\n\t\t\t\"id\": \"a\",\n\t\t\t\"name\": \"A\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"b\",\n\t\t\t\"name\": \"B\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"c\",\n\t\t\t\"name\": \"C\"\n\t\t},\n\t\t{\n\t\t\t\"id\": \"d\",\n\t\t\t\"name\": \"D\"\n\t\t}\n\t],\n\t\"links\": [\n\t\t{\n\t\t\t\"source\": 0,\n\t\t\t\"target\": 1,\n\t\t\t\"value\": 0.3\n\t\t},\n\t\t{\n\t\t\t\"source\": 0,\n\t\t\t\"target\": 2,\n\t\t\t\"value\": 0.5\n\t\t},\n\t\t{\n\t\t\t\"source\": 3,\n\t\t\t\"target\": 2,\n\t\t\t\"value\": 0.5\n\t\t},\n\t\t{\n\t\t\t\"source\": 3,\n\t\t\t\"target\": 1,\n\t\t\t\"value\": 0.2\n\t\t}\n\t]\n}")
+                    out.println(clientsData)
                 case _ =>
                     log.info("Response contents ------------ client")
                     out.println(UIUtils.commonNavigationPage(page))
@@ -107,32 +107,95 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
         clientList
     }
 
-    private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
+    private def clientsData: String = {
 
-        val rows = data.map(r => {
-            <tr>
-                <td>{r._1}</td>
-                <td>{r._2}</td>
-            </tr>
+        val zk = new ZookeeperClient(conf.zkHosts)
+
+        val clientNode = "/easyapi/clients"
+
+        val clients = zk.getChildren(clientNode)
+
+        var nodesSet = Set[String]()
+        var linksList = List[(String, String, Long)]()
+
+        clients.map(client => {
+
+            val hitData = zk.get(clientNode + "/" + client)
+
+            nodesSet += client
+
+            if (hitData != null) {
+                try {
+                    val hits = new String(hitData)
+
+                    log.info("Server [%s] - hits [%s] --------".format(client, hits))
+
+                    val hitObj = JSON.parseObject(hits)
+
+                    val miss = hitObj.getString("miss")
+
+                    val missObj = JSON.parseObject(miss)
+
+                    val servers = missObj.keySet().asScala.toList
+
+                    servers.foreach(serverKey => {
+
+                        nodesSet += serverKey
+
+                        linksList :+= (client, serverKey, missObj.getLong(serverKey).toLong)
+                    })
+
+                } catch {
+                    case e: Exception =>
+                        log.error("Error:", e)
+                }
+            }
+
         })
 
+        linksList.foreach(println)
+
+        val jsonNodes = new JSONArray()
+        nodesSet.foreach(x => {
+            val obj = new JSONObject()
+            obj.put("id", x)
+            obj.put("name", x)
+            jsonNodes.add(obj)
+        })
+
+        var countId = -1
+
+        val keyMap = nodesSet.map(x => {
+            countId += 1
+            (x, countId)
+        }).toMap
+
+        val tolalNum = linksList.map(_._3).sum.toFloat
+
+        val jsonLinks = new JSONArray()
+        linksList.foreach(x => {
+            val linkObj = new JSONObject()
+            linkObj.put("source", keyMap(x._1))
+            linkObj.put("target", keyMap(x._2))
+            linkObj.put("value", x._3 / tolalNum)
+
+            jsonLinks.add(linkObj)
+        })
+
+        val jsonObj = new JSONObject()
+        jsonObj.put("nodes", jsonNodes)
+        jsonObj.put("links", jsonLinks)
+
+        zk.close()
 
 
+        jsonObj.toJSONString
+    }
+
+    private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
         <h2>Server List</h2>
-            <p>All the available servers.</p>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Client</th>
-                        <th>Hits</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows}
-                </tbody>
-            </table>
+        <p>All the available servers.</p>
         <div id="chart" class="box"></div>
-
     }
 
     case class node(id: String, name: String)
