@@ -83,8 +83,6 @@ class Farm extends Actor {
         if (fields.size > 1) {
             server = fields(1)
 
-            AvailableServer.serverList.foreach(println)
-
             if (server != "" && AvailableServer.serverList.contains(server)) {
                 // Get current server list
                 WorkCounter.push(server)

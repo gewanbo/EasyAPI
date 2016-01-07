@@ -68,9 +68,9 @@ object SeedCounter {
 
     def pull(): List[(String, Long, Long)] ={
         seedQueue.synchronized{
-            println(seedQueue)
+            //println(seedQueue)
             seedQueue = seedQueue.filter(_._2 > (System.currentTimeMillis() - 60000))
-            println(seedQueue)
+            //println(seedQueue)
         }
         seedQueue
     }

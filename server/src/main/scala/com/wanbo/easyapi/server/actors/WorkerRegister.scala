@@ -44,7 +44,7 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
              println("current:" + workers.mkString("-"))
 
 
-             if(lostWorkers.size > 0) {println("lost:" + lostWorkers.mkString("-"))
+             if(lostWorkers.size > 0) {
                  if(log != null) {
                      lostWorkers.foreach(log.info)
                      log.info("These workers above were lost, try to register again.")

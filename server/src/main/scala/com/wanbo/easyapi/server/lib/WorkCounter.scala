@@ -42,7 +42,7 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
                     WorkCounter.updateSummary(countList)
 
                     log.info("Current summary ------------------- :" + WorkCounter.getSummary)
-                    WorkCounter.getSummary.foreach(println)
+                    //WorkCounter.getSummary.foreach(println)
 
                     WorkCounterSync.sync(conf)
                 } else {

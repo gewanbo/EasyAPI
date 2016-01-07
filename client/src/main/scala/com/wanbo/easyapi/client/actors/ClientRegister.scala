@@ -105,7 +105,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
         try {
             var retry = 3
-            println(_zk.exists(clientNode))
+
             while (_zk.exists(clientNode) && retry > 0) {
                 _zk.delete(clientNode)
                 retry -= 1
