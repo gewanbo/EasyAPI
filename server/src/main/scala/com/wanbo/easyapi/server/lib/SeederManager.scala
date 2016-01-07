@@ -1,6 +1,6 @@
 package com.wanbo.easyapi.server.lib
 
-import com.alibaba.fastjson.{JSONException, JSONObject, JSON}
+import com.alibaba.fastjson.{JSONArray, JSONException, JSONObject, JSON}
 import com.wanbo.easyapi.server.database.{HBaseDriver, MysqlDriver}
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.{MDC, LoggerFactory}
@@ -41,8 +41,27 @@ class SeederManager(conf: EasyConfig, seed: String) {
             else if (!transactionType.forall(_.isDigit))
                 throw new Exception("The transaction type is not supported.")
 
+            // Parse the body element
+            val body = seedBox.getJSONObject("body")
 
-            _seed = EasyConverts.json2map(seedBox.getJSONObject("body").getJSONObject("ielement"))
+            if(body.containsKey("ielement")) {
+                val eleObj = body.get("ielement")
+                eleObj match {
+                    case _: JSONObject =>
+                        // Single input element
+                        _seed = EasyConverts.json2map(eleObj.asInstanceOf[JSONObject])
+                    case _: JSONArray =>
+                        // Multiple input elements
+                        //eleObj.asInstanceOf[JSONArray].toArray.foreach()
+                        log.warn("Don't support multiple input elements in the version.")
+                        _seed = Map[String, Any]()
+                    case _ =>
+                        _seed = Map[String, Any]()
+                        throw new Exception("Didn't match the input element type.")
+                }
+            } else {
+                throw new Exception("Can't find the input element!")
+            }
 
             val uuId = head.getString("uuid")
             if(uuId != null && uuId != "")
