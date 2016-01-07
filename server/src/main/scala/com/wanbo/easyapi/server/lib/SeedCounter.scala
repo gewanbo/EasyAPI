@@ -39,7 +39,7 @@ class SeedCounter(conf: EasyConfig) extends Runnable with Logging {
                     SeedCounter.updateSummary(summaryData)
 
                     log.info("Current summary ------------------- :" + SeedCounter.getSummary)
-                    SeedCounter.getSummary.foreach(println)
+                    //SeedCounter.getSummary.foreach(println)
 
                 } else {
                     // Waiting for 10 seconds.
