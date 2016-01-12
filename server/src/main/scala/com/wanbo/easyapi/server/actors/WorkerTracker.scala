@@ -48,6 +48,9 @@ class WorkerTracker extends Actor {
                 cacheLeader ! ""
             }
 
+            val cacheUpdate = context.actorOf(Props(new CacheUpdateConsumer(conf)), "cache_update_consumer")
+            cacheUpdate ! ""
+
         case ListenerFailed =>
             log.info("Listener starting failed ...")
             context.system.shutdown()
