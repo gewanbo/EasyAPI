@@ -44,9 +44,9 @@ class Worker(conf: EasyConfig) extends Actor {
 
         var fruits = ""
 
-        try {
+        log.info("Input message is:" + message)
 
-            log.info("Receive a message:")
+        try {
 
             if (message == "") {
                 throw new Exception("Request body is empty!")
@@ -62,7 +62,6 @@ class Worker(conf: EasyConfig) extends Actor {
                 log.error("Message worker process exception :", e)
         }
 
-        log.info("Input message is:" + message)
         log.info("Output message is:" + fruits.replaceFirst("\\[.*\\]", "[...more...]"))
 
         fruits
