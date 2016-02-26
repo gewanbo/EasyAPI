@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.server
 
 import com.wanbo.easyapi.server.lib.MessageQ
-import com.wanbo.easyapi.server.messages.CacheUpdate
+import com.wanbo.easyapi.server.messages.{Seed, CacheUpdate}
 
 import scala.actors.threadpool.Executors
 
@@ -23,8 +23,8 @@ object MQTest {
             threadPool.submit(new Runnable {
                 override def run(): Unit = {
                     for(k <- 0 until 100) {
-                        println("push:" + MessageQ.push(qee1, CacheUpdate(qee1 + k.toString)))
-                        println("push:" + MessageQ.push(qee2, CacheUpdate(qee1 + k.toString)))
+                        println("push:" + MessageQ.push(qee1, CacheUpdate("61009", Map(("a", k)))))
+                        println("push:" + MessageQ.push(qee2, CacheUpdate("61009", Map(("a", k/2)))))
 //                        val msg = MessageQ.pull(qee1)
 //                        println("pull:" + msg)
 //                        if (msg != null) {
@@ -37,12 +37,12 @@ object MQTest {
         }
 
         Thread.sleep(5000)
-        println("Q size:" + MessageQ.getSize(qee1))
-        println("Q size:" + MessageQ.getSize(qee2))
+        println("Q1 size:" + MessageQ.getSize(qee1))
+        println("Q2 size:" + MessageQ.getSize(qee2))
 
         Thread.sleep(2000)
-        println("Q size:" + MessageQ.getSize(qee1))
-        println("Q size:" + MessageQ.getSize(qee2))
+        println("Q1 size:" + MessageQ.getSize(qee1))
+        println("Q2 size:" + MessageQ.getSize(qee2))
 
         println("Out queue:")
 
@@ -72,8 +72,8 @@ object MQTest {
 
         println("Out num:" + Counter.getSize)
 
-        println("Q size:" + MessageQ.getSize(qee1))
-        println("Q size:" + MessageQ.getSize(qee2))
+        println("Q1 size:" + MessageQ.getSize(qee1))
+        println("Q2 size:" + MessageQ.getSize(qee2))
 
         threadPool.shutdown()
 
