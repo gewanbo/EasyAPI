@@ -4,7 +4,7 @@ import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
- * Seeder storage.
+ * Seeder storage. Used for caching recently successful response data.
  * Created by root on 15-12-11.
  */
 class SeedStorage(conf: EasyConfig) extends Runnable with Logging {
