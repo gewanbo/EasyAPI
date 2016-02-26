@@ -28,7 +28,7 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
 
             try {
 
-                if (WorkCounter.missQueue.size > 300 || System.currentTimeMillis() - timeMark > 30000) {
+                if (WorkCounter.missQueue.size > 1000 || System.currentTimeMillis() - timeMark > 30000) {
                     var countList = List[(String, Long)]()
                     while (WorkCounter.missQueue.size > 0) {
                         val worker = WorkCounter.pull()
@@ -86,12 +86,17 @@ object WorkCounter {
 
     def updateSummary(list: List[(String, Long)]): Unit ={
         summary.synchronized{
+
+            // Reset all record last time.
+            summary = Map[String, Long]()
+
             list.foreach(item => {
-                var num = 0L
-                if(summary.contains(item._1)) {
-                    num = summary.getOrElse(item._1, 0)
-                }
-                summary = summary.updated(item._1, item._2 + num)
+//                var num = 0L
+//                if(summary.contains(item._1)) {
+//                    num = summary.getOrElse(item._1, 0)
+//                }
+//                summary = summary.updated(item._1, item._2 + num)
+                summary = summary.updated(item._1, item._2)
             })
         }
     }
