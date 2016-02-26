@@ -24,11 +24,15 @@ class MessageQ extends Serializable with Logging {
 
             dataQueue.synchronized {
 
-                if(dataQueue.size < maxSize) {
-                    dataQueue += msgData
-                    ret = true
+                if(!dataQueue.contains(msgData)) {
+                    if (dataQueue.size < maxSize) {
+                        dataQueue += msgData
+                        ret = true
+                    } else {
+                        throw new Exception("The queue was full.")
+                    }
                 } else {
-                    throw new Exception("The queue was full.")
+                    log.info("The message was exists.")
                 }
 
             }
