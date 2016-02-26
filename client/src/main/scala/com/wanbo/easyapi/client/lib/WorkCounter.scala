@@ -88,14 +88,9 @@ object WorkCounter {
         summary.synchronized{
 
             // Reset all record last time.
-            summary = Map[String, Long]()
+            summary = AvailableServer.serverList.map(x => (x._1, 0L))
 
             list.foreach(item => {
-//                var num = 0L
-//                if(summary.contains(item._1)) {
-//                    num = summary.getOrElse(item._1, 0)
-//                }
-//                summary = summary.updated(item._1, item._2 + num)
                 summary = summary.updated(item._1, item._2)
             })
         }
