@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import akka.actor.{Props, Actor}
 import akka.io.Tcp._
 import akka.io.{Tcp, IO}
-import akka.routing.{BalancingPool, DefaultResizer, RoundRobinRouter}
+import akka.routing.{SmallestMailboxPool, BalancingPool, DefaultResizer, RoundRobinRouter}
 import com.wanbo.easyapi.server.lib.WorkCounter
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.Logging
@@ -20,10 +20,11 @@ class SeedWatcher(conf: EasyConfig, port: Int) extends Actor with Logging {
 
     import context.system
 
-    val resizer = DefaultResizer(lowerBound=1, upperBound = conf.workersMaxThreads)
+    val reSizer = DefaultResizer(lowerBound=1, upperBound = conf.workersMaxThreads)
 
     //val worker = context.actorOf(Props(new Worker(conf)).withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "worker")
-    val worker = context.actorOf(Props(new Worker(conf)).withRouter(BalancingPool(conf.workersMaxThreads)), name = "worker")
+    //val worker = context.actorOf(Props(new Worker(conf)).withRouter(BalancingPool(conf.workersMaxThreads)), name = "worker")
+    val worker = context.actorOf(Props(new Worker(conf)).withRouter(SmallestMailboxPool(conf.workersMaxThreads).withResizer(reSizer)), name = "worker")
 
     IO(Tcp) ! Bind(self, new InetSocketAddress(conf.serverHost, port))
 
