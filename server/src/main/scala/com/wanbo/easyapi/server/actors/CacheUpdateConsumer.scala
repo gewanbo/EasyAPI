@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
+import akka.routing.{RoundRobinPool, DefaultResizer}
 import com.wanbo.easyapi.server.lib.{MessageQ, SeederManager}
 import com.wanbo.easyapi.server.messages.CacheUpdate
 import com.wanbo.easyapi.shared.common.Logging
@@ -19,6 +20,9 @@ class CacheUpdateConsumer(conf: EasyConfig) extends Actor with Logging {
 
     val threadPool = Executors.newFixedThreadPool(maxThread)
 
+    val reSizer = DefaultResizer(lowerBound=3, upperBound = 30)
+    val consumers = context.actorOf(Props(new ConsumerWorker(conf)).withRouter(RoundRobinPool(10).withResizer(reSizer)), name = "MessageConsumer")
+
     for(i <- 1 until maxThread) {
 
         threadPool.submit(new Runnable {
@@ -34,14 +38,16 @@ class CacheUpdateConsumer(conf: EasyConfig) extends Actor with Logging {
 
                             val msgObj = msg.asInstanceOf[CacheUpdate]
 
-                            MDC.put("destination", "cache")
-                            log.info("Update cache ....")
+                            consumers ! msgObj
 
-                            val seederManager = new SeederManager(conf, "")
-                            val ret = seederManager.updateCache(msgObj.seeder, msgObj.seed)
-                            MDC.put("destination", "cache")
-                            log.info(ret.oelement.toString())
-                            MDC.clear()
+//                            MDC.put("destination", "cache")
+//                            log.info("Update cache ....")
+//
+//                            val seederManager = new SeederManager(conf, "")
+//                            val ret = seederManager.updateCache(msgObj.seeder, msgObj.seed)
+//                            MDC.put("destination", "cache")
+//                            log.info(ret.oelement.toString())
+//                            MDC.clear()
 
                             log.info("Current message queue size: " + MessageQ.getSize(qName))
                         } else {
