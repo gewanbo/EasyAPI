@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.0.26-SNAPSHOT</version>
+    <version>1.0.27-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
