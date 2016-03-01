@@ -10,20 +10,33 @@ import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
  */
 object WorkCounterSync extends ZookeeperManager with Logging {
 
-    def sync(conf: EasyConfig): Unit ={
+    private var _zk: ZookeeperClient = null
+    private var _conf: EasyConfig = null
+
+    def init(conf: EasyConfig): Unit = {
+        _conf = conf
+    }
+
+    def sync(): Unit ={
         try {
-            val zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(this.callback))
+            zkConnect()
             WorkCounter.getSummary.foreach(server => {
                 val serverNode = server_root + "/" + server._1
-                if(zk.exists(serverNode)){
-                    zk.set(serverNode, server._2.toString.map(_.toByte).toArray)
+                if(_zk.exists(serverNode)){
+                    _zk.set(serverNode, server._2.toString.map(_.toByte).toArray)
                 }
             })
 
-            zk.close()
+            //zk.close()
         } catch {
             case e: Exception =>
                 log.error("Error:", e)
+        }
+    }
+
+    private def zkConnect(): Unit ={
+        if(_zk == null || !_zk.isAlive){
+            _zk = new ZookeeperClient(_conf.zkHosts, 3000, app_root, Some(this.callback))
         }
     }
 

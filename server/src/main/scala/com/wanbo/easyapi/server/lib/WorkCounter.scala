@@ -14,6 +14,8 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
     def start(): Unit ={
         log.info("Starting up the work counter ...")
 
+        WorkCounterSync.init(conf)
+
         val countThread = new Thread(new WorkCounter(conf))
 
         countThread.start()
@@ -44,7 +46,7 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
                     log.info("Current summary ------------------- :" + WorkCounter.getSummary)
                     //WorkCounter.getSummary.foreach(println)
 
-                    WorkCounterSync.sync(conf)
+                    WorkCounterSync.sync()
                 } else {
                     // Waiting for 3 seconds.
                     Thread.sleep(3000)
