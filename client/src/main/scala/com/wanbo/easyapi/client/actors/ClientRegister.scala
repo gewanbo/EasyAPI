@@ -23,20 +23,42 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
                 if (workers.nonEmpty) {
 
+//                    log.info("Servers were updated .... -----------------")
+//
+//                    workers.foreach(log.info)
+//
+//                    log.info("Current available servers ================")
+//
+//                    AvailableServer.serverList.foreach(x => log.info(x.toString()))
+
+                    // Remove the servers were lost.
+                    AvailableServer.serverList = AvailableServer.serverList.filter(x => workers.contains(x._1))
+
+                    val availableServers = AvailableServer.serverList.map(_._1).toList
+
+                    // Add new servers and update number of hits.
                     workers.foreach(server => {
-                        val serverNode = server_root + "/" + server
+                        if(availableServers.contains(server)){
+                            val serverNode = server_root + "/" + server
 
-                        val nodeBytes = zk.get(serverNode)
-                        if (nodeBytes != null) {
-                            val nodeStr = new String(nodeBytes)
+                            val nodeBytes = zk.get(serverNode)
+                            if (nodeBytes != null) {
+                                val nodeStr = new String(nodeBytes)
 
-                            if (nodeStr.isEmpty)
+                                if (nodeStr.isEmpty)
+                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
+                                else
+                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
+                            } else {
                                 AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
-                            else
-                                AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
+                            }
                         } else {
-                            AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
+                            AvailableServer.serverList = AvailableServer.serverList + (server -> 0L)
                         }
+                    })
+
+                    AvailableServer.serverList.foreach{ case(server: String, num: Long) =>
+                        val serverNode = server_root + "/" + server
 
                         zk.watchNode(serverNode, data => {
 
@@ -51,7 +73,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
                                 // Ignore, because the servers are miss.
                             }
                         })
-                    })
+                    }
 
                 } else {
                     AvailableServer.serverList = Map[String, Long]()
