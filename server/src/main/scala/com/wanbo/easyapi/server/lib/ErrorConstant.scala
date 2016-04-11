@@ -29,4 +29,8 @@ object ErrorConstant {
         else
             errorList.get("ERROR_UNDEFINED").get
     }
+
+    def setErrorMessage(code: String, msg: String): Unit ={
+        errorList = errorList.updated(code, msg)
+    }
 }

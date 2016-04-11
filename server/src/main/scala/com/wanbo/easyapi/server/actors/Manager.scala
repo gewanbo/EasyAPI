@@ -1,15 +1,15 @@
 package com.wanbo.easyapi.server.actors
 
-import java.io.{FileInputStream, PrintWriter, InputStreamReader, BufferedReader}
+import java.io._
 import java.net.Socket
 import java.util.Properties
 
-import akka.actor.{ActorRef, Props, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import com.wanbo.easyapi.server.database.MysqlDriver
-import com.wanbo.easyapi.server.lib.{SeedCounter, WorkCounter}
+import com.wanbo.easyapi.server.lib.{ErrorConstant, SeedCounter, WorkCounter}
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import org.slf4j.{MDC, LoggerFactory}
+import org.slf4j.{LoggerFactory, MDC}
 
 /**
  * Manager
@@ -28,6 +28,9 @@ class Manager(workTracker: ActorRef) extends Actor {
     override def receive: Receive = {
         case StartUp =>
             workTracker ! StartUp
+
+            // Load custom constant of error message.
+            loadErrorMessage()
 
             val confProps = new Properties()
             val configFile = System.getProperty("easy.conf", "config.properties")
@@ -126,5 +129,28 @@ class Manager(workTracker: ActorRef) extends Actor {
         }
 
         message
+    }
+
+    private def loadErrorMessage(){
+        try {
+
+            val f = new File("../conf/errormsg.properties")
+            if(f.exists()){
+                val confProps = new Properties()
+                confProps.load(new FileInputStream(f))
+
+                if(confProps.size() > 0) {
+                    val keys = confProps.keys()
+                    while (keys.hasMoreElements){
+                        val key = keys.nextElement().toString
+                        ErrorConstant.setErrorMessage(key, confProps.getProperty(key, ""))
+                    }
+                }
+            }
+
+        } catch {
+            case e: Exception =>
+                log.info("Throws exception when load custom error message:", e)
+        }
     }
 }
