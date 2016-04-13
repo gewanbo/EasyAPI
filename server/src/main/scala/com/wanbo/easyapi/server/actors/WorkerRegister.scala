@@ -40,11 +40,10 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
              val lostWorkers = workerList.filter(x => !workers.contains(x))
 
-             println("sys:" + workerList.mkString("-"))
-             println("current:" + workers.mkString("-"))
+             log.info("System configured workers:" + workerList.mkString("-"))
+             log.info("Current running workers:" + workers.mkString("-"))
 
-
-             if(lostWorkers.size > 0) {
+             if(lostWorkers.nonEmpty) {
                  if(log != null) {
                      lostWorkers.foreach(log.info)
                      log.info("These workers above were lost, try to register again.")
