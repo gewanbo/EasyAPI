@@ -1,11 +1,10 @@
 package com.wanbo.easyapi.server.actors
 
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import org.apache.zookeeper.CreateMode
-import org.slf4j.LoggerFactory
 
 /**
  * Elect a leader from cluster, and control the cache updating.
@@ -16,6 +15,9 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
     private var _zk: ZookeeperClient = null
 
     private var _serverId = ""
+
+    private val _cacheManagerActorName = "cache_manager"
+    private val _nodeBalancerActorName = "node_balancer"
 
     init()
 
@@ -84,21 +86,23 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
     private def gotLeader() ={
         log.info("Start to do the leading work.")
         openCacheUpdate()
+        openNodeBalance()
     }
 
     private def lostLeader(): Unit ={
         log.info("Stop doing the leading work.")
         closeCacheUpdate()
+        closeNodeBalance()
     }
 
     private def openCacheUpdate(): Unit ={
 
         log.info("------------- I'm ready to update cache -----")
 
-        val cacheOption = context.child("cache_manager")
+        val cacheOption = context.child(_cacheManagerActorName)
 
         if(cacheOption.isEmpty) {
-            val cacheManager = context.actorOf(Props(new CacheManager(conf)), name = "cache_manager")
+            val cacheManager = context.actorOf(Props(new CacheManager(conf)), name = _cacheManagerActorName)
             cacheManager ! "init"
         }
 
@@ -108,7 +112,7 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
 
         log.info("------------- Stop updating cache -----")
 
-        val cacheOption = context.child("cache_manager")
+        val cacheOption = context.child(_cacheManagerActorName)
 
         if(cacheOption.isDefined) {
             context.stop(cacheOption.get)
@@ -116,16 +120,35 @@ private[server] class ClusterLeader(conf: EasyConfig) extends ZookeeperManager w
 
     }
 
+    private def openNodeBalance(): Unit ={
+        log.info("-------------- Start to run node balancer...")
+
+        val nodeBalancerOption = context.child(_nodeBalancerActorName)
+
+        if(nodeBalancerOption.isEmpty) {
+            val nodeBalancer = context.actorOf(Props(new NodeBalancer(conf)), name = _nodeBalancerActorName)
+            nodeBalancer ! "init"
+        }
+    }
+
+    private def closeNodeBalance(): Unit ={
+        log.info("-------------- Stopping node balancer...")
+
+        val nodeBalancerOption = context.child(_nodeBalancerActorName)
+
+        if(nodeBalancerOption.isDefined){
+            nodeBalancerOption.get ! "stop"
+            context.stop(nodeBalancerOption.get)
+        }
+    }
+
     override def receive: Receive = {
         case "" =>
         // Do something
         case "shutdown" =>
 
-            val cacheOption = context.child("cache_manager")
-
-            if(cacheOption.isDefined) {
-                context.stop(cacheOption.get)
-            }
+            closeCacheUpdate()
+            closeNodeBalance()
 
             if(_zk != null) {
                 log.info("Shutting down the zk...")
