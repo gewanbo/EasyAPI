@@ -20,10 +20,19 @@ object WorkCounterSync extends ZookeeperManager with Logging {
     def sync(): Unit ={
         try {
             zkConnect()
+
+            var dataList: Map[String, Long] = _conf.workersPort.map(port => {
+                (_conf.serverHost + ":" + port, 0L)
+            }).toMap
+
             WorkCounter.getSummary.foreach(server => {
-                val serverNode = server_root + "/" + server._1
+                dataList = dataList.updated(server._1, server._2.toLong)
+            })
+
+            dataList.foreach(item => {
+                val serverNode = server_root + "/" + item._1
                 if(_zk.exists(serverNode)){
-                    _zk.set(serverNode, server._2.toString.map(_.toByte).toArray)
+                    _zk.set(serverNode, item._2.toString.getBytes)
                 }
             })
 
