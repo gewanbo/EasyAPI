@@ -39,14 +39,18 @@ object EasyConverts {
 
             item.map(x => {
                 val data = x._2 match {
-                    case y: String =>
-                        y
+                    case s: String =>
+                        s
+                    case i: Int =>
+                        i
                     case y: List[_] =>
                         list2json(y.asInstanceOf[List[Map[String, Any]]])
                     case z: Map[_, _] =>
                         map2json(z.asInstanceOf[Map[String, Any]])
                     case null =>
                         ""
+                    case m =>
+                        m.toString
                 }
 
                 obj.put(x._1, data)
