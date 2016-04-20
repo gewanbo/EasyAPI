@@ -114,6 +114,9 @@ class Manager(workTracker: ActorRef) extends Actor {
                         split = "|"
                     })
                     out.println(dataStr)
+                case "resetworkcount" =>
+                    WorkCounter.resetSummary()
+                    out.println("done")
                 case _ =>
                     println("Manager command is :" + message)
                     // Response message

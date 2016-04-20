@@ -32,7 +32,7 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
 
                 if (WorkCounter.workQueue.size > 300 || System.currentTimeMillis() - timeMark > 30000) {
                     var countList = List[(String, Long)]()
-                    while (WorkCounter.workQueue.size > 0) {
+                    while (WorkCounter.workQueue.nonEmpty) {
                         val worker = WorkCounter.pull()
                         if(worker != "")
                             countList :+= (worker, 1L)
@@ -76,10 +76,16 @@ object WorkCounter {
     def pull(): String ={
         var ret = ""
         workQueue.synchronized{
-            if(workQueue.size > 0)
+            if(workQueue.nonEmpty)
                 ret = workQueue.dequeue()
         }
         ret
+    }
+
+    def resetSummary(): Unit ={
+        summary.synchronized{
+            summary = Map[String, Long]()
+        }
     }
 
     def getSummary: Map[String, Long] ={
