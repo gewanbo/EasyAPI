@@ -1,12 +1,10 @@
 package com.wanbo.easyapi.ui.handlers
 
-import java.io._
-import java.net.Socket
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.wanbo.easyapi.shared.common.Logging
-import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ServerNode}
+import com.wanbo.easyapi.shared.common.utils.{Utils, ZookeeperClient}
 import com.wanbo.easyapi.ui.lib.UIUtils
 import com.wanbo.easyapi.ui.pages.WebPage
 import org.eclipse.jetty.server.Request
@@ -83,42 +81,7 @@ class SeedersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
         serverList.distinct
     }
 
-    private def getSummary(host: String): String ={
-        var info = ""
-
-        try {
-            val socket = new Socket(host, 8860)
-
-            val outStream = socket.getOutputStream
-
-            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outStream)))
-
-            val inStream = new InputStreamReader(socket.getInputStream)
-            val in = new BufferedReader(inStream)
-
-            out.println("seedcount")
-            out.flush()
-
-            val msg = in.readLine()
-
-            info = msg
-
-            println(msg)
-
-            out.close()
-            outStream.close()
-
-            in.close()
-            inStream.close()
-
-            socket.close()
-        } catch {
-            case e: Exception =>
-                log.error("Error:", e)
-        }
-
-        info
-    }
+    private def getSummary(host: String): String = Utils.simpleRequest(ServerNode(host, 8860), "seedcount")
 
     private def makeTable(data: Seq[(String, Long)]): Seq[Node] = {
 
