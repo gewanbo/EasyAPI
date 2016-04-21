@@ -35,7 +35,7 @@ class SeedersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
                 if(info != "") {
                     try {
                         info.split("\\|").map(_.split("=")).foreach(i => {
-                            if(i.size > 1) {
+                            if(i.length > 1) {
                                 val tk = i(0)
                                 val tv = i(1).toLong
 
@@ -77,7 +77,7 @@ class SeedersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
         val servers = zk.getChildren(serverNode)
 
-        serverList = servers.map(_.split(":")(0)).toSeq
+        serverList = servers.map(_.split(":")(0))
 
         zk.close()
         serverList.distinct
