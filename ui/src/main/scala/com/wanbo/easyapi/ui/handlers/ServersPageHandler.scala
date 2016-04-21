@@ -1,8 +1,6 @@
 package com.wanbo.easyapi.ui.handlers
 
-import java.io._
-import java.net.Socket
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
@@ -10,7 +8,7 @@ import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import com.wanbo.easyapi.ui.lib.UIUtils
 import com.wanbo.easyapi.ui.pages.WebPage
 import org.eclipse.jetty.server.Request
-import org.eclipse.jetty.server.handler.{ContextHandler, AbstractHandler}
+import org.eclipse.jetty.server.handler.{AbstractHandler, ContextHandler}
 
 import scala.xml.Node
 
@@ -50,7 +48,7 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
         val servers = zk.getChildren(serverNode)
 
-        servers.map(s => {
+        servers.foreach(s => {
             var hitNum = 0L
             val hitData = zk.get(serverNode + "/" + s)
 
