@@ -2,8 +2,8 @@ package com.wanbo.easyapi.server.actors
 
 import akka.actor.{Actor, Cancellable}
 import com.wanbo.easyapi.shared.common.Logging
-import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ServerNode, ServerNodeFactory}
+import com.wanbo.easyapi.shared.common.utils.{Utils, ZookeeperClient}
 import org.slf4j.MDC
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -32,7 +32,7 @@ class NodeBalancer(conf: EasyConfig) extends Actor with Logging{
             log.info("Start to initialize node balancer.")
 
             if(_scheduler == null || _scheduler.isCancelled) {
-                _scheduler = system.scheduler.schedule(10 seconds, 3 seconds, self, "sync")
+                _scheduler = system.scheduler.schedule(10 seconds, 3600 seconds, self, "sync")
             }
 
             MDC.clear()
@@ -40,8 +40,6 @@ class NodeBalancer(conf: EasyConfig) extends Actor with Logging{
             MDC.put("destination", "balancer")
             log.info("Sync all nodes priority ....")
             log.info("-----    Balancer  !!!!!! ")
-
-            println(_zk)
 
             zkConnect()
 
@@ -56,12 +54,12 @@ class NodeBalancer(conf: EasyConfig) extends Actor with Logging{
                     val dataBytes = _zk.get(server_node + "/" + node)
                     if(dataBytes != null){
                         val dataStr = new String(dataBytes)
-                        if(dataStr!="" && dataStr.forall(_.isDigit)){
+                        if(dataStr != "" && dataStr.forall(_.isDigit)){
                             nodeData = dataStr.toLong
                         }
                     }
-                    val hosts = node.split(":")
-                    (hosts(0), nodeData)
+                    val serverNode = ServerNodeFactory.parse(node)
+                    (serverNode.host, nodeData)
                 })
 
                 val dataEachServer = dataList.groupBy(_._1).map(x => {
@@ -78,14 +76,16 @@ class NodeBalancer(conf: EasyConfig) extends Actor with Logging{
                         k = min / max.toFloat
                     }
 
-                    log.info("----min:" + min)
-                    log.info("----max:" + max)
-                    log.info("----gap:" + gap)
-                    log.info("----k:" + k)
+                    log.info("-------------- Node rebalance details ------------")
+                    log.info("------min:" + min)
+                    log.info("------max:" + max)
+                    log.info("------gap:" + gap)
+                    log.info("------k:" + k)
 
-                    if(k > 0 && k < 0.8 && gap > 10) {
+                    if(k > 0 && k < 0.8 && gap > 1000) {
                         // Rebalance
                         log.info("The cluster is unhealthy, starting to rebalance the priority of every node.")
+                        rebalanceNodes(dataEachServer.keySet)
                     } else {
                         log.info("Current nodes in cluster are balanced.")
                     }
@@ -109,4 +109,18 @@ class NodeBalancer(conf: EasyConfig) extends Actor with Logging{
     }
 
     def callback(zk: ZookeeperClient): Unit ={}
+
+    private def rebalanceNodes(servers: Set[String]): Unit ={
+        log.info("------------- Rebalance servers start ----------------")
+        val serverList = servers.map(host => ServerNode(host, conf.serverPort))
+        serverList.foreach(server => {
+            log.info("Send reset message to server:" + server.toString)
+            val msg = Utils.simpleRequest(server, "resetworkcount")
+            if(msg == "done")
+                log.info("Successful!")
+            else
+                log.info("Failed!")
+        })
+        log.info("------------- Rebalance servers stop  ----------------")
+    }
 }
