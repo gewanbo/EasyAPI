@@ -6,7 +6,7 @@ package com.wanbo.easyapi.server.lib
  */
 class EasyException(code: String, message: String) extends Exception(message: String) {
 
-    private var _code: String = _
+    private var _code: String = code
 
     def this(code: String) = {
         this(code, ErrorConstant.getErrorMessage(code))
