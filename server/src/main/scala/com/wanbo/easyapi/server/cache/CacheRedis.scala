@@ -28,7 +28,7 @@ class CacheRedis(host: String, port: Int, expire: Int = 60) extends EasyCache {
 
             if(redis.exists(name)){
                 val tmp = redis.get(name)
-                if(tmp != null) {
+                if(tmp != null && tmp.isDefined) {
                     data = tmp.get
                     ttl = redis.ttl(name).get
                 } else
