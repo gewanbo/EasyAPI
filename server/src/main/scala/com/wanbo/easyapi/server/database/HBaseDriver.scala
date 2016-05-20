@@ -35,6 +35,7 @@ case class HBaseDriver() extends Driver {
                 throw new Exception("The configuration option [hbase.zookeeper.quorum] is empty!")
 
             hConf.set("hbase.zookeeper.quorum", db_zq)
+            hConf.set("hbase.client.operation.timeout", "30000")
         } catch {
             case e: Exception =>
                 log.error("HBase configure exception:", e)
