@@ -18,8 +18,8 @@ case class HBaseDriver() extends Driver {
 
         val settings = conf.driverSettings.filter(x => x._2.get("type").get == "hbase").toList.map(_._2)
 
-        if(settings.size > 0){
-            db_zq = settings.apply(0).getOrElse("zk", "")
+        if(settings.nonEmpty){
+            db_zq = settings.head.getOrElse("zk", "")
         }
 
         if(db_zq == "")
