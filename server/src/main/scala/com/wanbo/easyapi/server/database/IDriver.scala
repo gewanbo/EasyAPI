@@ -6,6 +6,6 @@ import com.wanbo.easyapi.shared.common.libs.EasyConfig
  * Database driver
  * Created by wanbo on 15/4/16.
  */
-trait Driver {
+trait IDriver {
     def setConfiguration(conf: EasyConfig)
 }
