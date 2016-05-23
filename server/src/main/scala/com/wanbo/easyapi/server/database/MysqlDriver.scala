@@ -23,10 +23,10 @@ case class MysqlDriver() extends Driver {
 
         try {
 
-            val sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable).toList
+            val sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable)
 
-            if(sourceList.size > 0) {
-                _conn = util.Random.shuffle(sourceList).apply(0)._2.getConnection
+            if(sourceList.nonEmpty) {
+                _conn = util.Random.shuffle(sourceList).head._2.getConnection
             } else {
                 throw new Exception("Didn't find the available database source.")
             }
@@ -62,7 +62,7 @@ object MysqlDriver {
      */
     def initializeDataSource(settings: List[Map[String, String]]): Unit ={
 
-        if (settings.size > 0) {
+        if (settings.nonEmpty) {
             settings.foreach(x => {
                 val db_host = x.getOrElse("host", "")
                 val db_port = x.getOrElse("port", "")
