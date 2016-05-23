@@ -11,12 +11,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * Mysql driver
  * Created by wanbo on 15/4/16.
  */
-case class MysqlDriver() extends Driver {
+case class MysqlDriver() extends DbDriver with IDriver {
 
     private var _conn:Connection = null
 
     override def setConfiguration(conf: EasyConfig): Unit = {
-
+        this._conf = conf
     }
 
     def getConnector(dbName: String = "test", writable: Boolean = false): Connection ={
