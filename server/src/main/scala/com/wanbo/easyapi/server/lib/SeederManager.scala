@@ -118,12 +118,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             seederObj.manager = this
 
-            seederObj.driver match {
-                case MysqlDriver() =>
-                    seederObj.driver.setConfiguration(conf)
-                case HBaseDriver() =>
-                    seederObj.driver.setConfiguration(conf)
-            }
+            seederObj.driver.setConfiguration(conf)
 
             fruits = seederObj.onHandle(_seed)
 
