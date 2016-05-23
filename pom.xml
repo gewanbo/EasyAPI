@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -35,7 +35,7 @@
         <ch.qos.logback.version>1.1.3</ch.qos.logback.version>
         <org.springframework.version>3.2.5.RELEASE</org.springframework.version>
         <org.mysql-connector-java.version>5.1.27</org.mysql-connector-java.version>
-        <org.apache.hadoop.hbase.version>0.98.3-hadoop2</org.apache.hadoop.hbase.version>
+        <org.apache.hadoop.hbase.version>1.0.1.1</org.apache.hadoop.hbase.version>
         <org.tachyonproject.version>0.7.0</org.tachyonproject.version>
         <org.eclipse.jetty.version>9.3.2.v20150730</org.eclipse.jetty.version>
         <file_encoding>UTF-8</file_encoding>
@@ -101,7 +101,7 @@
             <!-- Apache HBase -->
             <dependency>
                 <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase-server</artifactId>
+                <artifactId>hbase-client</artifactId>
                 <version>${org.apache.hadoop.hbase.version}</version>
                 <exclusions>
                     <exclusion>
@@ -109,11 +109,6 @@
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase-client</artifactId>
-                <version>${org.apache.hadoop.hbase.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.hbase</groupId>
