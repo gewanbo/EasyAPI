@@ -1,6 +1,6 @@
 package com.wanbo.easyapi.server.lib
 
-import com.wanbo.easyapi.server.database.Driver
+import com.wanbo.easyapi.server.database.IDriver
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 
 /**
@@ -10,7 +10,7 @@ import com.wanbo.easyapi.shared.common.libs.EasyConfig
 trait ISeeder {
     var _conf: EasyConfig = _
 
-    var driver: Driver = _
+    var driver: IDriver = _
 
     var manager: SeederManager = _
 
