@@ -23,7 +23,12 @@ case class MysqlDriver() extends DbDriver with IDriver {
 
         try {
 
-            val sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable)
+            var sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName && x._1._2 == writable)
+
+            // If didn't find readable data source, can read from writable data source.
+            if(sourceList.isEmpty && !writable){
+                sourceList = MysqlDriver.dataSourceList.filter(x => x._1._1 == dbName)
+            }
 
             if(sourceList.nonEmpty) {
                 _conn = util.Random.shuffle(sourceList).head._2.getConnection
