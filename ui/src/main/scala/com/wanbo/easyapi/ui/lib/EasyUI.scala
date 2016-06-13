@@ -33,7 +33,7 @@ class EasyUI(conf: EasyConfig) extends Logging {
 
         _server.attachHandler(staticContext)
 
-        _server.attachHandler(new RedirectHandler("/", "/servers"))
+        //_server.attachHandler(new RedirectHandler("/", "/servers"))
 
         val serversPage = new ServersPage
 
