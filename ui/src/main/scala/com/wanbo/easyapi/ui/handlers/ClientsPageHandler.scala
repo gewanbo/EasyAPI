@@ -26,22 +26,22 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
             var urlPath = request.getHttpURI.getPath.split("/")
 
-
             httpServletResponse.setContentType("text/html; charset=utf-8")
             httpServletResponse.setStatus(HttpServletResponse.SC_OK)
 
             val out = httpServletResponse.getWriter
 
-            page.title = "Clients"
-            page.content = makeTable(Seq[(String, Int)]())
-
-            if(urlPath.size < 3)
+            if(urlPath.length < 3)
                 urlPath :+= ""
 
             urlPath.apply(2) match {
                 case "data" =>
                     out.println(clientsData)
                 case _ =>
+
+                    page.title = "Clients"
+                    page.content = makeTable(Seq[(String, Int)]())
+
                     log.info("Response contents ------------ client")
                     out.println(UIUtils.commonNavigationPage(page))
                     log.info("Response contents ------------ client finish")
@@ -54,53 +54,17 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     this.setContextPath(contextPath)
     this.setHandler(handler)
 
-    private def availableServers: Seq[(String, Int)] = {
-        var clientList = Seq[(String, Int)]()
+    private def availableClients: Seq[String] = {
+        var clientList = Seq[String]()
         val zk = new ZookeeperClient(conf.zkHosts)
 
         val clientNode = "/easyapi/clients"
 
         val clients = zk.getChildren(clientNode)
 
-        var nodesSet = Set[String]()
-        var linksList = List[(String, String, Long)]()
-
-        clients.map(s => {
-            var hitNum = 0
-            val hitData = zk.get(clientNode + "/" + s)
-
-            nodesSet += s
-
-            if (hitData != null) {
-                try {
-                    val hits = new String(hitData)
-
-                    log.info("Server [%s] - hits [%s] --------".format(s, hits))
-
-                    val hitObj = JSON.parseObject(hits)
-
-                    val miss = hitObj.getString("miss")
-
-                    val missObj = JSON.parseObject(miss)
-
-                    val servers = missObj.keySet().asScala.toList
-
-                    servers.foreach(serverKey => {
-
-                        nodesSet += serverKey
-
-                        linksList :+= (s, serverKey, missObj.getLong(serverKey).toLong)
-                    })
-
-                    log.info("miss string-----:" + miss)
-
-                } catch {
-                    case e: Exception =>
-                        log.error("Error:", e)
-                }
-            }
-
-            clientList = clientList :+(s, hitNum)
+        clients.foreach(s => {
+            log.info("Client [%s] --------".format(s))
+            clientList = clientList :+ s
         })
 
         zk.close()
@@ -118,7 +82,7 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
         var nodesSet = Set[String]()
         var linksList = List[(String, String, Long)]()
 
-        clients.map(client => {
+        clients.foreach(client => {
 
             val hitData = zk.get(clientNode + "/" + client)
 
@@ -193,6 +157,28 @@ class ClientsPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
     }
 
     private def makeTable(data: Seq[(String, Int)]): Seq[Node] = {
+
+        val clients = availableClients.map(x => {
+            <tr>
+                <td>{x}</td>
+                <td>Running</td>
+            </tr>
+        })
+        <h2>Clents list</h2>
+            <p>All the running clients.</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {clients}
+                </tbody>
+            </table>
+
+
         <h2>Clients working stream</h2>
         <p>All clients call from all available servers.</p>
         <div id="chart" class="box"></div>
