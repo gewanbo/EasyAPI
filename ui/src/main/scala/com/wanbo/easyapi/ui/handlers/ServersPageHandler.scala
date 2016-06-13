@@ -71,43 +71,6 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
         serverList
     }
 
-//    private def getSummary(host: String): String ={
-//        var info = ""
-//
-//        try {
-//            val socket = new Socket(host, 8860)
-//
-//            val outStream = socket.getOutputStream
-//
-//            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outStream)))
-//
-//            val inStream = new InputStreamReader(socket.getInputStream)
-//            val in = new BufferedReader(inStream)
-//
-//            out.println("workcount")
-//            out.flush()
-//
-//            val msg = in.readLine()
-//
-//            info = msg
-//
-//            println(msg)
-//
-//            out.close()
-//            outStream.close()
-//
-//            in.close()
-//            inStream.close()
-//
-//            socket.close()
-//        } catch {
-//            case e: Exception =>
-//                log.error("Error:", e)
-//        }
-//
-//        info
-//    }
-
     private def makeTable(data: Seq[(String, Long)]): Seq[Node] = {
 
         val servers = data.map(x => {
