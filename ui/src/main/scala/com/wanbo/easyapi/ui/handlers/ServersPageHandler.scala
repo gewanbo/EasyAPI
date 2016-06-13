@@ -121,6 +121,7 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             <tr>
                 <td>{server}</td>
                 <td>{ports}</td>
+                <td>1.1.4</td>
                 <td>Running</td>
             </tr>
         })
@@ -139,6 +140,7 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
                     <tr>
                         <th>Server</th>
                         <th>Ports</th>
+                        <th>Version</th>
                         <th>Status</th>
                     </tr>
                 </thead>
