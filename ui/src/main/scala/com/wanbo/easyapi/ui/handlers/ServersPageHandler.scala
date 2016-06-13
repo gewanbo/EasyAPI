@@ -3,7 +3,7 @@ package com.wanbo.easyapi.ui.handlers
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.wanbo.easyapi.shared.common.Logging
-import com.wanbo.easyapi.shared.common.libs.EasyConfig
+import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ServerNodeFactory}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 import com.wanbo.easyapi.ui.lib.UIUtils
 import com.wanbo.easyapi.ui.pages.WebPage
@@ -110,6 +110,21 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
 
     private def makeTable(data: Seq[(String, Long)]): Seq[Node] = {
 
+        val servers = data.map(x => {
+            val serverNode = ServerNodeFactory.parse(x._1)
+            (serverNode.host, serverNode.port)
+        }).groupBy(_._1).map(x => {
+
+            val server = x._1
+            val ports = x._2.map(_._2).mkString(",")
+
+            <tr>
+                <td>{server}</td>
+                <td>{ports}</td>
+                <td>Running</td>
+            </tr>
+        })
+
         val rows = data.map(r => {
             <tr>
                 <td>{r._1}</td>
@@ -117,8 +132,23 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             </tr>
         })
 
-        <h2>Server List</h2>
+        <h2>Server Nodes</h2>
             <p>All the available servers.</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Server</th>
+                        <th>Ports</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {servers}
+                </tbody>
+            </table>
+
+        <h2>Hit balance detail</h2>
+            <p>All nodes hit balance detail.</p>
             <table class="table table-striped">
                 <thead>
                     <tr>
