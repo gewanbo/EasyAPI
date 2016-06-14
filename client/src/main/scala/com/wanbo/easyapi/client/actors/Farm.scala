@@ -155,6 +155,7 @@ class Farm extends Actor {
 
                         if(errorCode == "0"){
                             // Store to local storage
+                            // TODO: Need to filter write seeder, the size of odatalist is nonempty.
                             SeedStorage.push(SeedData(seedKey, response))
                         }
 
@@ -177,6 +178,7 @@ class Farm extends Actor {
 
                     if(errorCode == "0"){
                         // Store to local storage
+                        // TODO: Need to filter write seeder, the size of odatalist is nonempty.
                         SeedStorage.push(SeedData(seedKey, response))
                     }
 
