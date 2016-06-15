@@ -1,6 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
+import com.wanbo.easyapi.server.lib.ServerSetting
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
@@ -55,6 +56,30 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
                  })
              }
          })
+
+         // ### Update current server settings
+
+         val settings_server_root = setting_root + "/servers"
+         if(!zk.exists(settings_server_root)){
+             zk.create(settings_server_root, "".map(_.toByte).toArray, CreateMode.PERSISTENT)
+             log.warn("The ZNode [%s] does not exists, has created yet!".format(settings_server_root))
+         }
+
+         val currentServerSettingRoot = settings_server_root + "/" + conf.serverHost
+
+         val serverSetting = new ServerSetting
+
+         serverSetting.version = System.getProperty("appVersion", "0.0.0")
+         serverSetting.host = conf.serverHost
+
+         if(!zk.exists(currentServerSettingRoot)){
+             zk.create(currentServerSettingRoot, serverSetting.toJson.getBytes(), CreateMode.PERSISTENT)
+             log.warn("The ZNode [%s] does not exists, has created yet!".format(currentServerSettingRoot))
+         } else {
+             // Override all setting data
+             zk.set(currentServerSettingRoot, serverSetting.toJson.getBytes())
+         }
+
      }
 
      override def receive: Receive = {
