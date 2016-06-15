@@ -16,6 +16,8 @@ class ZookeeperManager extends Logging {
 
     protected val leader_root = "/leaders"
 
+    protected val setting_root = "/settings"
+
     /**
      * Initialize tree node structure.
      * @param conf    Configuration
@@ -48,6 +50,12 @@ class ZookeeperManager extends Logging {
 
             if(!zk.exists(leadersNode)){
                 zk.createPath(leadersNode)
+            }
+
+            val settingsNode = (app_root + setting_root).substring(1)
+
+            if(!zk.exists(settingsNode)){
+                zk.createPath(settingsNode)
             }
 
             zk.close()
