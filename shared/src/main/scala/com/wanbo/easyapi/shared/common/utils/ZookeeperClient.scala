@@ -50,7 +50,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         event.getState match {
             case KeeperState.SyncConnected =>
                 try {
-                    watcher.map(fn => fn(this))
+                    watcher.foreach(fn => fn(this))
                 } catch {
                     case e:Exception =>
                         log.error("Exception during zookeeper connection established callback", e)
@@ -224,7 +224,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
                     watchMap.synchronized {
                         watchMap(child) = deserialize(data)
                     }
-                    notifier.map(f => f(child))
+                    notifier.foreach(f => f(child))
                 case None => // deletion handled via parent watch
             }
         }
@@ -248,7 +248,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
                 }
             }
             for (child <- removedChildren) {
-                notifier.map(f => f(child))
+                notifier.foreach(f => f(child))
             }
         }
 
