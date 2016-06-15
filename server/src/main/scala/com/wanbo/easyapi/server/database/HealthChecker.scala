@@ -5,6 +5,8 @@ import com.wanbo.easyapi.shared.common.Logging
 import scala.collection.mutable
 
 /**
+  * @todo Didn't complete yet. Just in testing.
+  *
   * Created by wanbo on 16/6/12.
   */
 object HealthChecker extends Logging {
