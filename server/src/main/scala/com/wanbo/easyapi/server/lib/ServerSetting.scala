@@ -6,8 +6,9 @@ package com.wanbo.easyapi.server.lib
 class ServerSetting {
     var version = ""
     var host = ""
+    var startTime = ""
 
     def toJson: String ={
-        "{\"version\":\"%s\",\"host\":\"%s\"}".format(version, host)
+        "{\"Version\":\"%s\",\"Host\":\"%s\",\"StartTime\":\"%s\"}".format(version, host, startTime)
     }
 }
