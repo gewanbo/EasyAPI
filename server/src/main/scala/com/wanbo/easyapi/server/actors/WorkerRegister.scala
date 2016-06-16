@@ -1,5 +1,7 @@
 package com.wanbo.easyapi.server.actors
 
+import java.util.{Calendar, TimeZone}
+
 import akka.actor.Actor
 import com.wanbo.easyapi.server.lib.ServerSetting
 import com.wanbo.easyapi.shared.common.Logging
@@ -71,6 +73,7 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
          serverSetting.version = System.getProperty("appVersion", "0.0.0")
          serverSetting.host = conf.serverHost
+         serverSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
 
          if(!zk.exists(currentServerSettingRoot)){
              zk.create(currentServerSettingRoot, serverSetting.toJson.getBytes(), CreateMode.PERSISTENT)
