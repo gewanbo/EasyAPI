@@ -61,26 +61,36 @@ class WorkerRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
          // ### Update current server settings
 
-         val settings_server_root = setting_root + "/servers"
-         if(!zk.exists(settings_server_root)){
-             zk.create(settings_server_root, "".map(_.toByte).toArray, CreateMode.PERSISTENT)
-             log.warn("The ZNode [%s] does not exists, has created yet!".format(settings_server_root))
-         }
+         try {
+             val settings_server_root = setting_root + "/servers"
+             if (!zk.exists(settings_server_root)) {
+                 zk.create(settings_server_root, "".map(_.toByte).toArray, CreateMode.PERSISTENT)
+                 log.warn("The ZNode [%s] does not exists, has created yet!".format(settings_server_root))
+             }
 
-         val currentServerSettingRoot = settings_server_root + "/" + conf.serverHost
+             val currentServerSettingRoot = settings_server_root + "/" + conf.serverHost
 
-         val serverSetting = new ServerSetting
+             val serverSetting = new ServerSetting
 
-         serverSetting.version = System.getProperty("appVersion", "0.0.0")
-         serverSetting.host = conf.serverHost
-         serverSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
+             serverSetting.version = System.getProperty("appVersion", "0.0.0")
+             serverSetting.host = conf.serverHost
+             serverSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
 
-         if(!zk.exists(currentServerSettingRoot)){
-             zk.create(currentServerSettingRoot, serverSetting.toJson.getBytes(), CreateMode.PERSISTENT)
-             log.warn("The ZNode [%s] does not exists, has created yet!".format(currentServerSettingRoot))
-         } else {
-             // Override all setting data
-             zk.set(currentServerSettingRoot, serverSetting.toJson.getBytes())
+             if (!zk.exists(currentServerSettingRoot)) {
+                 zk.create(currentServerSettingRoot, serverSetting.toJson.getBytes(), CreateMode.PERSISTENT)
+                 log.warn("The ZNode [%s] does not exists, has created yet!".format(currentServerSettingRoot))
+             } else {
+                 // Override all setting data
+                 val stat = zk.set(currentServerSettingRoot, serverSetting.toJson.getBytes())
+                 if(stat != null){
+                     log.info("Update current server settings successful!")
+                 } else {
+                     log.info("Update current server settings failed!")
+                 }
+             }
+         } catch {
+             case e: Exception =>
+                 log.error("Error:", e)
          }
 
      }
