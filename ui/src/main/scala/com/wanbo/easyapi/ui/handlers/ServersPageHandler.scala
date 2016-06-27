@@ -78,6 +78,9 @@ class ServersPageHandler(conf: EasyConfig, contextPath: String, page: WebPage) e
             serverNode.host
         }).toSet
 
+        // Clean up settings
+        serverSettings = Set[ServerSetting]()
+
         serverSet.foreach(server => {
             val serverSettingRoot = "/easyapi/settings/servers/" + server
             if(zk.exists(serverSettingRoot)){
