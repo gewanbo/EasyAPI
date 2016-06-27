@@ -116,7 +116,7 @@ class ZookeeperClient(servers: String, sessionTimeout: Int, basePath : String,
         zk.getData(makeNodePath(path), false, null)
     }
 
-    def set(path: String, data: Array[Byte]) {
+    def set(path: String, data: Array[Byte]): Stat = {
         zk.setData(makeNodePath(path), data, -1)
     }
 
