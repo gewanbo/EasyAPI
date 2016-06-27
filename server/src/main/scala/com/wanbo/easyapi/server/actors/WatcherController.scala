@@ -21,7 +21,7 @@ class WatcherController(conf: EasyConfig, manager: ActorRef) extends Actor {
 
             try {
 
-                if (conf.workersPort.length > 0) {
+                if (conf.workersPort.nonEmpty) {
 
                     conf.workersPort.foreach(port => {
                         val seedWatcher = context.actorOf(Props(new SeedWatcher(conf, port)), name = "seed_watcher_" + port)
