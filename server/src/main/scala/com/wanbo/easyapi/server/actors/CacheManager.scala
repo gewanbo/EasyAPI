@@ -1,13 +1,13 @@
 package com.wanbo.easyapi.server.actors
 
 import akka.actor.Actor
-import com.wanbo.easyapi.server.lib.SeederManager
-import com.wanbo.easyapi.server.messages.UpdateCache
+import com.wanbo.easyapi.server.lib.MessageQ
+import com.wanbo.easyapi.server.messages.{CacheUpdate, UpdateCache}
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
-import org.slf4j.{MDC, LoggerFactory}
+import org.slf4j.{LoggerFactory, MDC}
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.duration._
 
 /**
  * Cache update manager
@@ -23,7 +23,7 @@ class CacheManager(conf: EasyConfig) extends Actor {
 
     override def preStart(){
         //cacheList = cacheList :+ ("10003", Map("days" ->"7", "num" ->"10"), 200)
-        //cacheList = cacheList :+ ("11001", Map[String, String](), 86000)
+        cacheList = cacheList :+ ("11001", Map[String, String](), 72000)
     }
 
     override def receive: Receive = {
@@ -38,16 +38,10 @@ class CacheManager(conf: EasyConfig) extends Actor {
 
             MDC.clear()
 
-        case UpdateCache(x, y) =>
-            MDC.put("destination", "cache")
-            log.info("Update cache ....")
+        case UpdateCache(name, seed) =>
 
-            log.info("-----" + x + " " + y)
+            log.info("----------- Push a CacheUpdate message [%s] to queue.".format(name))
+            MessageQ.push("UpdateCache", CacheUpdate(name, seed))
 
-            val seederManager = new SeederManager(conf, "")
-            val ret = seederManager.updateCache(x, y)
-            MDC.put("destination", "cache")
-            log.info(ret.oelement.toString())
-            MDC.clear()
     }
 }
