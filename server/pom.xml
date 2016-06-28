@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.wanbo.easyapi</groupId>
         <artifactId>easyapi</artifactId>
-        <version>1.1.7-SNAPSHOT</version>
+        <version>1.1.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -16,12 +16,8 @@
             <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-actors</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.10</artifactId>
+            <artifactId>akka-actor_2.11</artifactId>
         </dependency>
         <!-- easyapi.shared -->
         <dependency>
