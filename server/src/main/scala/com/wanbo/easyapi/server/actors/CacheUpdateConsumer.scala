@@ -1,14 +1,14 @@
 package com.wanbo.easyapi.server.actors
 
-import akka.actor.{Props, Actor}
-import akka.routing.{RoundRobinPool, DefaultResizer}
+import java.util.concurrent.Executors
+
+import akka.actor.{Actor, Props}
+import akka.routing.{DefaultResizer, RoundRobinPool}
 import com.wanbo.easyapi.server.lib.{MessageQ, SeederManager}
 import com.wanbo.easyapi.server.messages.CacheUpdate
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.MDC
-
-import scala.actors.threadpool.Executors
 
 /**
  * The consumer for update cache
