@@ -105,7 +105,7 @@ class CacheManager(conf: EasyConfig, cacheType: String = "", expire: Int = 60) {
         try {
 
             if(easyCache != null)
-                easyCache
+                easyCache.close()
 
         } catch {
             case e: Exception =>
