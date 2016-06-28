@@ -140,7 +140,7 @@
             <!-- RedisClient -->
             <dependency>
                 <groupId>net.debasishg</groupId>
-                <artifactId>redisclient_2.10</artifactId>
+                <artifactId>redisclient_2.11</artifactId>
                 <version>2.15</version>
             </dependency>
             <!-- logging -->

@@ -90,7 +90,7 @@
         <!-- RedisClient -->
         <dependency>
             <groupId>net.debasishg</groupId>
-            <artifactId>redisclient_2.10</artifactId>
+            <artifactId>redisclient_2.11</artifactId>
         </dependency>
         <!-- logging -->
         <dependency>
