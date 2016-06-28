@@ -53,7 +53,7 @@ class WorkerTracker extends Actor {
 
         case ListenerFailed =>
             log.info("Listener starting failed ...")
-            context.system.shutdown()
+            context.system.terminate()
         case ShutDown(msg) =>
             log.info("[%s] Shutting down ... ".format(classOf[WorkerTracker]))
 
@@ -68,7 +68,7 @@ class WorkerTracker extends Actor {
             Thread.sleep(3000)
 
             log.info("Shutting down main process ... ")
-            context.system.shutdown()
+            context.system.terminate()
             System.exit(-1)
     }
 }
