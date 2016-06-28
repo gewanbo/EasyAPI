@@ -2,10 +2,10 @@ package com.wanbo.easyapi.server.actors
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import akka.io.Tcp._
-import akka.io.{Tcp, IO}
-import akka.routing.{SmallestMailboxPool, BalancingPool, DefaultResizer, RoundRobinRouter}
+import akka.io.{IO, Tcp}
+import akka.routing.{DefaultResizer, SmallestMailboxPool}
 import com.wanbo.easyapi.server.lib.WorkCounter
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.Logging
