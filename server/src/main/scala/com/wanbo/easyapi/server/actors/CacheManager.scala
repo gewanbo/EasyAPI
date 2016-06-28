@@ -8,6 +8,7 @@ import org.slf4j.{LoggerFactory, MDC}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
  * Cache update manager
