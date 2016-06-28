@@ -1,9 +1,9 @@
 package com.wanbo.easyapi.server
 
-import com.wanbo.easyapi.server.lib.MessageQ
-import com.wanbo.easyapi.server.messages.{Seed, CacheUpdate}
+import java.util.concurrent.Executors
 
-import scala.actors.threadpool.Executors
+import com.wanbo.easyapi.server.lib.MessageQ
+import com.wanbo.easyapi.server.messages.{CacheUpdate, Seed}
 
 /**
  * Message Queue Test
