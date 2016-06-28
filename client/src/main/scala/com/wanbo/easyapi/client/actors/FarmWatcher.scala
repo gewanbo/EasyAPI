@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io.Tcp._
 import akka.io.{IO, Tcp}
-import akka.routing.{DefaultResizer, RoundRobinRouter}
+import akka.routing.{DefaultResizer, SmallestMailboxPool}
 import com.wanbo.easyapi.client.lib.{SeedStorage, WorkCounter}
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
 import org.slf4j.LoggerFactory
@@ -20,9 +20,9 @@ class FarmWatcher(conf: EasyConfig) extends Actor {
 
     private var _client: ActorRef = null
 
-    val resizer = DefaultResizer(lowerBound = conf.minThreads, upperBound = conf.maxThreads)
+    val reSizer = DefaultResizer(lowerBound = conf.minThreads, upperBound = conf.maxThreads, messagesPerResize = 100)
 
-    val farm = context.actorOf(Props(new Farm()).withRouter(RoundRobinRouter(resizer = Some(resizer))), name = "farm")
+    val farm = context.actorOf(Props(new Farm()).withRouter(SmallestMailboxPool(conf.minThreads, resizer = Some(reSizer))), name = "farm")
 
     override def receive: Receive = {
         case "StartUp" =>
