@@ -1,7 +1,9 @@
 package com.wanbo.easyapi.client.actors
 
+import java.util.{Calendar, TimeZone}
+
 import akka.actor.Actor
-import com.wanbo.easyapi.client.lib.AvailableServer
+import com.wanbo.easyapi.client.lib.{AvailableServer, ClientSetting}
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
@@ -17,24 +19,17 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
     def callback(zk: ZookeeperClient): Unit ={
 
+        // Update available servers
         zk.watchChildren(server_root, (workers: Seq[String]) =>{
 
             try {
 
                 if (workers.nonEmpty) {
 
-//                    log.info("Servers were updated .... -----------------")
-//
-//                    workers.foreach(log.info)
-//
-//                    log.info("Current available servers ================")
-//
-//                    AvailableServer.serverList.foreach(x => log.info(x.toString()))
-
                     // Remove the servers were lost.
                     AvailableServer.serverList = AvailableServer.serverList.filter(x => workers.contains(x._1))
 
-                    val availableServers = AvailableServer.serverList.map(_._1).toList
+                    val availableServers = AvailableServer.serverList.keys.toList
 
                     // Add new servers and update number of hits.
                     workers.foreach(server => {
@@ -84,10 +79,14 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
             }
         })
 
+        // Register client nodes and update current node settings
         zk.watchChildren(client_root, (clients: Seq[String]) => {
             try {
                 if(clients.nonEmpty && clients.contains(conf.clientId)) {
                     clients.foreach(log.info)
+
+                    updateClientSettings(zk)
+
                 } else {
                     val clientNode = client_root + "/" + conf.clientId
                     zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
@@ -97,6 +96,36 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
                     e.printStackTrace()
             }
         })
+    }
+
+    private def updateClientSettings(zk: ZookeeperClient): Unit ={
+        val setting_client_root = setting_root + "/clients"
+
+        if (!zk.exists(setting_client_root)) {
+            zk.create(setting_client_root, "".map(_.toByte).toArray, CreateMode.PERSISTENT)
+            log.warn("The ZNode [%s] does not exists, has created yet!".format(setting_client_root))
+        }
+
+        val currentClientSettingRoot = setting_client_root + "/" + conf.clientHost
+
+        val clientSetting = new ClientSetting
+
+        clientSetting.version = System.getProperty("appVersion", "0.0.0")
+        clientSetting.host = conf.clientHost
+        clientSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
+
+        if (!zk.exists(currentClientSettingRoot)) {
+            zk.create(currentClientSettingRoot, clientSetting.toJson.getBytes(), CreateMode.PERSISTENT)
+            log.warn("The ZNode [%s] does not exists, has created yet!".format(currentClientSettingRoot))
+        } else {
+            // Override all setting data
+            val stat = zk.set(currentClientSettingRoot, clientSetting.toJson.getBytes())
+            if(stat != null){
+                log.info("Update current client settings successful!")
+            } else {
+                log.info("Update current client settings failed!")
+            }
+        }
     }
 
     private def register(): Boolean ={
