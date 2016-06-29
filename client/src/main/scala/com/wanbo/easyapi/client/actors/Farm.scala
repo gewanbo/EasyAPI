@@ -6,6 +6,7 @@ import akka.util.ByteString
 import com.alibaba.fastjson.{JSON, JSONException, JSONObject}
 import com.wanbo.easyapi.client.lib.SeedStorage.SeedData
 import com.wanbo.easyapi.client.lib._
+import com.wanbo.easyapi.shared.common.libs.ServerNodeFactory
 import com.wanbo.easyapi.shared.common.utils.Utils
 import org.slf4j.LoggerFactory
 
@@ -85,7 +86,7 @@ class Farm extends Actor {
 
             if (server != "" && AvailableServer.serverList.contains(server)) {
                 // Get current server list
-                WorkCounter.push(server)
+                WorkCounter.push(ServerNodeFactory.parse(server), MetricsItem(MetricsStatus.failure, 0))
             }
         }
 
@@ -149,9 +150,9 @@ class Farm extends Actor {
 
                         val resObj: JSONObject = JSON.parseObject(response)
 
-                        val oelement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
+                        val oElement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
 
-                        val errorCode = oelement.getOrElse("errorcode", "-1")
+                        val errorCode = oElement.getOrElse("errorcode", "-1")
 
                         if(errorCode == "0"){
                             // Store to local storage
@@ -172,9 +173,9 @@ class Farm extends Actor {
 
                     val resObj: JSONObject = JSON.parseObject(response)
 
-                    val oelement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
+                    val oElement = EasyConverts.json2map(resObj.getJSONObject("body").getJSONObject("oelement"))
 
-                    val errorCode = oelement.getOrElse("errorcode", "-1")
+                    val errorCode = oElement.getOrElse("errorcode", "-1")
 
                     if(errorCode == "0"){
                         // Store to local storage
