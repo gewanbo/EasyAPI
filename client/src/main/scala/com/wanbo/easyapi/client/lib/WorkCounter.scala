@@ -1,7 +1,7 @@
 package com.wanbo.easyapi.client.lib
 
 import com.wanbo.easyapi.shared.common.Logging
-import com.wanbo.easyapi.shared.common.libs.EasyConfig
+import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ServerNode}
 
 import scala.collection.mutable
 
@@ -28,23 +28,36 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
 
             try {
 
-                if (WorkCounter.missQueue.size > 1000 || System.currentTimeMillis() - timeMark > 30000) {
-                    var countList = List[(String, Long)]()
-                    while (WorkCounter.missQueue.size > 0) {
-                        val worker = WorkCounter.pull()
-                        if(worker != "")
-                            countList :+= (worker, 1L)
+                if (WorkCounter.dataQueue.size > 1000 || System.currentTimeMillis() - timeMark > 30000) {
+                    var batchList = List[(ServerNode, MetricsItem)]()
+                    while (WorkCounter.dataQueue.nonEmpty) {
+                        val item = WorkCounter.pull()
+                        batchList :+= item
                     }
+
+                    if(batchList.nonEmpty) {
+                        val batchSummary = batchList.groupBy(_._1).map{
+                            case (serverNode: ServerNode, list: List[(ServerNode, MetricsItem)]) =>
+                                val status = list.map(_._2.status)
+                                val success = status.count(_ == MetricsStatus.success)
+                                val failure = status.count(_ == MetricsStatus.failure)
+                                (serverNode, success, failure)
+                        }.toList
+
+                        WorkCounter.updateSummary(batchSummary)
+
+                        log.info("Current summary ------------------- :" + WorkCounter.getSummary)
+                        //WorkCounter.getSummary.foreach(println)
+
+                        // Sync data to ZK
+                        WorkCounterSync.sync(conf)
+
+                    } else {
+                        log.info("Current batch list is empty!")
+                    }
+
                     timeMark = System.currentTimeMillis()
-                    // write counter to ZK
-                    log.info("Current batch ------------------- :" + countList)
 
-                    WorkCounter.updateSummary(countList)
-
-                    log.info("Current summary ------------------- :" + WorkCounter.getSummary)
-                    //WorkCounter.getSummary.foreach(println)
-
-                    WorkCounterSync.sync(conf)
                 } else {
                     // Waiting for 3 seconds.
                     Thread.sleep(3000)
@@ -61,37 +74,37 @@ class WorkCounter(conf: EasyConfig) extends Runnable with Logging {
 
 
 object WorkCounter {
-    private val missQueue = mutable.Queue[String]()
+    private val dataQueue = mutable.Queue[(ServerNode, MetricsItem)]()
 
-    private var summary = Map[String, Long]()
+    private var summary = Map[String, (Long, Long)]()
 
-    def push(worker: String): Unit ={
-        missQueue.synchronized{
-            missQueue += worker
+    def push(serverNode: ServerNode, metricsItem: MetricsItem): Unit ={
+        dataQueue.synchronized{
+            dataQueue.enqueue((serverNode, metricsItem))
         }
     }
 
-    def pull(): String ={
-        var ret = ""
-        missQueue.synchronized{
-            if(missQueue.size > 0)
-                ret = missQueue.dequeue()
+    def pull(): (ServerNode, MetricsItem) ={
+        var ret: (ServerNode, MetricsItem) = null
+        dataQueue.synchronized{
+            if(dataQueue.nonEmpty)
+                ret = dataQueue.dequeue()
         }
         ret
     }
 
-    def getSummary: Map[String, Long] ={
+    def getSummary: Map[String, (Long, Long)] ={
         summary
     }
 
-    def updateSummary(list: List[(String, Long)]): Unit ={
+    def updateSummary(list: List[(ServerNode, Int, Int)]): Unit ={
         summary.synchronized{
 
             // Reset all record last time.
-            summary = AvailableServer.serverList.map(x => (x._1, 0L))
+            summary = AvailableServer.serverList.map(x => (x._1, (0L, 0L)))
 
             list.foreach(item => {
-                summary = summary.updated(item._1, item._2)
+                summary = summary.updated(item._1.toString, (item._2.toLong, item._3.toLong))
             })
         }
     }
