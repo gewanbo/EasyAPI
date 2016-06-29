@@ -4,6 +4,7 @@ import java.io._
 import java.net.Socket
 
 import com.wanbo.easyapi.shared.common.Logging
+import com.wanbo.easyapi.shared.common.libs.{ServerNode, ServerNodeFactory}
 
 /**
  * Http utility
@@ -17,18 +18,22 @@ object HttpUtility extends Logging {
     def post(message: String): String ={
         var responseMsg = ""
 
+        var serverNode: ServerNode = null
+
         try {
 
             log.info("Post request to server with message:" + message)
 
-            val host = AvailableServer.availableServer.split(":")
+            val availableServer = AvailableServer.availableServer
 
-            if(host.size != 2)
-                throw new Exception("Can't bound host {%s} and port {%s} !".format(host(0), host(1)))
+            if(availableServer == "")
+                throw new Exception("Can't get an available server!")
 
-            log.info("Post request to host {%s} and port {%s} !".format(host(0), host(1)))
+            serverNode = ServerNodeFactory.parse(availableServer)
 
-            val socket = new Socket(host(0), host(1).toInt)
+            log.info("Post request to host {%s} and port {%s} !".format(serverNode.host, serverNode.port))
+
+            val socket = new Socket(serverNode.host, serverNode.port)
             socket.setSoTimeout(5000)
 
             val outStream = socket.getOutputStream
@@ -64,9 +69,12 @@ object HttpUtility extends Logging {
 
             socket.close()
 
+            WorkCounter.push(serverNode, MetricsItem(MetricsStatus.success, 0))
         } catch {
             case e: Exception =>
-                // todo: Count the miss request.
+                // Count the miss request.
+                if(serverNode != null)
+                    WorkCounter.push(serverNode, MetricsItem(MetricsStatus.failure, 0))
                 log.error("Error:" + e)
         }
 
