@@ -18,4 +18,8 @@ object ServerNodeFactory {
 }
 
 
-case class ServerNode(host: String, port: Int)
+case class ServerNode(host: String, port: Int) {
+    override def toString: String ={
+        host + ":" + port
+    }
+}
