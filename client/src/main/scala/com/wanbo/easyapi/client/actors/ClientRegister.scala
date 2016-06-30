@@ -106,12 +106,12 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
             log.warn("The ZNode [%s] does not exists, has created yet!".format(setting_client_root))
         }
 
-        val currentClientSettingRoot = setting_client_root + "/" + conf.clientHost
+        val currentClientSettingRoot = setting_client_root + "/" + conf.clientId
 
         val clientSetting = new ClientSetting
 
         clientSetting.version = System.getProperty("appVersion", "0.0.0")
-        clientSetting.host = conf.clientHost
+        clientSetting.host = conf.clientId
         clientSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
 
         if (!zk.exists(currentClientSettingRoot)) {
