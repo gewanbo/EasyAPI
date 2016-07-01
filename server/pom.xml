@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.wanbo.easyapi</groupId>
         <artifactId>easyapi</artifactId>
-        <version>1.1.8-SNAPSHOT</version>
+        <version>1.1.10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.1.8-SNAPSHOT</version>
+            <version>1.1.9-SNAPSHOT</version>
         </dependency>
         <!-- Tachyon -->
         <dependency>
