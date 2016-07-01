@@ -76,5 +76,5 @@ then
 	echo $! > ${EASY_HOME}/bin/easyclient.pid
 
 else 
-	echo "Easy conf("${easy_conf}") OR log configration file($logback_configurationFile) is not exist,please create then first!"
+	echo "Easy conf("${easy_conf}") OR log configuration file($logback_configurationFile) is not exist,please create then first!"
 fi
