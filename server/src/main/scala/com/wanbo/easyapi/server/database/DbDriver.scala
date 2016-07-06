@@ -7,5 +7,4 @@ import com.wanbo.easyapi.shared.common.libs.EasyConfig
   */
 abstract class DbDriver {
     protected var _conf: EasyConfig = null
-    protected def close()
 }

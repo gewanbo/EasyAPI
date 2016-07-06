@@ -8,4 +8,5 @@ import com.wanbo.easyapi.shared.common.libs.EasyConfig
  */
 trait IDriver {
     def setConfiguration(conf: EasyConfig)
+    def close()
 }

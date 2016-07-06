@@ -46,7 +46,7 @@ case class MongoDriver() extends DbDriver with IDriver {
         _coll
     }
 
-    protected def close(): Unit ={
+    def close(): Unit ={
         try{
             if(_client != null)
                 _client.close()

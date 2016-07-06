@@ -46,7 +46,7 @@ case class MysqlDriver() extends DbDriver with IDriver {
         _conn
     }
 
-    protected def close(): Unit ={
+    def close(): Unit ={
         try{
             if(_conn != null)
                 _conn.close()
