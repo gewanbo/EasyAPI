@@ -17,10 +17,6 @@
             <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-xml_2.11</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.11</artifactId>
         </dependency>
@@ -28,7 +24,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.1.9-SNAPSHOT</version>
+            <version>1.1.12-SNAPSHOT</version>
         </dependency>
         <!-- Zookeeper -->
         <dependency>
