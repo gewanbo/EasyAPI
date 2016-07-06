@@ -103,6 +103,18 @@ class EasyConfig() {
 
                             driverSettings = driverSettings.+(settingKey -> settings)
 
+                        case "mongo" =>
+
+                            val settings = Map(
+                                "type" -> dbType,
+                                "host" -> (node \\ "host").text,
+                                "port" -> (node \\ "port").text
+                            )
+
+                            val settingKey = settings.hashCode().toString
+
+                            driverSettings = driverSettings.+(settingKey -> settings)
+
                         case _ => // Ignore setup error.
                     }
                 }
