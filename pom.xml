@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.1.10-SNAPSHOT</version>
+    <version>1.1.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -37,6 +37,7 @@
         <org.mysql-connector-java.version>5.1.27</org.mysql-connector-java.version>
         <org.apache.hadoop.hbase.version>1.0.1.1</org.apache.hadoop.hbase.version>
         <org.tachyonproject.version>0.7.0</org.tachyonproject.version>
+        <org.mongodb.version>1.1.1</org.mongodb.version>
         <org.eclipse.jetty.version>9.3.2.v20150730</org.eclipse.jetty.version>
         <file_encoding>UTF-8</file_encoding>
     </properties>
@@ -119,6 +120,12 @@
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-protocol</artifactId>
                 <version>${org.apache.hadoop.hbase.version}</version>
+            </dependency>
+            <!-- MongoDB -->
+            <dependency>
+                <groupId>org.mongodb.scala</groupId>
+                <artifactId>mongo-scala-driver_2.11</artifactId>
+                <version>${org.mongodb.version}</version>
             </dependency>
             <!-- Jetty -->
             <dependency>
