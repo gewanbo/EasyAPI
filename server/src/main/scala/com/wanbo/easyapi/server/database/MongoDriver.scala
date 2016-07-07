@@ -15,6 +15,8 @@ case class MongoDriver() extends DbDriver with IDriver {
     private var _client: MongoClient = null
     private var _coll: MongoCollection[Document] = null
 
+    private var _settings: MongoClientSettings = null
+
     private val log = LoggerFactory.getLogger(classOf[MongoDriver])
 
     override def setConfiguration(conf: EasyConfig): Unit = {
@@ -25,9 +27,7 @@ case class MongoDriver() extends DbDriver with IDriver {
         if(settings.nonEmpty) {
             val serverAddress = ServerAddress(settings.head.getOrElse("host", ""), settings.head.getOrElse("port", "0").toInt)
             val clusterSetting = ClusterSettings.builder().hosts(List(serverAddress).asJava).build()
-            val clientSettings = MongoClientSettings.builder().clusterSettings(clusterSetting).build()
-
-            _client = MongoClient(clientSettings)
+            _settings = MongoClientSettings.builder().clusterSettings(clusterSetting).build()
         }
 
     }
@@ -35,6 +35,9 @@ case class MongoDriver() extends DbDriver with IDriver {
     def getCollection(dbName: String, collection: String): MongoCollection[Document] ={
 
         try {
+            if(_client == null)
+                _client = MongoClient(_settings)
+
             val db = _client.getDatabase(dbName)
             _coll = db.getCollection(collection)
 
