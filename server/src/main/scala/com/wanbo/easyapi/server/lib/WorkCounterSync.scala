@@ -2,7 +2,8 @@ package com.wanbo.easyapi.server.lib
 
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.retry.ExponentialBackoffRetry
 
 /**
  * Sync work count data.
@@ -10,7 +11,7 @@ import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
  */
 object WorkCounterSync extends ZookeeperManager with Logging {
 
-    private var _zk: ZookeeperClient = null
+    private var _zk: CuratorFramework = null
     private var _conf: EasyConfig = null
 
     def init(conf: EasyConfig): Unit = {
@@ -31,12 +32,12 @@ object WorkCounterSync extends ZookeeperManager with Logging {
 
             dataList.foreach(item => {
                 val serverNode = server_root + "/" + item._1
-                if(_zk.exists(serverNode)){
-                    _zk.set(serverNode, item._2.toString.getBytes)
+                if(_zk.checkExists().forPath(serverNode) != null) {
+                    _zk.setData().forPath(serverNode, item._2.toString.getBytes)
                 }
             })
 
-            //zk.close()
+            //_zk.close()
         } catch {
             case e: Exception =>
                 log.error("Error:", e)
@@ -44,10 +45,12 @@ object WorkCounterSync extends ZookeeperManager with Logging {
     }
 
     private def zkConnect(): Unit ={
-        if(_zk == null || !_zk.isAlive){
-            _zk = new ZookeeperClient(_conf.zkHosts, 3000, app_root, Some(this.callback))
+
+        if(_zk == null){
+            val retryPolicy = new ExponentialBackoffRetry(1000, 3)
+            _zk = CuratorFrameworkFactory.newClient(_conf.zkHosts, retryPolicy)
+            _zk.start()
         }
     }
 
-    def callback(zk: ZookeeperClient): Unit ={}
 }
