@@ -115,7 +115,7 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
         _client.createContainers(setting_client_root)
 
-        val currentClientSettingRoot = ZKPaths.makePath(setting_client_root, conf.clientId)
+        val currentClientSettingNode = ZKPaths.makePath(setting_client_root, conf.clientId)
 
         val clientSetting = new ClientSetting
 
@@ -123,17 +123,17 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
         clientSetting.host = conf.clientId
         clientSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
 
-        if (_client.checkExists().forPath(currentClientSettingRoot) != null) {
+        if (_client.checkExists().forPath(currentClientSettingNode) != null) {
             // Override all setting data
-            val stat = _client.setData().forPath(currentClientSettingRoot, clientSetting.toJson.getBytes())
+            val stat = _client.setData().forPath(currentClientSettingNode, clientSetting.toJson.getBytes())
             if(stat != null){
                 log.info("Update current client settings successful!")
             } else {
                 log.info("Update current client settings failed!")
             }
         } else {
-            _client.create().withMode(CreateMode.PERSISTENT).forPath(currentClientSettingRoot, clientSetting.toJson.getBytes())
-            log.warn("The ZNode [%s] does not exists, has created yet!".format(currentClientSettingRoot))
+            _client.create().withMode(CreateMode.PERSISTENT).forPath(currentClientSettingNode, clientSetting.toJson.getBytes())
+            log.warn("The ZNode [%s] does not exists, has created yet!".format(currentClientSettingNode))
         }
     }
 
