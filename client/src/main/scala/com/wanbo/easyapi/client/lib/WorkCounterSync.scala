@@ -3,7 +3,9 @@ package com.wanbo.easyapi.client.lib
 import com.alibaba.fastjson.JSONObject
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.curator.utils.CloseableUtils
 
 /**
  * Sync work count data.
@@ -12,6 +14,8 @@ import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
 object WorkCounterSync extends ZookeeperManager with Logging {
 
     def sync(conf: EasyConfig): Unit ={
+        var client: CuratorFramework = null
+
         try {
 
             val summary = WorkCounter.getSummary
@@ -26,19 +30,21 @@ object WorkCounterSync extends ZookeeperManager with Logging {
             jsonData.put("success", successData)
             jsonData.put("failure", failureData)
 
-            val zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(this.callback))
+            client = CuratorFrameworkFactory.newClient(conf.zkHosts, new ExponentialBackoffRetry(3000, 3))
 
-            val clientNode = client_root + "/" + conf.clientId
-            if(zk.exists(clientNode)){
-                zk.set(clientNode, jsonData.toJSONString.map(_.toByte).toArray)
+            val clientNode = app_root + client_root + "/" + conf.clientId
+
+            client.start()
+
+            if(client.checkExists().forPath(clientNode) != null){
+                client.setData().forPath(clientNode, jsonData.toJSONString.map(_.toByte).toArray)
             }
 
-            zk.close()
         } catch {
             case e: Exception =>
                 log.error("Error:", e)
+        } finally {
+            CloseableUtils.closeQuietly(client)
         }
     }
-
-    def callback(zk: ZookeeperClient): Unit ={}
 }
