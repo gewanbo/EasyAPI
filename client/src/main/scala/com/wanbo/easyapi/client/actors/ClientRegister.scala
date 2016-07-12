@@ -6,7 +6,10 @@ import akka.actor.Actor
 import com.wanbo.easyapi.client.lib.{AvailableServer, ClientSetting}
 import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
-import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
+import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.curator.utils.{CloseableUtils, ZKPaths}
 import org.apache.zookeeper.CreateMode
 
 /**
@@ -15,98 +18,104 @@ import org.apache.zookeeper.CreateMode
  */
 class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with Logging {
 
-    private val _zk = new ZookeeperClient(conf.zkHosts, 3000, app_root, Some(callback))
+    private var _client: CuratorFramework = null
+    private var _cache: PathChildrenCache = null
 
-    def callback(zk: ZookeeperClient): Unit ={
+    val _serverRoot = ZKPaths.makePath(app_root, server_root)
+    val _clientRoot = ZKPaths.makePath(app_root, client_root)
+    val _clientNode = ZKPaths.makePath(app_root, client_root, conf.clientId)
 
-        // Update available servers
-        zk.watchChildren(server_root, (workers: Seq[String]) =>{
+    init()
 
-            try {
+    def init(): Unit ={
+        try {
+            _client = CuratorFrameworkFactory.newClient(conf.zkHosts, new ExponentialBackoffRetry(1000, 3))
 
-                if (workers.nonEmpty) {
+            _client.start()
 
-                    // Remove the servers were lost.
-                    AvailableServer.serverList = AvailableServer.serverList.filter(x => workers.contains(x._1))
+            _cache = new PathChildrenCache(_client, _serverRoot, true)
 
-                    val availableServers = AvailableServer.serverList.keys.toList
+            _cache.start()
 
-                    // Add new servers and update number of hits.
-                    workers.foreach(server => {
-                        if(availableServers.contains(server)){
-                            val serverNode = server_root + "/" + server
+            _cache.getListenable.addListener(new PathChildrenCacheListener {
+                override def childEvent(curatorFramework: CuratorFramework, pathChildrenCacheEvent: PathChildrenCacheEvent): Unit = {
+                    pathChildrenCacheEvent.getType match {
+                        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+                            addServer(pathChildrenCacheEvent)
 
-                            val nodeBytes = zk.get(serverNode)
-                            if (nodeBytes != null) {
-                                val nodeStr = new String(nodeBytes)
+                        case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+                            updateServer(pathChildrenCacheEvent)
 
-                                if (nodeStr.isEmpty)
-                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
-                                else
-                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
-                            } else {
-                                AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
-                            }
-                        } else {
-                            AvailableServer.serverList = AvailableServer.serverList + (server -> 0L)
-                        }
-                    })
+                        case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
+                            removeServer(pathChildrenCacheEvent)
 
-                    AvailableServer.serverList.foreach{ case(server: String, num: Long) =>
-                        val serverNode = server_root + "/" + server
-
-                        zk.watchNode(serverNode, data => {
-
-                            if (data.isDefined && data.get != null) {
-                                val nodeStr = new String(data.get)
-
-                                if (nodeStr.isEmpty)
-                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, 0L)
-                                else
-                                    AvailableServer.serverList = AvailableServer.serverList.updated(server, nodeStr.toLong)
-                            } else {
-                                // Ignore, because the servers are miss.
-                            }
-                        })
+                        case _ =>
+                            log.info("...")
                     }
-
-                } else {
-                    AvailableServer.serverList = Map[String, Long]()
                 }
-            } catch {
-                case e: Exception =>
-                    e.printStackTrace()
-            }
-        })
+            })
 
-        // Register client nodes and update current node settings
-        zk.watchChildren(client_root, (clients: Seq[String]) => {
-            try {
-                if(clients.nonEmpty && clients.contains(conf.clientId)) {
-                    clients.foreach(log.info)
-
-                    updateClientSettings(zk)
-
-                } else {
-                    val clientNode = client_root + "/" + conf.clientId
-                    zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
-                }
-            } catch {
-                case e: Exception =>
-                    e.printStackTrace()
-            }
-        })
+        } catch {
+            case e: Exception =>
+                log.error("Error:", e)
+        }
     }
 
-    private def updateClientSettings(zk: ZookeeperClient): Unit ={
-        val setting_client_root = setting_root + "/clients"
+    private def addServer(pathChildrenCacheEvent: PathChildrenCacheEvent): Unit ={
+        log.info("New server node added, now updating available server list ...")
 
-        if (!zk.exists(setting_client_root)) {
-            zk.create(setting_client_root, "".map(_.toByte).toArray, CreateMode.PERSISTENT)
-            log.warn("The ZNode [%s] does not exists, has created yet!".format(setting_client_root))
+        val node = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData.getPath)
+        val nodeData = pathChildrenCacheEvent.getData.getData
+
+        if(nodeData != null) {
+            val dataStr = new String(nodeData)
+            if(dataStr != "")
+                AvailableServer.serverList = AvailableServer.serverList.updated(node, dataStr.toLong)
+        } else
+            AvailableServer.serverList = AvailableServer.serverList.updated(node, 0L)
+
+        log.info("The final server list is:")
+        AvailableServer.serverList.foreach(s => log.info(s._1 + "=>" + s._2))
+    }
+
+    private def updateServer(pathChildrenCacheEvent: PathChildrenCacheEvent): Unit ={
+        log.info("Server nodes data were updated, now updating each available server's rate ...")
+
+        val node = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData.getPath)
+        val nodeData = pathChildrenCacheEvent.getData.getData
+
+        if(nodeData != null) {
+            val dataStr = new String(nodeData)
+
+            log.info("node:" + node + " nodeData: " + dataStr)
+
+            if(dataStr != "")
+                AvailableServer.serverList = AvailableServer.serverList.updated(node, dataStr.toLong)
         }
 
-        val currentClientSettingRoot = setting_client_root + "/" + conf.clientId
+        log.info("The final server list is:")
+        AvailableServer.serverList.foreach(s => log.info(s._1 + "=>" + s._2))
+    }
+
+    private def removeServer(pathChildrenCacheEvent: PathChildrenCacheEvent): Unit ={
+        log.info("Server node was deleted, now updating available server list ...")
+
+        val node = ZKPaths.getNodeFromPath(pathChildrenCacheEvent.getData.getPath)
+
+        if(AvailableServer.serverList.contains(node)) {
+            AvailableServer.serverList = AvailableServer.serverList.-(node)
+        }
+
+        log.info("The final server list is:")
+        AvailableServer.serverList.foreach(s => log.info(s._1 + "=>" + s._2))
+    }
+
+    private def updateClientSettings(): Unit ={
+        val setting_client_root = ZKPaths.makePath(app_root, setting_root, "clients")
+
+        _client.createContainers(setting_client_root)
+
+        val currentClientSettingRoot = ZKPaths.makePath(setting_client_root, conf.clientId)
 
         val clientSetting = new ClientSetting
 
@@ -114,33 +123,34 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
         clientSetting.host = conf.clientId
         clientSetting.startTime = Calendar.getInstance(TimeZone.getTimeZone("Asin/Shanghai")).getTime.toString
 
-        if (!zk.exists(currentClientSettingRoot)) {
-            zk.create(currentClientSettingRoot, clientSetting.toJson.getBytes(), CreateMode.PERSISTENT)
-            log.warn("The ZNode [%s] does not exists, has created yet!".format(currentClientSettingRoot))
-        } else {
+        if (_client.checkExists().forPath(currentClientSettingRoot) != null) {
             // Override all setting data
-            val stat = zk.set(currentClientSettingRoot, clientSetting.toJson.getBytes())
+            val stat = _client.setData().forPath(currentClientSettingRoot, clientSetting.toJson.getBytes())
             if(stat != null){
                 log.info("Update current client settings successful!")
             } else {
                 log.info("Update current client settings failed!")
             }
+        } else {
+            _client.create().withMode(CreateMode.PERSISTENT).forPath(currentClientSettingRoot, clientSetting.toJson.getBytes())
+            log.warn("The ZNode [%s] does not exists, has created yet!".format(currentClientSettingRoot))
         }
     }
 
     private def register(): Boolean ={
         var ret = false
-        val clientNode = client_root + "/" + conf.clientId
 
         try {
 
-            if (_zk.exists(clientNode)) {
+            if (_client.checkExists().forPath(_clientNode) != null) {
                 log.warn("The client [%s] has been registered. Can't register same client twice!".format(conf.clientId))
                 ret = true
             } else {
-                val creNode = _zk.create(clientNode, "{}".map(_.toByte).toArray, CreateMode.EPHEMERAL)
-                if (!creNode.isEmpty)
+                val creNode = _client.create.withMode(CreateMode.EPHEMERAL).forPath(_clientNode, "{}".map(_.toByte).toArray)
+                if (creNode.nonEmpty) {
                     ret = true
+                    updateClientSettings()
+                }
             }
         } catch {
             case e: Exception =>
@@ -152,13 +162,11 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
 
     private def unregister(): Unit ={
 
-        val clientNode = client_root + "/" + conf.clientId
-
         try {
             var retry = 3
 
-            while (_zk.exists(clientNode) && retry > 0) {
-                _zk.delete(clientNode)
+            while (_client.checkExists().forPath(_clientNode) != null && retry > 0) {
+                _client.delete().guaranteed().forPath(_clientNode)
                 retry -= 1
             }
         } catch {
@@ -186,10 +194,9 @@ class ClientRegister(conf: EasyConfig) extends ZookeeperManager with Actor with 
         case "ShutDown" =>
             unregister()
 
-            if(_zk != null) {
-                log.info("Shutting down the zk...")
-                _zk.close()
-            }
+            CloseableUtils.closeQuietly(_cache)
+            CloseableUtils.closeQuietly(_client)
+
             context.stop(self)
     }
 }
