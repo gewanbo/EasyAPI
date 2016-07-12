@@ -5,7 +5,7 @@ import com.wanbo.easyapi.shared.common.Logging
 import com.wanbo.easyapi.shared.common.libs.{EasyConfig, ZookeeperManager}
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
-import org.apache.curator.utils.CloseableUtils
+import org.apache.curator.utils.{CloseableUtils, ZKPaths}
 
 /**
  * Sync work count data.
@@ -32,7 +32,7 @@ object WorkCounterSync extends ZookeeperManager with Logging {
 
             client = CuratorFrameworkFactory.newClient(conf.zkHosts, new ExponentialBackoffRetry(3000, 3))
 
-            val clientNode = app_root + client_root + "/" + conf.clientId
+            val clientNode = ZKPaths.makePath(app_root, client_root, conf.clientId)
 
             client.start()
 
