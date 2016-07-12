@@ -31,7 +31,7 @@ object WorkCounterSync extends ZookeeperManager with Logging {
             })
 
             dataList.foreach(item => {
-                val serverNode = server_root + "/" + item._1
+                val serverNode = app_root + server_root + "/" + item._1
                 if(_zk.checkExists().forPath(serverNode) != null) {
                     _zk.setData().forPath(serverNode, item._2.toString.getBytes)
                 }
