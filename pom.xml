@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wanbo.easyapi</groupId>
     <artifactId>easyapi</artifactId>
-    <version>1.1.13-SNAPSHOT</version>
+    <version>1.1.14-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <developers>
@@ -86,7 +86,7 @@
             <!-- Curator -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
-                <artifactId>curator-framework</artifactId>
+                <artifactId>curator-recipes</artifactId>
                 <version>2.11.0</version>
             </dependency>
 
