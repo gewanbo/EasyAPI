@@ -7,6 +7,7 @@ import com.wanbo.easyapi.shared.common.utils.ZookeeperClient
  * The manager of Zookeeper.
  * Created by wanbo on 15/7/7.
  */
+@Deprecated
 class ZookeeperManager extends Logging {
 
     protected val app_root = "/easyapi"
