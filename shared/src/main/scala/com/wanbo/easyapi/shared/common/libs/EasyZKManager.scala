@@ -28,11 +28,16 @@ class EasyZKManager extends Logging {
     protected var cache: PathChildrenCache = null
 
     protected def open(connectionString: String): Unit ={
-        client = CuratorFrameworkFactory.newClient(connectionString, new ExponentialBackoffRetry(1000, 3))
+        client = CuratorFrameworkFactory.builder()
+            .connectString(connectionString)
+            .retryPolicy(new ExponentialBackoffRetry(1000, 3))
+            .namespace(app_namespace)
+            .build()
     }
 
     protected def open(connectionString: String, retryPolicy: RetryPolicy): Unit ={
-        client = CuratorFrameworkFactory.builder().connectString(connectionString).retryPolicy(retryPolicy).namespace(app_namespace).build()
+        client = CuratorFrameworkFactory.builder()
+            .connectString(connectionString).retryPolicy(retryPolicy).namespace(app_namespace).build()
     }
 
     /**
