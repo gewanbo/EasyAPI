@@ -35,8 +35,12 @@ case class MongoDriver() extends DbDriver with IDriver {
     def getCollection(dbName: String, collection: String): MongoCollection[Document] ={
 
         try {
-            if(_client == null)
-                _client = MongoClient(_settings)
+            if(_client == null) {
+                if (_settings == null)
+                    throw new Exception("The configuration for MongoDB driver was not found!")
+                else
+                    _client = MongoClient(_settings)
+            }
 
             val db = _client.getDatabase(dbName)
             _coll = db.getCollection(collection)
