@@ -47,8 +47,11 @@ case class MongoDriver() extends DbDriver with IDriver with Logging {
 
     def close(): Unit ={
         try{
-            if(MongoDriver._client != null)
-                MongoDriver._client.close()
+            /**
+              * Warning: MongoDB creates long connection, so no need to close except shutdown.
+              */
+            //            if(MongoDriver._client != null)
+            //                MongoDriver._client.close()
         } catch {
             case e: Exception =>
         }
