@@ -43,7 +43,7 @@ class WorkerTracker extends Actor {
 
             if(conf.serverMode == "Cluster" && conf.zkEnable) {
                 val workerUpdate = context.actorOf(Props(new WorkerRegister(conf)), "worker_register")
-                workerUpdate ! ""
+                workerUpdate ! "StartUp"
                 val cacheLeader = context.actorOf(Props(new ClusterLeader(conf)), "cache_leader")
                 cacheLeader ! ""
             }
@@ -61,7 +61,7 @@ class WorkerTracker extends Actor {
                 log.info(msg)
 
             if(_conf.zkEnable){
-                context.child("worker_register").get ! "shutdown"
+                context.child("worker_register").get ! "ShutDown"
                 context.child("cache_leader").get ! "shutdown"
             }
 
@@ -70,5 +70,8 @@ class WorkerTracker extends Actor {
             log.info("Shutting down main process ... ")
             context.system.terminate()
             System.exit(-1)
+
+        case _ =>
+            // Ignore
     }
 }
