@@ -108,7 +108,8 @@ class EasyConfig() {
                             val settings = Map(
                                 "type" -> dbType,
                                 "host" -> (node \\ "host").text,
-                                "port" -> (node \\ "port").text
+                                "port" -> (node \\ "port").text,
+                                "dbname" -> (node \\ "dbname").text
                             )
 
                             val settingKey = settings.hashCode().toString
