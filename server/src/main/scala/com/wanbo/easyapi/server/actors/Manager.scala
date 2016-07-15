@@ -5,7 +5,7 @@ import java.net.Socket
 import java.util.Properties
 
 import akka.actor.{Actor, ActorRef, Props}
-import com.wanbo.easyapi.server.database.MysqlDriver
+import com.wanbo.easyapi.server.database.{MongoDriver, MysqlDriver}
 import com.wanbo.easyapi.server.lib.{ErrorConstant, SeedCounter, WorkCounter}
 import com.wanbo.easyapi.server.messages._
 import com.wanbo.easyapi.shared.common.libs.EasyConfig
@@ -48,6 +48,10 @@ class Manager(workTracker: ActorRef) extends Actor {
                 // Initialize Mysql database resources.
                 val mysqlSettings = conf.driverSettings.filter(x => x._2.get("type").get == "mysql").toList.map(_._2)
                 MysqlDriver.initializeDataSource(mysqlSettings)
+
+                // Initialize MongoDB database resources.
+                val mongoSettings = conf.driverSettings.filter(x => x._2.get("type").get == "mongo").toList.map(_._2)
+                MongoDriver.initializeDataSource(mongoSettings)
 
                 // Start up work counter
                 val workCounter = new WorkCounter(conf)
