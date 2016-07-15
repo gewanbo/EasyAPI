@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.wanbo.easyapi</groupId>
         <artifactId>easyapi</artifactId>
-        <version>1.1.14-SNAPSHOT</version>
+        <version>1.1.16-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.wanbo.easyapi</groupId>
             <artifactId>easyapi.shared</artifactId>
-            <version>1.1.14-SNAPSHOT</version>
+            <version>1.1.15-SNAPSHOT</version>
         </dependency>
         <!-- Tachyon -->
         <dependency>
@@ -36,6 +36,14 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-recipes</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-framework</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
                     <artifactId>curator-client</artifactId>
                 </exclusion>
             </exclusions>
@@ -43,6 +51,12 @@
         <dependency>
             <groupId>org.tachyonproject</groupId>
             <artifactId>tachyon-underfs-local</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.curator</groupId>
+                    <artifactId>curator-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Zookeeper -->
         <dependency>
