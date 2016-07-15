@@ -30,4 +30,10 @@
         <zookeeper>zk1:2181</zookeeper>
     </property>
 
+    <property type="mongo">
+        <host>localhost</host>
+        <port>27017</port>
+        <dbname>test</dbname>
+    </property>
+
 </configuration>
