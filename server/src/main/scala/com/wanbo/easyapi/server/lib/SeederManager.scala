@@ -191,12 +191,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
 
             seederObj.manager = this
 
-            seederObj.driver match {
-                case MysqlDriver() =>
-                    seederObj.driver.setConfiguration(conf)
-                case HBaseDriver() =>
-                    seederObj.driver.setConfiguration(conf)
-            }
+            seederObj.driver.setConfiguration(conf)
 
             fruits = seederObj.onHandle(seed)
 
@@ -204,6 +199,7 @@ class SeederManager(conf: EasyConfig, seed: String) {
             case ee: ClassNotFoundException =>
                 log.error("Seeder not found Exception:", ee)
             case e: Exception =>
+                log.error("Seeder transforming Exception:", e)
         }
 
         fruits
