@@ -74,7 +74,7 @@ class CacheManager(conf: EasyConfig, cacheType: String = "", expire: Int = 60) {
             if(data == null) {
                 // Delete cache
                 easyCache.del(cache_name)
-            } else if (data.odata != null || data.oelement.size > 2) {
+            } else if (data.odata.nonEmpty && data.oelement.getOrElse("errorcode", "-1") != "-1") {
                 // Set cache
                 if(inExpire > 0)
                     easyCache.set(cache_name, ObjectSerialization.objectEncode(data), inExpire)
